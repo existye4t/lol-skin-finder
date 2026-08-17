@@ -11,10 +11,6 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   margin: 0;
   min-width: 320px;
@@ -22,7 +18,6 @@ body {
     radial-gradient(ellipse at 15% 0%, #273c79 0%, transparent 42%),
     radial-gradient(ellipse at 88% 30%, #3a1f63 0%, transparent 38%),
     #070b18;
-  overflow-x: hidden;
 }
 
 /* ================================
@@ -38,7 +33,6 @@ body {
 .hero {
   max-width: 780px;
   padding: 30px 0 92px;
-  animation: heroIn .65s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 .eyebrow {
@@ -84,18 +78,12 @@ h1 em {
   border-radius: 12px;
   background: rgba(10, 16, 34, .72);
   box-shadow: 0 18px 50px #0004;
-  transition:
-    border-color .25s ease,
-    box-shadow .25s ease,
-    transform .25s ease;
+  transition: border .2s, box-shadow .2s;
 }
 
 .search-box:focus-within {
   border-color: #d2b175;
-  box-shadow:
-    0 0 0 4px #d2b17522,
-    0 18px 50px #0005;
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 4px #d2b17522;
 }
 
 .search-box > span {
@@ -103,11 +91,6 @@ h1 em {
   font-size: 35px;
   transform: rotate(-18deg);
   line-height: 1;
-  transition: transform .25s ease;
-}
-
-.search-box:focus-within > span {
-  transform: rotate(-8deg) scale(1.08);
 }
 
 input {
@@ -152,26 +135,15 @@ kbd {
   padding: 7px 12px;
   cursor: pointer;
   font: 500 12px Manrope;
-  transition:
-    color .2s ease,
-    border-color .2s ease,
-    background .2s ease,
-    transform .2s ease;
 }
 
 .quick-searches button:hover {
   color: #fff;
   border-color: #d2b175;
-  background: #1e2945;
-  transform: translateY(-2px);
-}
-
-.quick-searches button:active {
-  transform: translateY(0) scale(.97);
 }
 
 /* ================================
-   RESULTS
+   RESULTS HEADER
    ================================ */
 
 .results-header {
@@ -195,6 +167,10 @@ kbd {
   text-align: right;
 }
 
+/* ================================
+   RESULTS GRID
+   ================================ */
+
 .results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -214,26 +190,14 @@ kbd {
   background: #11182b;
   isolation: isolate;
   cursor: pointer;
-
-  opacity: 0;
-  transform: translateY(12px);
-
-  animation: cardIn .45s cubic-bezier(.2, .8, .2, 1) forwards;
-
-  transition:
-    transform .3s cubic-bezier(.2, .8, .2, 1),
-    border-color .3s ease,
-    box-shadow .3s ease;
+  transition: transform .25s, border-color .25s;
 }
 
 .skin-card:hover,
 .skin-card:focus-visible {
-  transform: translateY(-6px);
+  transform: translateY(-5px);
   border-color: #d2b175;
   outline: none;
-  box-shadow:
-    0 18px 45px rgba(0, 0, 0, .35),
-    0 0 0 1px #d2b17522;
 }
 
 .skin-card img,
@@ -246,30 +210,20 @@ kbd {
 
 .skin-card img {
   object-fit: cover;
-  transition:
-    transform .65s cubic-bezier(.2, .8, .2, 1),
-    filter .35s ease;
+  transition: transform .5s;
 }
 
 .skin-card:hover img {
-  transform: scale(1.07);
-  filter: saturate(1.08);
+  transform: scale(1.05);
 }
 
 .card-shade {
-  background:
-    linear-gradient(
-      0deg,
-      #080c18 1%,
-      #080c18cc 27%,
-      #080c1800 66%
-    );
+  background: linear-gradient(
+    0deg,
+    #080c18 1%,
+    #080c1800 66%
+  );
   z-index: 1;
-  transition: opacity .3s ease;
-}
-
-.skin-card:hover .card-shade {
-  opacity: .92;
 }
 
 .card-content {
@@ -279,12 +233,6 @@ kbd {
   left: 0;
   width: 100%;
   padding: 20px;
-  transform: translateY(3px);
-  transition: transform .3s ease;
-}
-
-.skin-card:hover .card-content {
-  transform: translateY(0);
 }
 
 .champion {
@@ -341,11 +289,10 @@ kbd {
   cursor: pointer;
 
   opacity: 0;
-  transform: scale(.8);
+  transform: scale(.9);
 
   transition:
-    opacity .25s ease,
-    transform .25s cubic-bezier(.2, .8, .2, 1),
+    opacity .2s ease,
     color .2s ease,
     background .2s ease,
     border-color .2s ease;
@@ -362,7 +309,6 @@ kbd {
   color: #ffd98a;
   border-color: #d2b17588;
   background: rgba(31, 25, 18, .82);
-  transform: scale(1.08);
 }
 
 .favorite-button.is-favorite {
@@ -370,15 +316,11 @@ kbd {
 }
 
 .favorite-button:active {
-  transform: scale(.88);
-}
-
-.favorite-button.is-favorite {
-  animation: favoritePop .3s cubic-bezier(.2, 1.4, .4, 1);
+  transform: scale(.92);
 }
 
 /* ================================
-   EMPTY
+   EMPTY STATE
    ================================ */
 
 .empty-state {
@@ -387,7 +329,6 @@ kbd {
   border: 1px dashed #3d4d70;
   border-radius: 12px;
   color: #99a5bd;
-  animation: fadeIn .35s ease both;
 }
 
 .empty-state span {
@@ -417,14 +358,11 @@ kbd {
   color: #f1f5ff;
   background: #11182b;
   box-shadow: 0 26px 100px #000c;
-
-  animation: modalIn .3s cubic-bezier(.2, .8, .2, 1);
 }
 
 .skin-modal::backdrop {
   background: #02050dde;
   backdrop-filter: blur(5px);
-  animation: backdropIn .25s ease;
 }
 
 .skin-modal > img {
@@ -464,16 +402,6 @@ kbd {
   font-size: 25px;
   line-height: 1;
   cursor: pointer;
-  transition:
-    transform .25s ease,
-    background .2s ease,
-    border-color .2s ease;
-}
-
-.modal-close:hover {
-  transform: rotate(90deg);
-  border-color: #d2b175;
-  background: #17213a;
 }
 
 .download-list-wrap {
@@ -507,17 +435,11 @@ kbd {
   background: #17213a;
   font-size: .78rem;
   text-decoration: none;
-
-  transition:
-    border-color .2s ease,
-    background .2s ease,
-    transform .2s ease;
 }
 
 .download-item:hover {
   border-color: #d2b175;
   background: #253354;
-  transform: translateX(3px);
 }
 
 .download-item.unavailable {
@@ -688,15 +610,11 @@ kbd {
   position: absolute;
   top: -90px;
   left: 50%;
-
   width: 220px;
   height: 220px;
-
   border-radius: 50%;
-
   background: rgba(111, 94, 201, .18);
   filter: blur(45px);
-
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -815,17 +733,6 @@ kbd {
 
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .025);
-
-  transition:
-    border-color .25s ease,
-    transform .25s ease,
-    background .25s ease;
-}
-
-.discord-profile:hover {
-  border-color: #555f80;
-  background: rgba(24, 33, 58, .86);
-  transform: translateY(-2px);
 }
 
 /* ================================
@@ -854,17 +761,9 @@ kbd {
 
 .discord-profile-avatar img {
   display: block;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
-  transition: transform .5s ease;
-}
-
-.discord-profile:hover .discord-profile-avatar img {
-  transform: scale(1.08);
 }
 
 .discord-profile-avatar i {
@@ -918,102 +817,6 @@ kbd {
 .discord-modal-hint span:first-child {
   color: #65d391;
   font-size: 8px;
-}
-
-/* ================================
-   ANIMATIONS
-   ================================ */
-
-@keyframes heroIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes cardIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes backdropIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes discordModalIn {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes discordBackdropIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes favoritePop {
-  0% {
-    transform: scale(.8);
-  }
-
-  55% {
-    transform: scale(1.22);
-  }
-
-  100% {
-    transform: scale(1);
-  }
 }
 
 /* ================================
@@ -1119,23 +922,5 @@ kbd {
     width: 34px;
     height: 34px;
     font-size: 17px;
-  }
-}
-
-/* ================================
-   HAREKET AZALTMA
-   ================================ */
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
   }
 }

@@ -37,7 +37,7 @@ function saveFavorites() {
       JSON.stringify([...favorites])
     );
   } catch {
-    // localStorage kullanılamıyorsa site çalışmaya devam eder.
+    // localStorage kullanılamıyorsa devam et.
   }
 }
 
@@ -59,6 +59,14 @@ function toggleFavorite(skinId, button) {
   updateFavoriteButton(button, id);
   updateFavoriteCount();
 
+  /*
+   * Favoriler filtresi açıksa favoriden çıkarılan
+   * kartı anında ekrandan kaldır.
+   */
+  if (isFavoriteFilterActive()) {
+    render();
+  }
+
   track('favorite_toggle', {
     skin_id: id,
     is_favorite: favorites.has(id) ? 1 : 0
@@ -66,9 +74,12 @@ function toggleFavorite(skinId, button) {
 }
 
 function updateFavoriteButton(button, skinId) {
+  if (!button) return;
+
   const favorite = isFavorite(skinId);
 
   button.classList.toggle('is-favorite', favorite);
+
   button.setAttribute(
     'aria-pressed',
     favorite ? 'true' : 'false'
@@ -93,12 +104,12 @@ function updateFavoriteButton(button, skinId) {
 }
 
 function updateFavoriteCount() {
-  const favoriteCount = document.querySelector('#favorite-count');
+  const favoriteCount =
+    document.querySelector('#favorite-count');
 
   if (!favoriteCount) return;
 
   favoriteCount.textContent = favorites.size;
-
   favoriteCount.hidden = favorites.size === 0;
 }
 
@@ -108,6 +119,7 @@ function updateFavoriteCount() {
 
 let skins = [];
 let skinGroups = [];
+
 let searchTrackingTimer;
 let lastTrackedSearch = '';
 
@@ -121,7 +133,7 @@ const track = (eventName, parameters) => {
 };
 
 const normalize = (value) =>
-  value
+  String(value)
     .toLocaleLowerCase('tr-TR')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -129,10 +141,60 @@ const normalize = (value) =>
     .replace(/[^a-z0-9]/g, '');
 
 /* =========================================
-   SKIN KARTINI OLUŞTUR
+   FAVORİ FİLTRESİ
    ========================================= */
 
-function createSkinCard(group, index) {
+const favoriteFilter =
+  document.querySelector('#favorite-filter');
+
+function isFavoriteFilterActive() {
+  return Boolean(
+    favoriteFilter?.classList.contains('is-active')
+  );
+}
+
+function setFavoriteFilter(active) {
+  if (!favoriteFilter) return;
+
+  favoriteFilter.classList.toggle(
+    'is-active',
+    active
+  );
+
+  favoriteFilter.setAttribute(
+    'aria-pressed',
+    active ? 'true' : 'false'
+  );
+}
+
+/* =========================================
+   ARAMA EŞLEŞMESİ
+   ========================================= */
+
+function groupMatchesSearch(group, query) {
+  if (!query) return true;
+
+  return normalize(
+    group.skins
+      .map(
+        (skin) =>
+          `${skin.name} ${skin.champion} ${skin.id}`
+      )
+      .join(' ')
+  ).includes(query);
+}
+
+function groupHasFavorite(group) {
+  return group.skins.some((skin) =>
+    isFavorite(skin.id)
+  );
+}
+
+/* =========================================
+   SKIN KARTI
+   ========================================= */
+
+function createSkinCard(group) {
   const skin = group.primary;
   const card = template.content.cloneNode(true);
 
@@ -161,10 +223,8 @@ function createSkinCard(group, index) {
     card.querySelector('.favorite-button');
 
   /*
-   * HTML'de buton henüz yoksa JS otomatik oluşturur.
-   * Böylece mevcut template'in çalışması bozulmaz.
+   * Template içinde buton yoksa otomatik oluştur.
    */
-
   if (!favoriteButton) {
     favoriteButton =
       document.createElement('button');
@@ -202,24 +262,14 @@ function createSkinCard(group, index) {
      ===================================== */
 
   article.tabIndex = 0;
-  article.setAttribute('role', 'button');
+  article.setAttribute(
+    'role',
+    'button'
+  );
 
   article.setAttribute(
     'aria-label',
     `${skin.name} detayını aç`
-  );
-
-  /* =====================================
-     SMOOTH ANİMASYON
-     ===================================== */
-
-  article.style.setProperty(
-    '--card-index',
-    index
-  );
-
-  article.classList.add(
-    'skin-card-enter'
   );
 
   /* =====================================
@@ -252,42 +302,105 @@ function createSkinCard(group, index) {
    ========================================= */
 
 function render() {
-  const query = normalize(
-    search.value
+  const query = normalize(search.value);
+
+  /*
+   * Önce arama sonuçlarını bul.
+   */
+  let found = skinGroups.filter((group) =>
+    groupMatchesSearch(group, query)
   );
 
-  const found = skinGroups.filter(
-    (group) =>
-      normalize(
-        group.skins
-          .map(
-            (skin) =>
-              `${skin.name} ${skin.champion} ${skin.id}`
-          )
-          .join(' ')
-      ).includes(query)
-  );
+  /*
+   * Favoriler filtresi açıksa yalnızca
+   * favorisi bulunan grupları göster.
+   */
+  if (isFavoriteFilterActive()) {
+    found = found.filter((group) =>
+      groupHasFavorite(group)
+    );
+  }
 
+  /*
+   * Arama yoksa 24,
+   * arama varsa 80,
+   * favoriler filtresinde de 80 göster.
+   */
   const visible = found.slice(
     0,
-    query ? 80 : 24
+    query || isFavoriteFilterActive()
+      ? 80
+      : 24
   );
 
   results.replaceChildren(
-    ...visible.map(
-      (group, index) =>
-        createSkinCard(group, index)
+    ...visible.map((group) =>
+      createSkinCard(group)
     )
   );
 
   const count = found.length;
 
-  title.textContent = query
-    ? `${count} sonuç bulundu`
-    : 'Skinleri keşfet';
+  /* =====================================
+     BAŞLIK
+     ===================================== */
+
+  if (isFavoriteFilterActive()) {
+    title.textContent = query
+      ? `${count} favori sonuç`
+      : `${count} favori`;
+  } else {
+    title.textContent = query
+      ? `${count} sonuç bulundu`
+      : 'Skinleri keşfet';
+  }
+
+  /* =====================================
+     BOŞ DURUM
+     ===================================== */
 
   empty.hidden = count !== 0;
   results.hidden = count === 0;
+
+  /*
+   * Favoriler filtresi açık ve favori yoksa
+   * daha açıklayıcı mesaj göster.
+   */
+  const emptyTitle =
+    empty.querySelector('h2');
+
+  const emptyText =
+    empty.querySelector('p');
+
+  if (emptyTitle && emptyText) {
+    if (
+      isFavoriteFilterActive() &&
+      favorites.size === 0
+    ) {
+      emptyTitle.textContent =
+        'Henüz favorin yok';
+
+      emptyText.textContent =
+        'Skin kartındaki yıldız simgesine tıklayarak favorilerine ekleyebilirsin.';
+    } else if (
+      isFavoriteFilterActive() &&
+      count === 0
+    ) {
+      emptyTitle.textContent =
+        'Favori skin bulunamadı';
+
+      emptyText.textContent =
+        query
+          ? 'Bu arama için favorilerinde eşleşen skin bulunamadı.'
+          : 'Henüz favorilerine eklediğin bir skin yok.';
+    } else {
+      emptyTitle.textContent =
+        'Sonuç bulunamadı';
+
+      emptyText.textContent =
+        'Skin adı, şampiyon adı veya ID ile yeniden deneyin.';
+    }
+  }
 
   updateFavoriteCount();
 }
@@ -326,11 +439,12 @@ function openModal(group) {
   downloadList.replaceChildren(
     ...group.skins.map((item) => {
       const hasFile =
-        fantomeFiles.has(item.id);
+        fantomeFiles.has(String(item.id));
 
-      const link = document.createElement(
-        hasFile ? 'a' : 'span'
-      );
+      const link =
+        document.createElement(
+          hasFile ? 'a' : 'span'
+        );
 
       link.className =
         `download-item${
@@ -388,12 +502,12 @@ function openModal(group) {
 
 document
   .querySelector('.modal-close')
-  .addEventListener(
+  ?.addEventListener(
     'click',
     () => modal.close()
   );
 
-modal.addEventListener(
+modal?.addEventListener(
   'click',
   (event) => {
     if (event.target === modal) {
@@ -471,84 +585,26 @@ if (
 }
 
 /* =========================================
-   FAVORİ BUTONU / FİLTRE
+   FAVORİ FİLTRESİ BUTONU
    ========================================= */
-
-const favoriteFilter =
-  document.querySelector(
-    '#favorite-filter'
-  );
 
 if (favoriteFilter) {
   favoriteFilter.addEventListener(
     'click',
     () => {
-      const isActive =
-        favoriteFilter.classList.toggle(
-          'is-active'
-        );
+      const active =
+        !isFavoriteFilterActive();
 
-      favoriteFilter.setAttribute(
-        'aria-pressed',
-        isActive
-          ? 'true'
-          : 'false'
+      setFavoriteFilter(active);
+
+      render();
+
+      track(
+        'favorite_filter',
+        {
+          active: active ? 1 : 0
+        }
       );
-
-      if (!isActive) {
-        render();
-        return;
-      }
-
-      const query = normalize(
-        search.value
-      );
-
-      const found =
-        skinGroups.filter((group) => {
-          const matchesSearch =
-            normalize(
-              group.skins
-                .map(
-                  (skin) =>
-                    `${skin.name} ${skin.champion} ${skin.id}`
-                )
-                .join(' ')
-            ).includes(query);
-
-          const hasFavorite =
-            group.skins.some(
-              (skin) =>
-                isFavorite(skin.id)
-            );
-
-          return (
-            matchesSearch &&
-            hasFavorite
-          );
-        });
-
-      const visible =
-        found.slice(0, 80);
-
-      results.replaceChildren(
-        ...visible.map(
-          (group, index) =>
-            createSkinCard(
-              group,
-              index
-            )
-        )
-      );
-
-      title.textContent =
-        `${found.length} favori`;
-
-      empty.hidden =
-        found.length !== 0;
-
-      results.hidden =
-        found.length === 0;
     }
   );
 }
@@ -581,14 +637,8 @@ function scheduleSearchAnalytics() {
       const resultCount =
         skinGroups.filter(
           (group) =>
-            normalize(
-              group.skins
-                .map(
-                  (skin) =>
-                    `${skin.name} ${skin.champion} ${skin.id}`
-                )
-                .join(' ')
-            ).includes(
+            groupMatchesSearch(
+              group,
               lastTrackedSearch
             )
         ).length;
@@ -602,7 +652,9 @@ function scheduleSearchAnalytics() {
             resultCount
         }
       );
-    }, 700);
+    },
+    700
+  );
 }
 
 /* =========================================
@@ -625,25 +677,18 @@ search.addEventListener(
     ) {
       search.value = '';
 
-      /*
-       * Favori filtresi açıksa kapat.
-       */
-      if (favoriteFilter) {
-        favoriteFilter.classList.remove(
-          'is-active'
-        );
-
-        favoriteFilter.setAttribute(
-          'aria-pressed',
-          'false'
-        );
-      }
+      setFavoriteFilter(false);
 
       render();
+
       search.blur();
     }
   }
 );
+
+/* =========================================
+   HIZLI ARAMALAR
+   ========================================= */
 
 document
   .querySelectorAll(
@@ -656,18 +701,10 @@ document
         search.value =
           button.dataset.query;
 
-        if (favoriteFilter) {
-          favoriteFilter.classList.remove(
-            'is-active'
-          );
-
-          favoriteFilter.setAttribute(
-            'aria-pressed',
-            'false'
-          );
-        }
+        setFavoriteFilter(false);
 
         render();
+
         search.focus();
       }
     );
@@ -708,11 +745,21 @@ try {
     )
   ]);
 
+  /* =====================================
+     FANTOME DOSYALARI
+     ===================================== */
+
   files.forEach((id) => {
-    fantomeFiles.add(id);
+    fantomeFiles.add(String(id));
   });
 
-  skins = data.skins;
+  /* =====================================
+     SKIN VERİLERİ
+     ===================================== */
+
+  skins = Array.isArray(data.skins)
+    ? data.skins
+    : [];
 
   const groups = new Map();
 
@@ -740,6 +787,9 @@ try {
 
     group.skins.push(skin);
 
+    /*
+     * Chroma olmayan ana skin'i primary yap.
+     */
     if (
       skin.name.trim() ===
       baseName
@@ -747,6 +797,10 @@ try {
       group.primary = skin;
     }
   });
+
+  /* =====================================
+     GRUPLARI HAZIRLA
+     ===================================== */
 
   skinGroups =
     [...groups.values()]
@@ -768,6 +822,10 @@ try {
           )
       }));
 
+  /* =====================================
+     META
+     ===================================== */
+
   meta.textContent =
     skins.length
       ? `${skinGroups.length.toLocaleString(
@@ -781,7 +839,12 @@ try {
 
   render();
 
-} catch {
+} catch (error) {
+  console.error(
+    'Skin verileri yüklenemedi:',
+    error
+  );
+
   meta.textContent =
     'Skin verisi yüklenemedi';
 
