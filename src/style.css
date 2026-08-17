@@ -1276,13 +1276,22 @@ dialog::backdrop {
    DISCORD BUTTON
    ================================ */
 
-.discord-contact {
+.top-actions {
   position: fixed;
 
   z-index: 100;
 
   top: 24px;
   right: 28px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 10px;
+}
+
+.discord-contact {
+  position: relative;
 
   display: flex;
   align-items: center;
@@ -1438,6 +1447,204 @@ dialog::backdrop {
 
   transform:
     translate(2px, -2px);
+}
+
+/* ================================
+   DİL SEÇİCİ
+   ================================ */
+
+.lang-switch-wrap {
+  position: relative;
+}
+
+.lang-switch {
+  display: flex;
+  align-items: center;
+
+  height: 100%;
+
+  gap: 7px;
+
+  padding: 10px 12px;
+
+  border: 1px solid #4b4c86;
+  border-radius: 12px;
+
+  color: #f1f5ff;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(88, 73, 145, .28),
+      rgba(17, 24, 43, .92)
+    );
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, .35),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  cursor: pointer;
+
+  transition:
+    transform .25s var(--ease-spring),
+    border-color .25s ease,
+    box-shadow .25s ease,
+    background .25s ease;
+}
+
+.lang-switch:hover {
+  transform:
+    translateY(-2px)
+    scale(1.01);
+
+  border-color: #7d73d4;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(104, 86, 177, .38),
+      rgba(17, 24, 43, .94)
+    );
+
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, .42),
+    0 0 25px rgba(91, 76, 166, .16);
+}
+
+.lang-switch:active {
+  transform:
+    translateY(0)
+    scale(.98);
+}
+
+.lang-switch:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.lang-switch-flag {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.lang-switch-code {
+  color: #f3f4ff;
+
+  font:
+    12px "DM Mono",
+    monospace;
+
+  letter-spacing: .06em;
+}
+
+.lang-switch-chevron {
+  color: #8279c5;
+
+  font-size: 11px;
+
+  transition: transform .2s var(--ease-spring);
+}
+
+.lang-switch[aria-expanded="true"] .lang-switch-chevron {
+  transform: rotate(180deg);
+}
+
+.lang-menu {
+  position: absolute;
+
+  top: calc(100% + 8px);
+  right: 0;
+
+  z-index: 110;
+
+  min-width: 148px;
+
+  margin: 0;
+  padding: 6px;
+
+  list-style: none;
+
+  border: 1px solid #4b4c86;
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      160deg,
+      rgba(43, 37, 77, .96),
+      rgba(13, 18, 34, .98)
+    );
+
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, .5),
+    inset 0 1px 0 rgba(255, 255, 255, .06);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  animation: lang-menu-in .18s var(--ease-out);
+}
+
+.lang-menu[hidden] {
+  display: none;
+}
+
+@keyframes lang-menu-in {
+  from {
+    opacity: 0;
+
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+.lang-menu-option {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  gap: 9px;
+
+  padding: 8px 10px;
+
+  border: none;
+  border-radius: 8px;
+
+  color: #dfe2f5;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition: background .18s ease, color .18s ease;
+}
+
+.lang-menu-option span:first-child {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.lang-menu-option:hover {
+  color: #fff;
+
+  background: rgba(125, 115, 212, .22);
+}
+
+.lang-menu-option[aria-selected="true"] {
+  color: var(--gold-light);
+
+  background: rgba(210, 177, 117, .14);
 }
 
 /* ================================
@@ -2003,10 +2210,14 @@ dialog::backdrop {
     aspect-ratio: 16 / 8;
   }
 
-  .discord-contact {
+  .top-actions {
     top: 14px;
     right: 14px;
 
+    gap: 8px;
+  }
+
+  .discord-contact {
     min-width: 0;
 
     padding: 8px;
@@ -2026,6 +2237,20 @@ dialog::backdrop {
   }
 
   .discord-contact-arrow {
+    display: none;
+  }
+
+  .lang-switch {
+    padding: 8px;
+
+    border-radius: 11px;
+  }
+
+  .lang-switch-code {
+    display: none;
+  }
+
+  .lang-switch-chevron {
     display: none;
   }
 

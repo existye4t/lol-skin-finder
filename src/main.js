@@ -1,6 +1,577 @@
 import './style.css';
 
 /* =========================================
+   DİL / i18n
+   ========================================= */
+
+const LANG_STORAGE_KEY = 'exist-lol-skin-lang';
+
+const LOCALE_MAP = {
+  tr: 'tr-TR',
+  en: 'en-US'
+};
+
+const TRANSLATIONS = {
+  heroEyebrow: {
+    tr: 'LEAGUE OF LEGENDS • SKIN VERİTABANI',
+    en: 'LEAGUE OF LEGENDS • SKIN DATABASE'
+  },
+  heroTitleLine: {
+    tr: 'Aradığın skin',
+    en: 'The skin you want'
+  },
+  heroTitleEm: {
+    tr: 'burada.',
+    en: 'is here.'
+  },
+  heroIntro: {
+    tr: 'Skin adını, şampiyonu veya Riot skin ID’sini yaz. Sonuçlar anında filtrelenir.',
+    en: 'Type the skin name, champion, or Riot skin ID. Results filter instantly.'
+  },
+  searchPlaceholder: {
+    tr: 'Örn. Omega Timi Twitch veya 29004',
+    en: 'E.g. Omega Squad Twitch or 29004'
+  },
+  showFavorites: {
+    tr: 'Favorileri göster',
+    en: 'Show favorites'
+  },
+  showAll: {
+    tr: 'Tüm skinleri göster',
+    en: 'Show all skins'
+  },
+  favoritesLabel: {
+    tr: 'Favoriler',
+    en: 'Favorites'
+  },
+  quickSearchesAriaLabel: {
+    tr: 'Örnek aramalar',
+    en: 'Example searches'
+  },
+  savedEyebrow: {
+    tr: 'KAYDEDİLENLER',
+    en: 'SAVED'
+  },
+  favoritesHeading: {
+    tr: 'Favori skinlerin',
+    en: 'Your favorite skins'
+  },
+  clearFavorites: {
+    tr: 'Favorileri temizle',
+    en: 'Clear favorites'
+  },
+  resultsEyebrow: {
+    tr: 'SONUÇLAR',
+    en: 'RESULTS'
+  },
+  exploreSkins: {
+    tr: 'Skinleri keşfet',
+    en: 'Explore skins'
+  },
+  loadingData: {
+    tr: 'Veriler yükleniyor…',
+    en: 'Loading data…'
+  },
+  noResults: {
+    tr: 'Sonuç bulunamadı',
+    en: 'No results found'
+  },
+  noResultsHint: {
+    tr: 'Skin adı, şampiyon adı veya ID ile yeniden deneyin.',
+    en: 'Try again with a skin name, champion name, or ID.'
+  },
+  noFavoritesYet: {
+    tr: 'Henüz favorin yok',
+    en: 'No favorites yet'
+  },
+  noFavoritesYetHint: {
+    tr: 'Skin kartındaki yıldız simgesine tıklayarak favorilerine ekleyebilirsin.',
+    en: 'Tap the star icon on a skin card to add it to your favorites.'
+  },
+  noFavoriteResults: {
+    tr: 'Favori skin bulunamadı',
+    en: 'No favorite skins found'
+  },
+  noFavoriteResultsSearchHint: {
+    tr: 'Bu arama için favorilerinde eşleşen skin bulunamadı.',
+    en: 'No matching skins found in your favorites for this search.'
+  },
+  noFavoriteResultsHint: {
+    tr: 'Henüz favorilerine eklediğin bir skin yok.',
+    en: 'You haven’t added any skins to your favorites yet.'
+  },
+  addFavorite: {
+    tr: 'Favorilere ekle',
+    en: 'Add to favorites'
+  },
+  removeFavorite: {
+    tr: 'Favorilerden çıkar',
+    en: 'Remove from favorites'
+  },
+  close: {
+    tr: 'Kapat',
+    en: 'Close'
+  },
+  downloadsHeading: {
+    tr: 'İNDİRMELER',
+    en: 'DOWNLOADS'
+  },
+  downloadsAriaLabel: {
+    tr: 'Skin ve chroma indirmeleri',
+    en: 'Skin and chroma downloads'
+  },
+  mainSkin: {
+    tr: 'Ana skin',
+    en: 'Base skin'
+  },
+  fileNotFound: {
+    tr: 'Bu dosya klasörde bulunamadı',
+    en: 'This file was not found in the folder'
+  },
+  downloadFantomeTitle: {
+    tr: '{id}.fantome indir',
+    en: 'Download {id}.fantome'
+  },
+  downloadFantomeAriaLabel: {
+    tr: '{name} fantome dosyasını indir',
+    en: 'Download the {name} fantome file'
+  },
+  riotSkinId: {
+    tr: 'RIOT SKIN ID: {id}',
+    en: 'RIOT SKIN ID: {id}'
+  },
+  cardAriaLabel: {
+    tr: '{name}, {champion}, ID {id}. Detayları aç',
+    en: '{name}, {champion}, ID {id}. Open details'
+  },
+  favoriteResultsCount: {
+    tr: '{count} favori sonuç',
+    en: '{count} favorite results'
+  },
+  favoriteCount: {
+    tr: '{count} favori',
+    en: '{count} favorites'
+  },
+  resultsCount: {
+    tr: '{count} sonuç bulundu',
+    en: '{count} results found'
+  },
+  showingCount: {
+    tr: '{visible}/{total} gösteriliyor',
+    en: 'Showing {visible}/{total}'
+  },
+  metaVersion: {
+    tr: '{count} ana skin • Yama {version}',
+    en: '{count} base skins • Patch {version}'
+  },
+  dataLoadFailedMeta: {
+    tr: 'Skin verisi yüklenemedi',
+    en: 'Skin data could not be loaded'
+  },
+  dataLoadFailedTitle: {
+    tr: 'Skin verileri yüklenemedi',
+    en: 'Skin data could not be loaded'
+  },
+  dataLoadFailedHint: {
+    tr: 'data/skins.json dosyasının mevcut olduğundan ve geçerli JSON içerdiğinden emin olun.',
+    en: 'Make sure data/skins.json exists and contains valid JSON.'
+  },
+  discordEyebrow: {
+    tr: 'DISCORD İLETİŞİM',
+    en: 'DISCORD CONTACT'
+  },
+  discordTitle: {
+    tr: 'Bir sorun mu var?',
+    en: 'Got an issue?'
+  },
+  discordDescription: {
+    tr: 'Problem, öneri veya sorularınız için Discord üzerinden bana ulaşabilirsiniz.',
+    en: 'Reach out to me on Discord for any issues, suggestions, or questions.'
+  },
+  discordHint: {
+    tr: 'Yardım etmek için buradayım.',
+    en: 'I’m here to help.'
+  },
+  closeDiscord: {
+    tr: 'Discord penceresini kapat',
+    en: 'Close the Discord window'
+  }
+};
+
+function getLang() {
+  try {
+    const saved = localStorage.getItem(
+      LANG_STORAGE_KEY
+    );
+
+    if (saved === 'tr' || saved === 'en') {
+      return saved;
+    }
+  } catch (error) {
+    console.warn(
+      'Dil tercihi okunamadı:',
+      error
+    );
+  }
+
+  return 'tr';
+}
+
+let currentLang = getLang();
+
+function t(key, vars) {
+  const entry =
+    TRANSLATIONS[key];
+
+  if (!entry) {
+    console.warn(
+      `Çeviri bulunamadı: ${key}`
+    );
+
+    return key;
+  }
+
+  let text =
+    entry[currentLang] ||
+    entry.tr ||
+    key;
+
+  if (vars) {
+    Object.keys(vars).forEach(
+      (varKey) => {
+        text = text.replace(
+          `{${varKey}}`,
+          vars[varKey]
+        );
+      }
+    );
+  }
+
+  return text;
+}
+
+function formatNumber(value) {
+  return Number(
+    value
+  ).toLocaleString(
+    LOCALE_MAP[currentLang] ||
+      'tr-TR'
+  );
+}
+
+/* ---------------------------------------
+   Skin adı / şampiyon adı yerelleştirme
+
+   Not: data/skins.json şu an sadece
+   Türkçe (tr_TR) verisiyle üretiliyor.
+   scripts/update-skins.mjs güncellendi;
+   `npm run update-data` yeniden
+   çalıştırıldığında İngilizce alanlar
+   (nameEn / championEn) da dosyaya
+   eklenecek. O zamana kadar İngilizce
+   modda otomatik olarak Türkçe isimlere
+   geri dönülür.
+   --------------------------------------- */
+
+function localizedName(skin) {
+  if (
+    currentLang === 'en' &&
+    skin?.nameEn
+  ) {
+    return skin.nameEn;
+  }
+
+  return skin?.name || '';
+}
+
+function localizedChampion(skin) {
+  if (
+    currentLang === 'en' &&
+    skin?.championEn
+  ) {
+    return skin.championEn;
+  }
+
+  return skin?.champion || '';
+}
+
+/* ---------------------------------------
+   Statik metinleri uygula
+   --------------------------------------- */
+
+function applyStaticTranslations() {
+  document.documentElement.lang =
+    currentLang;
+
+  document
+    .querySelectorAll('[data-i18n]')
+    .forEach((element) => {
+      const key =
+        element.dataset.i18n;
+
+      element.textContent =
+        t(key);
+    });
+
+  document
+    .querySelectorAll(
+      '[data-i18n-placeholder]'
+    )
+    .forEach((element) => {
+      element.placeholder =
+        t(
+          element.dataset
+            .i18nPlaceholder
+        );
+    });
+
+  document
+    .querySelectorAll(
+      '[data-i18n-title]'
+    )
+    .forEach((element) => {
+      element.title =
+        t(
+          element.dataset
+            .i18nTitle
+        );
+    });
+
+  document
+    .querySelectorAll(
+      '[data-i18n-aria-label]'
+    )
+    .forEach((element) => {
+      element.setAttribute(
+        'aria-label',
+        t(
+          element.dataset
+            .i18nAriaLabel
+        )
+      );
+    });
+
+  document
+    .querySelectorAll(
+      '[data-query-tr]'
+    )
+    .forEach((button) => {
+      const query =
+        currentLang === 'en'
+          ? button.dataset
+              .queryEn ||
+            button.dataset
+              .queryTr
+          : button.dataset
+              .queryTr;
+
+      const label =
+        currentLang === 'en'
+          ? button.dataset
+              .labelEn ||
+            button.dataset
+              .labelTr
+          : button.dataset
+              .labelTr;
+
+      button.dataset.query =
+        query;
+
+      button.textContent =
+        label;
+    });
+}
+
+/* ---------------------------------------
+   Dil butonu / menüsü
+   --------------------------------------- */
+
+const langSwitch =
+  document.querySelector(
+    '#lang-switch'
+  );
+
+const langMenu =
+  document.querySelector(
+    '#lang-menu'
+  );
+
+const langSwitchFlag =
+  document.querySelector(
+    '#lang-switch-flag'
+  );
+
+const langSwitchCode =
+  document.querySelector(
+    '#lang-switch-code'
+  );
+
+const LANG_FLAGS = {
+  tr: '🇹🇷',
+  en: '🇬🇧'
+};
+
+function updateLangSwitchUI() {
+  if (langSwitchFlag) {
+    langSwitchFlag.textContent =
+      LANG_FLAGS[currentLang];
+  }
+
+  if (langSwitchCode) {
+    langSwitchCode.textContent =
+      currentLang.toUpperCase();
+  }
+
+  document
+    .querySelectorAll(
+      '.lang-menu-option'
+    )
+    .forEach((option) => {
+      const active =
+        option.dataset.lang ===
+        currentLang;
+
+      option.setAttribute(
+        'aria-selected',
+        active
+          ? 'true'
+          : 'false'
+      );
+    });
+}
+
+function closeLangMenu() {
+  if (!langMenu) {
+    return;
+  }
+
+  langMenu.hidden = true;
+
+  langSwitch?.setAttribute(
+    'aria-expanded',
+    'false'
+  );
+}
+
+function openLangMenu() {
+  if (!langMenu) {
+    return;
+  }
+
+  langMenu.hidden = false;
+
+  langSwitch?.setAttribute(
+    'aria-expanded',
+    'true'
+  );
+}
+
+function setLang(lang) {
+  if (
+    lang !== 'tr' &&
+    lang !== 'en'
+  ) {
+    return;
+  }
+
+  currentLang = lang;
+
+  try {
+    localStorage.setItem(
+      LANG_STORAGE_KEY,
+      lang
+    );
+  } catch (error) {
+    console.warn(
+      'Dil tercihi kaydedilemedi:',
+      error
+    );
+  }
+
+  applyStaticTranslations();
+
+  updateLangSwitchUI();
+
+  setFavoriteFilter(
+    isFavoriteFilterActive()
+  );
+
+  render();
+
+  track('language_change', {
+    language: lang
+  });
+}
+
+langSwitch?.addEventListener(
+  'click',
+  (event) => {
+    event.stopPropagation();
+
+    if (langMenu?.hidden) {
+      openLangMenu();
+    } else {
+      closeLangMenu();
+    }
+  }
+);
+
+document
+  .querySelectorAll(
+    '.lang-menu-option'
+  )
+  .forEach((option) => {
+    option.addEventListener(
+      'click',
+      () => {
+        setLang(
+          option.dataset.lang
+        );
+
+        closeLangMenu();
+      }
+    );
+  });
+
+document.addEventListener(
+  'click',
+  (event) => {
+    if (
+      !langMenu ||
+      langMenu.hidden
+    ) {
+      return;
+    }
+
+    if (
+      langMenu.contains(
+        event.target
+      ) ||
+      langSwitch?.contains(
+        event.target
+      )
+    ) {
+      return;
+    }
+
+    closeLangMenu();
+  }
+);
+
+document.addEventListener(
+  'keydown',
+  (event) => {
+    if (
+      event.key === 'Escape' &&
+      langMenu &&
+      !langMenu.hidden
+    ) {
+      closeLangMenu();
+    }
+  }
+);
+
+/* =========================================
    DOM
    ========================================= */
 
@@ -132,8 +703,8 @@ function updateFavoriteCount() {
   }
 
   favoriteCount.textContent =
-    favorites.size.toLocaleString(
-      'tr-TR'
+    formatNumber(
+      favorites.size
     );
 
   favoriteCount.hidden =
@@ -170,14 +741,14 @@ function updateFavoriteButton(
   button.setAttribute(
     'aria-label',
     favorite
-      ? 'Favorilerden çıkar'
-      : 'Favorilere ekle'
+      ? t('removeFavorite')
+      : t('addFavorite')
   );
 
   button.title =
     favorite
-      ? 'Favorilerden çıkar'
-      : 'Favorilere ekle';
+      ? t('removeFavorite')
+      : t('addFavorite');
 
   const icon =
     button.querySelector(
@@ -231,14 +802,14 @@ function setFavoriteFilter(
   favoriteFilter.setAttribute(
     'aria-label',
     active
-      ? 'Tüm skinleri göster'
-      : 'Favorileri göster'
+      ? t('showAll')
+      : t('showFavorites')
   );
 
   favoriteFilter.title =
     active
-      ? 'Tüm skinleri göster'
-      : 'Favorileri göster';
+      ? t('showAll')
+      : t('showFavorites');
 }
 
 /* =========================================
@@ -372,9 +943,13 @@ function groupMatchesSearch(
         (skin) =>
           [
             skin.name,
+            skin.nameEn,
             skin.champion,
+            skin.championEn,
             skin.id
-          ].join(' ')
+          ]
+            .filter(Boolean)
+            .join(' ')
       )
       .join(' ');
 
@@ -430,6 +1005,20 @@ function normalizeSkin(
       skin.image ?? ''
     ).trim();
 
+  const nameEn =
+    skin.nameEn
+      ? String(
+          skin.nameEn
+        ).trim()
+      : '';
+
+  const championEn =
+    skin.championEn
+      ? String(
+          skin.championEn
+        ).trim()
+      : '';
+
   if (
     !id ||
     !name ||
@@ -443,7 +1032,9 @@ function normalizeSkin(
     id,
     name,
     champion,
-    image
+    image,
+    nameEn,
+    championEn
   };
 }
 
@@ -516,13 +1107,19 @@ function createSkinCard(
      Görsel
      --------------------------------------- */
 
+  const displayName =
+    localizedName(skin);
+
+  const displayChampion =
+    localizedChampion(skin);
+
   if (image) {
     image.src =
       skin.image ||
       '';
 
     image.alt =
-      `${skin.name} — ${skin.champion}`;
+      `${displayName} — ${displayChampion}`;
 
     image.loading =
       'lazy';
@@ -548,12 +1145,12 @@ function createSkinCard(
 
   if (championElement) {
     championElement.textContent =
-      skin.champion;
+      displayChampion;
   }
 
   if (nameElement) {
     nameElement.textContent =
-      skin.name;
+      displayName;
   }
 
   if (idElement) {
@@ -629,7 +1226,11 @@ function createSkinCard(
 
   article.setAttribute(
     'aria-label',
-    `${skin.name}, ${skin.champion}, ID ${skin.id}. Detayları aç`
+    t('cardAriaLabel', {
+      name: displayName,
+      champion: displayChampion,
+      id: skin.id
+    })
   );
 
   /* ---------------------------------------
@@ -745,13 +1346,28 @@ function render() {
   ) {
     title.textContent =
       query
-        ? `${found.length} favori sonuç`
-        : `${found.length} favori`;
+        ? t(
+            'favoriteResultsCount',
+            {
+              count: formatNumber(
+                found.length
+              )
+            }
+          )
+        : t('favoriteCount', {
+            count: formatNumber(
+              found.length
+            )
+          });
   } else {
     title.textContent =
       query
-        ? `${found.length} sonuç bulundu`
-        : 'Skinleri keşfet';
+        ? t('resultsCount', {
+            count: formatNumber(
+              found.length
+            )
+          })
+        : t('exploreSkins');
   }
 
   /* ---------------------------------------
@@ -770,11 +1386,14 @@ function render() {
       isFavoriteFilterActive()
     ) {
       meta.textContent =
-        `${visibleCount.toLocaleString(
-          'tr-TR'
-        )}/${found.length.toLocaleString(
-          'tr-TR'
-        )} gösteriliyor`;
+        t('showingCount', {
+          visible: formatNumber(
+            visibleCount
+          ),
+          total: formatNumber(
+            found.length
+          )
+        });
     }
   }
 
@@ -807,27 +1426,31 @@ function render() {
       favorites.size === 0
     ) {
       emptyTitle.textContent =
-        'Henüz favorin yok';
+        t('noFavoritesYet');
 
       emptyText.textContent =
-        'Skin kartındaki yıldız simgesine tıklayarak favorilerine ekleyebilirsin.';
+        t('noFavoritesYetHint');
     } else if (
       isFavoriteFilterActive() &&
       found.length === 0
     ) {
       emptyTitle.textContent =
-        'Favori skin bulunamadı';
+        t('noFavoriteResults');
 
       emptyText.textContent =
         query
-          ? 'Bu arama için favorilerinde eşleşen skin bulunamadı.'
-          : 'Henüz favorilerine eklediğin bir skin yok.';
+          ? t(
+              'noFavoriteResultsSearchHint'
+            )
+          : t(
+              'noFavoriteResultsHint'
+            );
     } else {
       emptyTitle.textContent =
-        'Sonuç bulunamadı';
+        t('noResults');
 
       emptyText.textContent =
-        'Skin adı, şampiyon adı veya ID ile yeniden deneyin.';
+        t('noResultsHint');
     }
   }
 
@@ -872,6 +1495,12 @@ function openModal(
       '#modal-skin-id'
     );
 
+  const displayName =
+    localizedName(skin);
+
+  const displayChampion =
+    localizedChampion(skin);
+
   /* ---------------------------------------
      Modal görseli
      --------------------------------------- */
@@ -882,7 +1511,7 @@ function openModal(
       '';
 
     modalImage.alt =
-      `${skin.name} — ${skin.champion}`;
+      `${displayName} — ${displayChampion}`;
   }
 
   /* ---------------------------------------
@@ -891,17 +1520,19 @@ function openModal(
 
   if (modalChampion) {
     modalChampion.textContent =
-      skin.champion;
+      displayChampion;
   }
 
   if (modalSkinName) {
     modalSkinName.textContent =
-      skin.name;
+      displayName;
   }
 
   if (modalSkinId) {
     modalSkinId.textContent =
-      `RIOT SKIN ID: ${skin.id}`;
+      t('riotSkinId', {
+        id: skin.id
+      });
   }
 
   /* ---------------------------------------
@@ -932,18 +1563,21 @@ function openModal(
             : ' unavailable'
         }`;
 
+      const itemDisplayName =
+        localizedName(item);
+
       const chromaName =
-        item.name
+        itemDisplayName
           .match(
             /\(([^)]+)\)$/
           )?.[1];
 
       element.textContent =
         item === skin
-          ? `Ana skin · ${item.id}`
+          ? `${t('mainSkin')} · ${item.id}`
           : `${
               chromaName ||
-              item.name
+              itemDisplayName
             } · ${item.id}`;
 
       if (hasFile) {
@@ -956,11 +1590,21 @@ function openModal(
           `${item.id}.fantome`;
 
         element.title =
-          `${item.id}.fantome indir`;
+          t(
+            'downloadFantomeTitle',
+            {
+              id: item.id
+            }
+          );
 
         element.setAttribute(
           'aria-label',
-          `${item.name} fantome dosyasını indir`
+          t(
+            'downloadFantomeAriaLabel',
+            {
+              name: itemDisplayName
+            }
+          )
         );
 
         element.addEventListener(
@@ -988,7 +1632,7 @@ function openModal(
         );
       } else {
         element.title =
-          'Bu dosya klasörde bulunamadı';
+          t('fileNotFound');
 
         element.setAttribute(
           'aria-disabled',
@@ -1655,12 +2299,17 @@ async function loadData() {
     if (meta) {
       const version =
         data?.version ||
-        'Bilinmiyor';
+        (currentLang === 'en'
+          ? 'Unknown'
+          : 'Bilinmiyor');
 
       meta.textContent =
-        `${skinGroups.length.toLocaleString(
-          'tr-TR'
-        )} ana skin • Yama ${version}`;
+        t('metaVersion', {
+          count: formatNumber(
+            skinGroups.length
+          ),
+          version
+        });
     }
 
     updateFavoriteCount();
@@ -1685,7 +2334,7 @@ async function loadData() {
 
     if (meta) {
       meta.textContent =
-        'Skin verisi yüklenemedi';
+        t('dataLoadFailedMeta');
     }
 
     empty.hidden =
@@ -1706,12 +2355,12 @@ async function loadData() {
 
     if (emptyTitle) {
       emptyTitle.textContent =
-        'Skin verileri yüklenemedi';
+        t('dataLoadFailedTitle');
     }
 
     if (emptyText) {
       emptyText.textContent =
-        'data/skins.json dosyasının mevcut olduğundan ve geçerli JSON içerdiğinden emin olun.';
+        t('dataLoadFailedHint');
     }
   }
 }
@@ -1719,6 +2368,10 @@ async function loadData() {
 /* =========================================
    BAŞLAT
    ========================================= */
+
+applyStaticTranslations();
+
+updateLangSwitchUI();
 
 updateFavoriteCount();
 

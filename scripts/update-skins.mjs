@@ -18,25 +18,42 @@ console.log(`Data Dragon ${version} verisi indiriliyor...`);
 
 const champions = await getJson(`${baseUrl}/cdn/${version}/data/tr_TR/champion.json`);
 const entries = Object.values(champions.data);
+
+// Hem Türkçe hem İngilizce yerelleştirmeleri paralel indir.
+// Bu sayede sitedeki dil değiştirici (TR/EN) skin ve şampiyon
+// isimlerini de doğru dilde gösterebilir.
 const details = await Promise.all(entries.map(async ({ id }) => {
-  try {
-    return await getJson(`${baseUrl}/cdn/${version}/data/tr_TR/champion/${id}.json`);
-  } catch {
-    // Bazı yerelleştirmeler eksik olursa İngilizce veri ile devam edilir.
-    return getJson(`${baseUrl}/cdn/${version}/data/en_US/champion/${id}.json`);
-  }
+  const [trDetail, enDetail] = await Promise.all([
+    getJson(`${baseUrl}/cdn/${version}/data/tr_TR/champion/${id}.json`).catch(() =>
+      // Türkçe yerelleştirme eksikse İngilizce veriyle devam edilir.
+      getJson(`${baseUrl}/cdn/${version}/data/en_US/champion/${id}.json`)
+    ),
+    getJson(`${baseUrl}/cdn/${version}/data/en_US/champion/${id}.json`).catch(() => null)
+  ]);
+
+  return { trDetail, enDetail };
 }));
 
-const skins = details.flatMap((detail) => {
-  const champion = Object.values(detail.data)[0];
-  return champion.skins.map((skin) => ({
-    id: `${champion.key}${String(skin.num).padStart(3, '0')}`,
-    skinNum: skin.num,
-    name: skin.name === 'default' ? champion.name : skin.name,
-    champion: champion.name,
-    championId: champion.id,
-    image: `${baseUrl}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`
-  }));
+const skins = details.flatMap(({ trDetail, enDetail }) => {
+  const champion = Object.values(trDetail.data)[0];
+  const championEn = enDetail ? Object.values(enDetail.data)[0] : null;
+
+  return champion.skins.map((skin, index) => {
+    const skinEn = championEn?.skins?.[index];
+
+    return {
+      id: `${champion.key}${String(skin.num).padStart(3, '0')}`,
+      skinNum: skin.num,
+      name: skin.name === 'default' ? champion.name : skin.name,
+      champion: champion.name,
+      nameEn: skinEn
+        ? (skinEn.name === 'default' ? (championEn.name || champion.name) : skinEn.name)
+        : (skin.name === 'default' ? champion.name : skin.name),
+      championEn: championEn?.name || champion.name,
+      championId: champion.id,
+      image: `${baseUrl}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`
+    };
+  });
 }).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
 await mkdir(dirname(output), { recursive: true });

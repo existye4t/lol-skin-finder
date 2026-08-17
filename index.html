@@ -128,6 +128,84 @@
   <body>
 
     <!-- =========================================
+         ÜST SAĞ AKSİYONLAR (DİL + DISCORD)
+         ========================================= -->
+
+    <div class="top-actions">
+
+      <!-- =========================================
+           DİL SEÇİCİ
+           ========================================= -->
+
+      <div class="lang-switch-wrap">
+
+        <button
+          id="lang-switch"
+          class="lang-switch"
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+          aria-controls="lang-menu"
+          title="Dil seç"
+        >
+
+          <span
+            id="lang-switch-flag"
+            class="lang-switch-flag"
+            aria-hidden="true"
+          >🇹🇷</span>
+
+          <span
+            id="lang-switch-code"
+            class="lang-switch-code"
+          >TR</span>
+
+          <span
+            class="lang-switch-chevron"
+            aria-hidden="true"
+          >▾</span>
+
+        </button>
+
+        <ul
+          id="lang-menu"
+          class="lang-menu"
+          role="listbox"
+          aria-label="Dil seç"
+          hidden
+        >
+
+          <li role="presentation">
+            <button
+              type="button"
+              class="lang-menu-option"
+              role="option"
+              data-lang="tr"
+              aria-selected="true"
+            >
+              <span aria-hidden="true">🇹🇷</span>
+              <span>Türkçe</span>
+            </button>
+          </li>
+
+          <li role="presentation">
+            <button
+              type="button"
+              class="lang-menu-option"
+              role="option"
+              data-lang="en"
+              aria-selected="false"
+            >
+              <span aria-hidden="true">🇬🇧</span>
+              <span>English</span>
+            </button>
+          </li>
+
+        </ul>
+
+      </div>
+
+    <!-- =========================================
          DISCORD BUTONU
          ========================================= -->
 
@@ -178,6 +256,8 @@
 
     </button>
 
+    </div>
+
 
     <!-- =========================================
          ANA SAYFA
@@ -187,16 +267,22 @@
 
       <section class="hero">
 
-        <p class="eyebrow">
+        <p
+          class="eyebrow"
+          data-i18n="heroEyebrow"
+        >
           LEAGUE OF LEGENDS • SKIN VERİTABANI
         </p>
 
         <h1>
-          Aradığın skin<br />
-          <em>burada.</em>
+          <span data-i18n="heroTitleLine">Aradığın skin</span><br />
+          <em data-i18n="heroTitleEm">burada.</em>
         </h1>
 
-        <p class="intro">
+        <p
+          class="intro"
+          data-i18n="heroIntro"
+        >
           Skin adını, şampiyonu veya Riot skin ID’sini yaz.
           Sonuçlar anında filtrelenir.
         </p>
@@ -216,6 +302,7 @@
               id="search"
               type="search"
               autocomplete="off"
+              data-i18n-placeholder="searchPlaceholder"
               placeholder="Örn. Omega Timi Twitch veya 29004"
               autofocus
             />
@@ -231,6 +318,7 @@
             class="favorite-filter"
             type="button"
             aria-pressed="false"
+            data-i18n-title="showFavorites"
             title="Favorileri göster"
           >
 
@@ -241,7 +329,7 @@
               ☆
             </span>
 
-            <span>
+            <span data-i18n="favoritesLabel">
               Favoriler
             </span>
 
@@ -259,26 +347,36 @@
 
         <div
           class="quick-searches"
+          data-i18n-aria-label="quickSearchesAriaLabel"
           aria-label="Örnek aramalar"
         >
 
           <button
             type="button"
-            data-query="Omega Timi Twitch"
+            data-query-tr="Omega Timi Twitch"
+            data-query-en="Omega Squad Twitch"
+            data-label-tr="Omega Timi Twitch"
+            data-label-en="Omega Squad Twitch"
           >
             Omega Timi Twitch
           </button>
 
           <button
             type="button"
-            data-query="Ahri"
+            data-query-tr="Ahri"
+            data-query-en="Ahri"
+            data-label-tr="Ahri"
+            data-label-en="Ahri"
           >
             Ahri
           </button>
 
           <button
             type="button"
-            data-query="29004"
+            data-query-tr="29004"
+            data-query-en="29004"
+            data-label-tr="ID: 29004"
+            data-label-en="ID: 29004"
           >
             ID: 29004
           </button>
@@ -303,11 +401,14 @@
 
           <div>
 
-            <p class="eyebrow">
+            <p
+              class="eyebrow"
+              data-i18n="savedEyebrow"
+            >
               KAYDEDİLENLER
             </p>
 
-            <h2>
+            <h2 data-i18n="favoritesHeading">
               Favori skinlerin
             </h2>
 
@@ -317,6 +418,7 @@
             id="clear-favorites"
             class="clear-favorites"
             type="button"
+            data-i18n="clearFavorites"
           >
             Favorileri temizle
           </button>
@@ -344,17 +446,26 @@
 
           <div>
 
-            <p class="eyebrow">
+            <p
+              class="eyebrow"
+              data-i18n="resultsEyebrow"
+            >
               SONUÇLAR
             </p>
 
-            <h2 id="result-title">
+            <h2
+              id="result-title"
+              data-i18n="exploreSkins"
+            >
               Skinleri keşfet
             </h2>
 
           </div>
 
-          <p id="meta">
+          <p
+            id="meta"
+            data-i18n="loadingData"
+          >
             Veriler yükleniyor…
           </p>
 
@@ -375,11 +486,11 @@
             ◇
           </span>
 
-          <h2>
+          <h2 data-i18n="noResults">
             Sonuç bulunamadı
           </h2>
 
-          <p>
+          <p data-i18n="noResultsHint">
             Skin adı, şampiyon adı veya ID ile yeniden deneyin.
           </p>
 
@@ -405,8 +516,10 @@
         <button
           class="favorite-button"
           type="button"
+          data-i18n-aria-label="addFavorite"
           aria-label="Favorilere ekle"
           aria-pressed="false"
+          data-i18n-title="addFavorite"
           title="Favorilere ekle"
         >
 
@@ -454,6 +567,7 @@
       <button
         class="modal-close"
         type="button"
+        data-i18n-aria-label="close"
         aria-label="Kapat"
       >
         ×
@@ -494,7 +608,10 @@
               ☆
             </span>
 
-            <span class="modal-favorite-text">
+            <span
+              class="modal-favorite-text"
+              data-i18n="addFavorite"
+            >
               Favorilere ekle
             </span>
 
@@ -504,10 +621,14 @@
 
         <section
           class="download-list-wrap"
+          data-i18n-aria-label="downloadsAriaLabel"
           aria-label="Skin ve chroma indirmeleri"
         >
 
-          <p class="download-heading">
+          <p
+            class="download-heading"
+            data-i18n="downloadsHeading"
+          >
             İNDİRMELER
           </p>
 
@@ -542,6 +663,7 @@
         id="discord-modal-close"
         class="discord-modal-close"
         type="button"
+        data-i18n-aria-label="closeDiscord"
         aria-label="Discord penceresini kapat"
       >
         ×
@@ -567,15 +689,24 @@
 
         </div>
 
-        <p class="discord-modal-eyebrow">
+        <p
+          class="discord-modal-eyebrow"
+          data-i18n="discordEyebrow"
+        >
           DISCORD İLETİŞİM
         </p>
 
-        <h2 id="discord-modal-title">
+        <h2
+          id="discord-modal-title"
+          data-i18n="discordTitle"
+        >
           Bir sorun mu var?
         </h2>
 
-        <p class="discord-modal-description">
+        <p
+          class="discord-modal-description"
+          data-i18n="discordDescription"
+        >
           Problem, öneri veya sorularınız için Discord üzerinden
           bana ulaşabilirsiniz.
         </p>
@@ -613,7 +744,7 @@
             ●
           </span>
 
-          <span>
+          <span data-i18n="discordHint">
             Yardım etmek için buradayım.
           </span>
 
