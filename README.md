@@ -27,6 +27,7 @@ Tarayıcıda terminalin gösterdiği yerel adresi açın. Veri dosyasını daha 
 - Arama Türkçe karakter ve aksan farklarını yok sayar.
 - Veri kaynağı resmi Riot Data Dragon'dur; içerik Riot Games'e aittir.
 - Uygulama herhangi bir kullanıcı verisi toplamaz veya sunucuya göndermez.
+- Google Analytics etkin olduğunda; toplu ziyaret, arama ve indirme istatistikleri ölçülür. Kişisel kullanıcı hesabı veya isim bilgisi tutulmaz.
 
 ## GitHub Pages ile yayınlama
 

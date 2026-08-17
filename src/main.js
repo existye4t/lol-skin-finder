@@ -11,7 +11,13 @@ const downloadList = document.querySelector('#download-list');
 const fantomeFiles = new Set();
 let skins = [];
 let skinGroups = [];
+let searchTrackingTimer;
+let lastTrackedSearch = '';
 const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
+
+const track = (eventName, parameters) => {
+  if (typeof window.gtag === 'function') window.gtag('event', eventName, parameters);
+};
 
 const normalize = (value) => value.toLocaleLowerCase('tr-TR')
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -60,6 +66,12 @@ function openModal(group) {
       link.href = assetUrl(`fantome/${item.id}.fantome`);
       link.download = `${item.id}.fantome`;
       link.title = `${item.id}.fantome indir`;
+      link.addEventListener('click', () => track('fantome_download', {
+        skin_id: item.id,
+        skin_name: item.name,
+        champion: item.champion,
+        is_chroma: item !== skin ? 1 : 0
+      }));
     } else link.title = 'Bu dosya klasörde bulunamadı';
     return link;
   }));
@@ -69,7 +81,18 @@ function openModal(group) {
 document.querySelector('.modal-close').addEventListener('click', () => modal.close());
 modal.addEventListener('click', (event) => { if (event.target === modal) modal.close(); });
 
-search.addEventListener('input', render);
+function scheduleSearchAnalytics() {
+  clearTimeout(searchTrackingTimer);
+  searchTrackingTimer = setTimeout(() => {
+    const term = search.value.trim();
+    if (!term || normalize(term) === lastTrackedSearch) return;
+    lastTrackedSearch = normalize(term);
+    const resultCount = skinGroups.filter((group) => normalize(group.skins.map((skin) => `${skin.name} ${skin.champion} ${skin.id}`).join(' ')).includes(lastTrackedSearch)).length;
+    track('search', { search_term: term.slice(0, 100), result_count: resultCount });
+  }, 700);
+}
+
+search.addEventListener('input', () => { render(); scheduleSearchAnalytics(); });
 search.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') { search.value = ''; render(); search.blur(); }
 });
