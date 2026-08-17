@@ -1,88 +1,170 @@
 import './style.css';
 
+/* =========================================
+   DOM
+   ========================================= */
+
 const search = document.querySelector('#search');
 const results = document.querySelector('#results');
 const empty = document.querySelector('#empty');
 const meta = document.querySelector('#meta');
 const title = document.querySelector('#result-title');
 const template = document.querySelector('#skin-template');
+
 const modal = document.querySelector('#skin-modal');
 const downloadList = document.querySelector('#download-list');
+
 const fantomeFiles = new Set();
 
 /* =========================================
    FAVORİLER
    ========================================= */
 
-const FAVORITES_STORAGE_KEY = 'exist-lol-skin-favorites';
+const FAVORITES_STORAGE_KEY =
+  'exist-lol-skin-favorites';
 
 let favorites = new Set();
 
 try {
   const savedFavorites = JSON.parse(
-    localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]'
+    localStorage.getItem(
+      FAVORITES_STORAGE_KEY
+    ) || '[]'
   );
 
   if (Array.isArray(savedFavorites)) {
-    favorites = new Set(savedFavorites.map(String));
+    favorites = new Set(
+      savedFavorites.map(String)
+    );
   }
-} catch {
+} catch (error) {
+  console.warn(
+    'Favoriler yüklenemedi:',
+    error
+  );
+
   favorites = new Set();
 }
+
+/* =========================================
+   ANALYTICS
+   ========================================= */
+
+const track = (
+  eventName,
+  parameters = {}
+) => {
+  if (
+    typeof window.gtag ===
+    'function'
+  ) {
+    window.gtag(
+      'event',
+      eventName,
+      parameters
+    );
+  }
+};
+
+/* =========================================
+   ASSET URL
+   ========================================= */
+
+const assetUrl = (path) => {
+  const base =
+    import.meta.env?.BASE_URL || '/';
+
+  return `${base}${String(path).replace(/^\/+/, '')}`;
+};
+
+/* =========================================
+   VERİLER
+   ========================================= */
+
+let skins = [];
+let skinGroups = [];
+
+let searchTrackingTimer = null;
+let lastTrackedSearch = '';
+
+/* =========================================
+   FAVORİLERİ KAYDET
+   ========================================= */
 
 function saveFavorites() {
   try {
     localStorage.setItem(
       FAVORITES_STORAGE_KEY,
-      JSON.stringify([...favorites])
+      JSON.stringify(
+        [...favorites]
+      )
     );
-  } catch {
-    // localStorage kullanılamıyorsa devam et.
+  } catch (error) {
+    console.warn(
+      'Favoriler kaydedilemedi:',
+      error
+    );
   }
 }
+
+/* =========================================
+   FAVORİ KONTROLÜ
+   ========================================= */
 
 function isFavorite(skinId) {
-  return favorites.has(String(skinId));
+  return favorites.has(
+    String(skinId)
+  );
 }
 
-function toggleFavorite(skinId, button) {
-  const id = String(skinId);
+/* =========================================
+   FAVORİ SAYISI
+   ========================================= */
 
-  if (favorites.has(id)) {
-    favorites.delete(id);
-  } else {
-    favorites.add(id);
+function updateFavoriteCount() {
+  const favoriteCount =
+    document.querySelector(
+      '#favorite-count'
+    );
+
+  if (!favoriteCount) {
+    return;
   }
 
-  saveFavorites();
+  favoriteCount.textContent =
+    favorites.size.toLocaleString(
+      'tr-TR'
+    );
 
-  updateFavoriteButton(button, id);
-  updateFavoriteCount();
-
-  /*
-   * Favoriler filtresi açıksa favoriden çıkarılan
-   * kartı anında ekrandan kaldır.
-   */
-  if (isFavoriteFilterActive()) {
-    render();
-  }
-
-  track('favorite_toggle', {
-    skin_id: id,
-    is_favorite: favorites.has(id) ? 1 : 0
-  });
+  favoriteCount.hidden =
+    favorites.size === 0;
 }
 
-function updateFavoriteButton(button, skinId) {
-  if (!button) return;
+/* =========================================
+   FAVORİ BUTONU
+   ========================================= */
 
-  const favorite = isFavorite(skinId);
+function updateFavoriteButton(
+  button,
+  skinId
+) {
+  if (!button) {
+    return;
+  }
 
-  button.classList.toggle('is-favorite', favorite);
+  const favorite =
+    isFavorite(skinId);
+
+  button.classList.toggle(
+    'is-favorite',
+    favorite
+  );
 
   button.setAttribute(
     'aria-pressed',
-    favorite ? 'true' : 'false'
+    favorite
+      ? 'true'
+      : 'false'
   );
 
   button.setAttribute(
@@ -92,69 +174,47 @@ function updateFavoriteButton(button, skinId) {
       : 'Favorilere ekle'
   );
 
-  button.title = favorite
-    ? 'Favorilerden çıkar'
-    : 'Favorilere ekle';
+  button.title =
+    favorite
+      ? 'Favorilerden çıkar'
+      : 'Favorilere ekle';
 
-  const icon = button.querySelector('.favorite-icon');
+  const icon =
+    button.querySelector(
+      '.favorite-icon'
+    );
 
   if (icon) {
-    icon.textContent = favorite ? '★' : '☆';
+    icon.textContent =
+      favorite
+        ? '★'
+        : '☆';
   }
 }
-
-function updateFavoriteCount() {
-  const favoriteCount =
-    document.querySelector('#favorite-count');
-
-  if (!favoriteCount) return;
-
-  favoriteCount.textContent = favorites.size;
-  favoriteCount.hidden = favorites.size === 0;
-}
-
-/* =========================================
-   VERİLER
-   ========================================= */
-
-let skins = [];
-let skinGroups = [];
-
-let searchTrackingTimer;
-let lastTrackedSearch = '';
-
-const assetUrl = (path) =>
-  `${import.meta.env.BASE_URL}${path}`;
-
-const track = (eventName, parameters) => {
-  if (typeof window.gtag === 'function') {
-    window.gtag('event', eventName, parameters);
-  }
-};
-
-const normalize = (value) =>
-  String(value)
-    .toLocaleLowerCase('tr-TR')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/ı/g, 'i')
-    .replace(/[^a-z0-9]/g, '');
 
 /* =========================================
    FAVORİ FİLTRESİ
    ========================================= */
 
 const favoriteFilter =
-  document.querySelector('#favorite-filter');
+  document.querySelector(
+    '#favorite-filter'
+  );
 
 function isFavoriteFilterActive() {
   return Boolean(
-    favoriteFilter?.classList.contains('is-active')
+    favoriteFilter?.classList.contains(
+      'is-active'
+    )
   );
 }
 
-function setFavoriteFilter(active) {
-  if (!favoriteFilter) return;
+function setFavoriteFilter(
+  active
+) {
+  if (!favoriteFilter) {
+    return;
+  }
 
   favoriteFilter.classList.toggle(
     'is-active',
@@ -163,81 +223,379 @@ function setFavoriteFilter(active) {
 
   favoriteFilter.setAttribute(
     'aria-pressed',
-    active ? 'true' : 'false'
+    active
+      ? 'true'
+      : 'false'
+  );
+
+  favoriteFilter.setAttribute(
+    'aria-label',
+    active
+      ? 'Tüm skinleri göster'
+      : 'Favorileri göster'
+  );
+
+  favoriteFilter.title =
+    active
+      ? 'Tüm skinleri göster'
+      : 'Favorileri göster';
+}
+
+/* =========================================
+   FAVORİ DEĞİŞTİR
+   ========================================= */
+
+function toggleFavorite(
+  skinId,
+  button
+) {
+  if (!button) {
+    return;
+  }
+
+  const id = String(
+    skinId
+  );
+
+  const wasFavorite =
+    favorites.has(id);
+
+  if (wasFavorite) {
+    favorites.delete(id);
+  } else {
+    favorites.add(id);
+  }
+
+  saveFavorites();
+
+  updateFavoriteButton(
+    button,
+    id
+  );
+
+  /* ---------------------------------------
+     Favori ekleme animasyonu
+     --------------------------------------- */
+
+  button.classList.remove(
+    'favorite-pop',
+    'favorite-remove'
+  );
+
+  void button.offsetWidth;
+
+  if (!wasFavorite) {
+    button.classList.add(
+      'favorite-pop'
+    );
+  } else {
+    button.classList.add(
+      'favorite-remove'
+    );
+
+    window.setTimeout(() => {
+      button.classList.remove(
+        'favorite-remove'
+      );
+    }, 320);
+  }
+
+  updateFavoriteCount();
+
+  /* ---------------------------------------
+     Favoriler filtresi açıksa render
+     --------------------------------------- */
+
+  if (
+    isFavoriteFilterActive()
+  ) {
+    window.setTimeout(
+      () => {
+        render();
+      },
+      220
+    );
+  }
+
+  track(
+    'favorite_toggle',
+    {
+      skin_id: id,
+      is_favorite:
+        favorites.has(id)
+          ? 1
+          : 0
+    }
   );
 }
+
+/* =========================================
+   NORMALIZE
+   ========================================= */
+
+const normalize = (
+  value
+) =>
+  String(value ?? '')
+    .toLocaleLowerCase(
+      'tr-TR'
+    )
+    .normalize('NFD')
+    .replace(
+      /[\u0300-\u036f]/g,
+      ''
+    )
+    .replace(
+      /ı/g,
+      'i'
+    )
+    .replace(
+      /[^a-z0-9]/g,
+      ''
+    );
 
 /* =========================================
    ARAMA EŞLEŞMESİ
    ========================================= */
 
-function groupMatchesSearch(group, query) {
-  if (!query) return true;
+function groupMatchesSearch(
+  group,
+  query
+) {
+  if (!query) {
+    return true;
+  }
 
-  return normalize(
+  const searchableText =
     group.skins
       .map(
         (skin) =>
-          `${skin.name} ${skin.champion} ${skin.id}`
+          [
+            skin.name,
+            skin.champion,
+            skin.id
+          ].join(' ')
       )
-      .join(' ')
+      .join(' ');
+
+  return normalize(
+    searchableText
   ).includes(query);
 }
 
-function groupHasFavorite(group) {
-  return group.skins.some((skin) =>
-    isFavorite(skin.id)
+/* =========================================
+   FAVORİ GRUP KONTROLÜ
+   ========================================= */
+
+function groupHasFavorite(
+  group
+) {
+  return group.skins.some(
+    (skin) =>
+      isFavorite(skin.id)
   );
+}
+
+/* =========================================
+   GÜVENLİ SKIN VERİSİ
+   ========================================= */
+
+function normalizeSkin(
+  skin
+) {
+  if (
+    !skin ||
+    typeof skin !== 'object'
+  ) {
+    return null;
+  }
+
+  const id =
+    String(
+      skin.id ?? ''
+    ).trim();
+
+  const name =
+    String(
+      skin.name ?? ''
+    ).trim();
+
+  const champion =
+    String(
+      skin.champion ?? ''
+    ).trim();
+
+  const image =
+    String(
+      skin.image ?? ''
+    ).trim();
+
+  if (
+    !id ||
+    !name ||
+    !champion
+  ) {
+    return null;
+  }
+
+  return {
+    ...skin,
+    id,
+    name,
+    champion,
+    image
+  };
 }
 
 /* =========================================
    SKIN KARTI
    ========================================= */
 
-function createSkinCard(group) {
-  const skin = group.primary;
-  const card = template.content.cloneNode(true);
+function createSkinCard(
+  group
+) {
+  if (
+    !group ||
+    !group.primary
+  ) {
+    return null;
+  }
 
-  const image = card.querySelector('img');
+  const skin =
+    group.primary;
 
-  image.src = skin.image;
-  image.alt = `${skin.name} — ${skin.champion}`;
+  if (
+    !template?.content
+  ) {
+    console.error(
+      '#skin-template bulunamadı.'
+    );
 
-  card.querySelector('.champion').textContent =
-    skin.champion;
+    return null;
+  }
 
-  card.querySelector('h3').textContent =
-    skin.name;
+  const card =
+    template.content.cloneNode(
+      true
+    );
 
-  card.querySelector('.skin-id').textContent =
-    `ID: ${skin.id}`;
+  const image =
+    card.querySelector(
+      'img'
+    );
+
+  const championElement =
+    card.querySelector(
+      '.champion'
+    );
+
+  const nameElement =
+    card.querySelector(
+      'h3'
+    );
+
+  const idElement =
+    card.querySelector(
+      '.skin-id'
+    );
 
   const article =
-    card.querySelector('.skin-card');
+    card.querySelector(
+      '.skin-card'
+    );
 
-  /* =====================================
-     FAVORİ BUTONU
-     ===================================== */
+  if (!article) {
+    console.error(
+      '.skin-card template içinde bulunamadı.'
+    );
+
+    return null;
+  }
+
+  /* ---------------------------------------
+     Görsel
+     --------------------------------------- */
+
+  if (image) {
+    image.src =
+      skin.image ||
+      '';
+
+    image.alt =
+      `${skin.name} — ${skin.champion}`;
+
+    image.loading =
+      'lazy';
+
+    image.decoding =
+      'async';
+
+    image.addEventListener(
+      'error',
+      () => {
+        image.style.display =
+          'none';
+      },
+      {
+        once: true
+      }
+    );
+  }
+
+  /* ---------------------------------------
+     Metin
+     --------------------------------------- */
+
+  if (championElement) {
+    championElement.textContent =
+      skin.champion;
+  }
+
+  if (nameElement) {
+    nameElement.textContent =
+      skin.name;
+  }
+
+  if (idElement) {
+    idElement.textContent =
+      `ID: ${skin.id}`;
+  }
+
+  /* ---------------------------------------
+     Favori butonu
+     --------------------------------------- */
 
   let favoriteButton =
-    card.querySelector('.favorite-button');
+    card.querySelector(
+      '.favorite-button'
+    );
 
-  /*
-   * Template içinde buton yoksa otomatik oluştur.
-   */
   if (!favoriteButton) {
     favoriteButton =
-      document.createElement('button');
+      document.createElement(
+        'button'
+      );
 
-    favoriteButton.type = 'button';
+    favoriteButton.type =
+      'button';
+
     favoriteButton.className =
       'favorite-button';
 
-    favoriteButton.innerHTML =
-      '<span class="favorite-icon" aria-hidden="true">☆</span>';
+    favoriteButton.innerHTML = `
+      <span
+        class="favorite-icon"
+        aria-hidden="true"
+      >☆</span>
+    `;
 
-    article.appendChild(favoriteButton);
+    article.appendChild(
+      favoriteButton
+    );
   }
+
+  favoriteButton.type =
+    'button';
 
   updateFavoriteButton(
     favoriteButton,
@@ -257,11 +615,13 @@ function createSkinCard(group) {
     }
   );
 
-  /* =====================================
-     KART ERİŞİLEBİLİRLİĞİ
-     ===================================== */
+  /* ---------------------------------------
+     Kart erişilebilirliği
+     --------------------------------------- */
 
-  article.tabIndex = 0;
+  article.tabIndex =
+    0;
+
   article.setAttribute(
     'role',
     'button'
@@ -269,26 +629,31 @@ function createSkinCard(group) {
 
   article.setAttribute(
     'aria-label',
-    `${skin.name} detayını aç`
+    `${skin.name}, ${skin.champion}, ID ${skin.id}. Detayları aç`
   );
 
-  /* =====================================
-     MODAL
-     ===================================== */
+  /* ---------------------------------------
+     Modal
+     --------------------------------------- */
 
   article.addEventListener(
     'click',
-    () => openModal(group)
+    () => {
+      openModal(group);
+    }
   );
 
   article.addEventListener(
     'keydown',
     (event) => {
       if (
-        event.key === 'Enter' ||
-        event.key === ' '
+        event.key ===
+          'Enter' ||
+        event.key ===
+          ' '
       ) {
         event.preventDefault();
+
         openModal(group);
       }
     }
@@ -302,77 +667,141 @@ function createSkinCard(group) {
    ========================================= */
 
 function render() {
-  const query = normalize(search.value);
-
-  /*
-   * Önce arama sonuçlarını bul.
-   */
-  let found = skinGroups.filter((group) =>
-    groupMatchesSearch(group, query)
-  );
-
-  /*
-   * Favoriler filtresi açıksa yalnızca
-   * favorisi bulunan grupları göster.
-   */
-  if (isFavoriteFilterActive()) {
-    found = found.filter((group) =>
-      groupHasFavorite(group)
-    );
+  if (
+    !search ||
+    !results ||
+    !empty ||
+    !title
+  ) {
+    return;
   }
 
-  /*
-   * Arama yoksa 24,
-   * arama varsa 80,
-   * favoriler filtresinde de 80 göster.
-   */
-  const visible = found.slice(
-    0,
-    query || isFavoriteFilterActive()
+  const query =
+    normalize(
+      search.value
+    );
+
+  let found =
+    skinGroups.filter(
+      (group) =>
+        groupMatchesSearch(
+          group,
+          query
+        )
+    );
+
+  /* ---------------------------------------
+     Favori filtresi
+     --------------------------------------- */
+
+  if (
+    isFavoriteFilterActive()
+  ) {
+    found =
+      found.filter(
+        (group) =>
+          groupHasFavorite(
+            group
+          )
+      );
+  }
+
+  /* ---------------------------------------
+     Maksimum görünür kart
+     --------------------------------------- */
+
+  const maxVisible =
+    query ||
+    isFavoriteFilterActive()
       ? 80
-      : 24
-  );
+      : 24;
+
+  const visible =
+    found.slice(
+      0,
+      maxVisible
+    );
+
+  const cards =
+    visible
+      .map(
+        (group) =>
+          createSkinCard(
+            group
+          )
+      )
+      .filter(Boolean);
 
   results.replaceChildren(
-    ...visible.map((group) =>
-      createSkinCard(group)
-    )
+    ...cards
   );
 
-  const count = found.length;
+  /* ---------------------------------------
+     Başlık
+     --------------------------------------- */
 
-  /* =====================================
-     BAŞLIK
-     ===================================== */
-
-  if (isFavoriteFilterActive()) {
-    title.textContent = query
-      ? `${count} favori sonuç`
-      : `${count} favori`;
+  if (
+    isFavoriteFilterActive()
+  ) {
+    title.textContent =
+      query
+        ? `${found.length} favori sonuç`
+        : `${found.length} favori`;
   } else {
-    title.textContent = query
-      ? `${count} sonuç bulundu`
-      : 'Skinleri keşfet';
+    title.textContent =
+      query
+        ? `${found.length} sonuç bulundu`
+        : 'Skinleri keşfet';
   }
 
-  /* =====================================
-     BOŞ DURUM
-     ===================================== */
+  /* ---------------------------------------
+     Meta
+     --------------------------------------- */
 
-  empty.hidden = count !== 0;
-  results.hidden = count === 0;
+  const visibleCount =
+    visible.length;
 
-  /*
-   * Favoriler filtresi açık ve favori yoksa
-   * daha açıklayıcı mesaj göster.
-   */
+  if (
+    meta &&
+    skinGroups.length
+  ) {
+    if (
+      query ||
+      isFavoriteFilterActive()
+    ) {
+      meta.textContent =
+        `${visibleCount.toLocaleString(
+          'tr-TR'
+        )}/${found.length.toLocaleString(
+          'tr-TR'
+        )} gösteriliyor`;
+    }
+  }
+
+  /* ---------------------------------------
+     Boş durum
+     --------------------------------------- */
+
+  empty.hidden =
+    found.length !== 0;
+
+  results.hidden =
+    found.length === 0;
+
   const emptyTitle =
-    empty.querySelector('h2');
+    empty.querySelector(
+      'h2'
+    );
 
   const emptyText =
-    empty.querySelector('p');
+    empty.querySelector(
+      'p'
+    );
 
-  if (emptyTitle && emptyText) {
+  if (
+    emptyTitle &&
+    emptyText
+  ) {
     if (
       isFavoriteFilterActive() &&
       favorites.size === 0
@@ -384,7 +813,7 @@ function render() {
         'Skin kartındaki yıldız simgesine tıklayarak favorilerine ekleyebilirsin.';
     } else if (
       isFavoriteFilterActive() &&
-      count === 0
+      found.length === 0
     ) {
       emptyTitle.textContent =
         'Favori skin bulunamadı';
@@ -409,109 +838,272 @@ function render() {
    SKIN MODALI
    ========================================= */
 
-function openModal(group) {
-  const skin = group.primary;
+function openModal(
+  group
+) {
+  if (
+    !modal ||
+    !downloadList ||
+    !group?.primary
+  ) {
+    return;
+  }
 
-  document.querySelector(
-    '#modal-image'
-  ).src = skin.image;
+  const skin =
+    group.primary;
 
-  document.querySelector(
-    '#modal-image'
-  ).alt =
-    `${skin.name} — ${skin.champion}`;
+  const modalImage =
+    document.querySelector(
+      '#modal-image'
+    );
 
-  document.querySelector(
-    '#modal-champion'
-  ).textContent =
-    skin.champion;
+  const modalChampion =
+    document.querySelector(
+      '#modal-champion'
+    );
 
-  document.querySelector(
-    '#modal-skin-name'
-  ).textContent =
-    skin.name;
+  const modalSkinName =
+    document.querySelector(
+      '#modal-skin-name'
+    );
 
-  document.querySelector(
-    '#modal-skin-id'
-  ).textContent =
-    `RIOT SKIN ID: ${skin.id}`;
+  const modalSkinId =
+    document.querySelector(
+      '#modal-skin-id'
+    );
 
-  downloadList.replaceChildren(
-    ...group.skins.map((item) => {
+  /* ---------------------------------------
+     Modal görseli
+     --------------------------------------- */
+
+  if (modalImage) {
+    modalImage.src =
+      skin.image ||
+      '';
+
+    modalImage.alt =
+      `${skin.name} — ${skin.champion}`;
+  }
+
+  /* ---------------------------------------
+     Modal bilgileri
+     --------------------------------------- */
+
+  if (modalChampion) {
+    modalChampion.textContent =
+      skin.champion;
+  }
+
+  if (modalSkinName) {
+    modalSkinName.textContent =
+      skin.name;
+  }
+
+  if (modalSkinId) {
+    modalSkinId.textContent =
+      `RIOT SKIN ID: ${skin.id}`;
+  }
+
+  /* ---------------------------------------
+     Fantome dosyaları
+     --------------------------------------- */
+
+  const fragment =
+    document.createDocumentFragment();
+
+  group.skins.forEach(
+    (item) => {
       const hasFile =
-        fantomeFiles.has(String(item.id));
-
-      const link =
-        document.createElement(
-          hasFile ? 'a' : 'span'
+        fantomeFiles.has(
+          String(item.id)
         );
 
-      link.className =
+      const element =
+        document.createElement(
+          hasFile
+            ? 'a'
+            : 'span'
+        );
+
+      element.className =
         `download-item${
           hasFile
             ? ''
             : ' unavailable'
         }`;
 
-      link.textContent =
+      const chromaName =
+        item.name
+          .match(
+            /\(([^)]+)\)$/
+          )?.[1];
+
+      element.textContent =
         item === skin
           ? `Ana skin · ${item.id}`
           : `${
-              item.name.match(
-                /\(([^)]+)\)$/
-              )?.[1] ?? item.name
+              chromaName ||
+              item.name
             } · ${item.id}`;
 
       if (hasFile) {
-        link.href = assetUrl(
-          `fantome/${item.id}.fantome`
-        );
+        element.href =
+          assetUrl(
+            `fantome/${item.id}.fantome`
+          );
 
-        link.download =
+        element.download =
           `${item.id}.fantome`;
 
-        link.title =
+        element.title =
           `${item.id}.fantome indir`;
 
-        link.addEventListener(
+        element.setAttribute(
+          'aria-label',
+          `${item.name} fantome dosyasını indir`
+        );
+
+        element.addEventListener(
           'click',
           () => {
             track(
               'fantome_download',
               {
-                skin_id: item.id,
-                skin_name: item.name,
-                champion: item.champion,
+                skin_id:
+                  item.id,
+
+                skin_name:
+                  item.name,
+
+                champion:
+                  item.champion,
+
                 is_chroma:
-                  item !== skin ? 1 : 0
+                  item !== skin
+                    ? 1
+                    : 0
               }
             );
           }
         );
       } else {
-        link.title =
+        element.title =
           'Bu dosya klasörde bulunamadı';
+
+        element.setAttribute(
+          'aria-disabled',
+          'true'
+        );
       }
 
-      return link;
-    })
+      fragment.appendChild(
+        element
+      );
+    }
   );
 
-  modal.showModal();
+  downloadList.replaceChildren(
+    fragment
+  );
+
+  /* ---------------------------------------
+     Modal aç
+     --------------------------------------- */
+
+  if (
+    typeof modal.showModal ===
+    'function'
+  ) {
+    modal.showModal();
+  } else {
+    modal.setAttribute(
+      'open',
+      ''
+    );
+  }
+
+  track(
+    'skin_open',
+    {
+      skin_id:
+        skin.id,
+
+      skin_name:
+        skin.name,
+
+      champion:
+        skin.champion
+    }
+  );
+}
+
+/* =========================================
+   SKIN MODALI KAPAT
+   ========================================= */
+
+function closeSkinModal() {
+  if (!modal) {
+    return;
+  }
+
+  if (
+    typeof modal.close ===
+    'function'
+  ) {
+    modal.close();
+  } else {
+    modal.removeAttribute(
+      'open'
+    );
+  }
 }
 
 document
-  .querySelector('.modal-close')
+  .querySelector(
+    '.modal-close'
+  )
   ?.addEventListener(
     'click',
-    () => modal.close()
+    closeSkinModal
   );
 
 modal?.addEventListener(
   'click',
   (event) => {
-    if (event.target === modal) {
-      modal.close();
+    if (
+      event.target ===
+      modal
+    ) {
+      closeSkinModal();
+    }
+  }
+);
+
+/* =========================================
+   ESC — MODALLAR
+   ========================================= */
+
+document.addEventListener(
+  'keydown',
+  (event) => {
+    if (
+      event.key !==
+      'Escape'
+    ) {
+      return;
+    }
+
+    if (
+      modal?.open
+    ) {
+      closeSkinModal();
+      return;
+    }
+
+    if (
+      discordModal?.open
+    ) {
+      closeDiscordModal();
     }
   }
 );
@@ -536,9 +1128,21 @@ const discordClose =
   );
 
 function openDiscordModal() {
-  if (!discordModal) return;
+  if (!discordModal) {
+    return;
+  }
 
-  discordModal.showModal();
+  if (
+    typeof discordModal.showModal ===
+    'function'
+  ) {
+    discordModal.showModal();
+  } else {
+    discordModal.setAttribute(
+      'open',
+      ''
+    );
+  }
 
   track(
     'discord_contact_open',
@@ -550,9 +1154,20 @@ function openDiscordModal() {
 }
 
 function closeDiscordModal() {
-  if (!discordModal) return;
+  if (!discordModal) {
+    return;
+  }
 
-  discordModal.close();
+  if (
+    typeof discordModal.close ===
+    'function'
+  ) {
+    discordModal.close();
+  } else {
+    discordModal.removeAttribute(
+      'open'
+    );
+  }
 }
 
 if (
@@ -564,12 +1179,10 @@ if (
     openDiscordModal
   );
 
-  if (discordClose) {
-    discordClose.addEventListener(
-      'click',
-      closeDiscordModal
-    );
-  }
+  discordClose?.addEventListener(
+    'click',
+    closeDiscordModal
+  );
 
   discordModal.addEventListener(
     'click',
@@ -585,29 +1198,32 @@ if (
 }
 
 /* =========================================
-   FAVORİ FİLTRESİ BUTONU
+   FAVORİ FİLTRESİ
    ========================================= */
 
-if (favoriteFilter) {
-  favoriteFilter.addEventListener(
-    'click',
-    () => {
-      const active =
-        !isFavoriteFilterActive();
+favoriteFilter?.addEventListener(
+  'click',
+  () => {
+    const active =
+      !isFavoriteFilterActive();
 
-      setFavoriteFilter(active);
+    setFavoriteFilter(
+      active
+    );
 
-      render();
+    render();
 
-      track(
-        'favorite_filter',
-        {
-          active: active ? 1 : 0
-        }
-      );
-    }
-  );
-}
+    track(
+      'favorite_filter',
+      {
+        active:
+          active
+            ? 1
+            : 0
+      }
+    );
+  }
+);
 
 /* =========================================
    ARAMA ANALYTICS
@@ -619,65 +1235,82 @@ function scheduleSearchAnalytics() {
   );
 
   searchTrackingTimer =
-    setTimeout(() => {
-      const term =
-        search.value.trim();
-
-      if (
-        !term ||
-        normalize(term) ===
-          lastTrackedSearch
-      ) {
-        return;
-      }
-
-      lastTrackedSearch =
-        normalize(term);
-
-      const resultCount =
-        skinGroups.filter(
-          (group) =>
-            groupMatchesSearch(
-              group,
-              lastTrackedSearch
-            )
-        ).length;
-
-      track(
-        'search',
-        {
-          search_term:
-            term.slice(0, 100),
-          result_count:
-            resultCount
+    window.setTimeout(
+      () => {
+        if (!search) {
+          return;
         }
-      );
-    },
-    700
-  );
+
+        const term =
+          search.value.trim();
+
+        const normalizedTerm =
+          normalize(term);
+
+        if (
+          !term ||
+          normalizedTerm ===
+            lastTrackedSearch
+        ) {
+          return;
+        }
+
+        lastTrackedSearch =
+          normalizedTerm;
+
+        const resultCount =
+          skinGroups.filter(
+            (group) =>
+              groupMatchesSearch(
+                group,
+                normalizedTerm
+              )
+          ).length;
+
+        track(
+          'search',
+          {
+            search_term:
+              term.slice(
+                0,
+                100
+              ),
+
+            result_count:
+              resultCount
+          }
+        );
+      },
+      700
+    );
 }
 
 /* =========================================
    ARAMA
    ========================================= */
 
-search.addEventListener(
+search?.addEventListener(
   'input',
   () => {
     render();
+
     scheduleSearchAnalytics();
   }
 );
 
-search.addEventListener(
+search?.addEventListener(
   'keydown',
   (event) => {
     if (
-      event.key === 'Escape'
+      event.key ===
+      'Escape'
     ) {
-      search.value = '';
+      search.value =
+        '';
 
-      setFavoriteFilter(false);
+      setFavoriteFilter(
+        false
+      );
 
       render();
 
@@ -694,160 +1327,403 @@ document
   .querySelectorAll(
     '[data-query]'
   )
-  .forEach((button) => {
-    button.addEventListener(
-      'click',
-      () => {
-        search.value =
-          button.dataset.query;
+  .forEach(
+    (button) => {
+      button.addEventListener(
+        'click',
+        () => {
+          if (!search) {
+            return;
+          }
 
-        setFavoriteFilter(false);
+          search.value =
+            button.dataset.query ||
+            '';
 
-        render();
+          setFavoriteFilter(
+            false
+          );
 
-        search.focus();
-      }
+          render();
+
+          search.focus();
+
+          scheduleSearchAnalytics();
+        }
+      );
+    }
+  );
+
+/* =========================================
+   FANTOME ID VERİLERİNİ NORMALİZE ET
+   ========================================= */
+
+function addFantomeFile(
+  value
+) {
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return;
+  }
+
+  /*
+   * JSON bazen:
+   *
+   * [29004, 29005]
+   *
+   * bazen de:
+   *
+   * ["29004", "29005"]
+   *
+   * gelebilir.
+   */
+
+  if (
+    typeof value ===
+    'object'
+  ) {
+    if (
+      'id' in value
+    ) {
+      fantomeFiles.add(
+        String(value.id)
+      );
+    }
+
+    if (
+      'skinId' in value
+    ) {
+      fantomeFiles.add(
+        String(value.skinId)
+      );
+    }
+
+    return;
+  }
+
+  const id =
+    String(value)
+      .trim()
+      .replace(
+        /\.fantome$/i,
+        ''
+      );
+
+  if (id) {
+    fantomeFiles.add(
+      id
     );
-  });
+  }
+}
+
+/* =========================================
+   SKIN GRUPLARINI OLUŞTUR
+   ========================================= */
+
+function buildSkinGroups(
+  skinList
+) {
+  const groups =
+    new Map();
+
+  skinList.forEach(
+    (skin) => {
+      const baseName =
+        skin.name
+          .trim()
+          .replace(
+            /\s*\([^)]+\)$/,
+            ''
+          );
+
+      /*
+       * Aynı şampiyondaki aynı skin
+       * isimlerini aynı grupta tut.
+       */
+
+      const key =
+        `${skin.championId ?? skin.champion}:${normalize(
+          baseName
+        )}`;
+
+      if (
+        !groups.has(key)
+      ) {
+        groups.set(
+          key,
+          {
+            primary:
+              skin,
+            skins: []
+          }
+        );
+      }
+
+      const group =
+        groups.get(key);
+
+      group.skins.push(
+        skin
+      );
+
+      /*
+       * Chroma olmayan ana skin
+       * primary olarak kullanılır.
+       */
+
+      if (
+        skin.name.trim() ===
+        baseName
+      ) {
+        group.primary =
+          skin;
+      }
+    }
+  );
+
+  return [
+    ...groups.values()
+  ].map(
+    (group) => {
+      const primary =
+        group.primary;
+
+      const sorted =
+        [...group.skins].sort(
+          (a, b) => {
+            if (
+              a.id ===
+              primary.id
+            ) {
+              return -1;
+            }
+
+            if (
+              b.id ===
+              primary.id
+            ) {
+              return 1;
+            }
+
+            return a.name.localeCompare(
+              b.name,
+              'tr',
+              {
+                sensitivity:
+                  'base'
+              }
+            );
+          }
+        );
+
+      return {
+        primary,
+        skins: sorted
+      };
+    }
+  );
+}
 
 /* =========================================
    VERİLERİ YÜKLE
    ========================================= */
 
-try {
-  const [
-    data,
-    files
-  ] = await Promise.all([
-    fetch(
-      assetUrl(
-        'data/skins.json'
-      )
-    ).then((response) => {
-      if (!response.ok) {
-        throw new Error(
-          'Veri dosyası bulunamadı'
+async function loadData() {
+  if (!search || !results || !empty) {
+    console.error(
+      'Gerekli HTML elementleri bulunamadı.'
+    );
+
+    return;
+  }
+
+  try {
+    const [
+      dataResponse,
+      filesResponse
+    ] =
+      await Promise.all([
+        fetch(
+          assetUrl(
+            'data/skins.json'
+          ),
+          {
+            cache:
+              'no-cache'
+          }
+        ),
+
+        fetch(
+          assetUrl(
+            'data/fantome-files.json'
+          ),
+          {
+            cache:
+              'no-cache'
+          }
+        )
+      ]);
+
+    /* ---------------------------------------
+       skins.json
+       --------------------------------------- */
+
+    if (
+      !dataResponse.ok
+    ) {
+      throw new Error(
+        `skins.json yüklenemedi (${dataResponse.status})`
+      );
+    }
+
+    const data =
+      await dataResponse.json();
+
+    /* ---------------------------------------
+       Fantome listesi
+       --------------------------------------- */
+
+    if (
+      filesResponse.ok
+    ) {
+      const files =
+        await filesResponse.json();
+
+      if (
+        Array.isArray(files)
+      ) {
+        files.forEach(
+          addFantomeFile
+        );
+      } else if (
+        files &&
+        Array.isArray(
+          files.files
+        )
+      ) {
+        files.files.forEach(
+          addFantomeFile
         );
       }
+    } else {
+      console.warn(
+        `fantome-files.json yüklenemedi (${filesResponse.status}).`
+      );
+    }
 
-      return response.json();
-    }),
+    /* ---------------------------------------
+       Skin listesi
+       --------------------------------------- */
 
-    fetch(
-      assetUrl(
-        'data/fantome-files.json'
+    const rawSkins =
+      Array.isArray(
+        data?.skins
       )
-    ).then(
-      (response) =>
-        response.ok
-          ? response.json()
-          : []
-    )
-  ]);
+        ? data.skins
+        : [];
 
-  /* =====================================
-     FANTOME DOSYALARI
-     ===================================== */
+    skins =
+      rawSkins
+        .map(
+          normalizeSkin
+        )
+        .filter(Boolean);
 
-  files.forEach((id) => {
-    fantomeFiles.add(String(id));
-  });
-
-  /* =====================================
-     SKIN VERİLERİ
-     ===================================== */
-
-  skins = Array.isArray(data.skins)
-    ? data.skins
-    : [];
-
-  const groups = new Map();
-
-  skins.forEach((skin) => {
-    const baseName =
-      skin.name
-        .trim()
-        .replace(
-          /\s*\([^)]+\)$/,
-          ''
-        );
-
-    const key =
-      `${skin.championId}:${baseName}`;
-
-    if (!groups.has(key)) {
-      groups.set(key, {
-        primary: skin,
-        skins: []
-      });
-    }
-
-    const group =
-      groups.get(key);
-
-    group.skins.push(skin);
-
-    /*
-     * Chroma olmayan ana skin'i primary yap.
-     */
     if (
-      skin.name.trim() ===
-      baseName
+      skins.length === 0
     ) {
-      group.primary = skin;
+      throw new Error(
+        'skins.json içinde geçerli skin bulunamadı.'
+      );
     }
-  });
 
-  /* =====================================
-     GRUPLARI HAZIRLA
-     ===================================== */
+    /* ---------------------------------------
+       Gruplar
+       --------------------------------------- */
 
-  skinGroups =
-    [...groups.values()]
-      .map((group) => ({
-        ...group,
+    skinGroups =
+      buildSkinGroups(
+        skins
+      );
 
-        skins:
-          group.skins.sort(
-            (a, b) =>
-              a === group.primary
-                ? -1
-                : b ===
-                    group.primary
-                  ? 1
-                  : a.name.localeCompare(
-                      b.name,
-                      'tr'
-                    )
-          )
-      }));
+    /* ---------------------------------------
+       Meta
+       --------------------------------------- */
 
-  /* =====================================
-     META
-     ===================================== */
+    if (meta) {
+      const version =
+        data?.version ||
+        'Bilinmiyor';
 
-  meta.textContent =
-    skins.length
-      ? `${skinGroups.length.toLocaleString(
+      meta.textContent =
+        `${skinGroups.length.toLocaleString(
           'tr-TR'
-        )} ana skin • Yama ${
-          data.version
-        }`
-      : 'Önce veri güncellemesi gerekli';
+        )} ana skin • Yama ${version}`;
+    }
 
-  updateFavoriteCount();
+    updateFavoriteCount();
 
-  render();
+    render();
 
-} catch (error) {
-  console.error(
-    'Skin verileri yüklenemedi:',
-    error
-  );
+    track(
+      'skin_data_loaded',
+      {
+        skin_count:
+          skins.length,
 
-  meta.textContent =
-    'Skin verisi yüklenemedi';
+        group_count:
+          skinGroups.length
+      }
+    );
+  } catch (error) {
+    console.error(
+      'Skin verileri yüklenemedi:',
+      error
+    );
 
-  empty.hidden = false;
-  results.hidden = true;
+    if (meta) {
+      meta.textContent =
+        'Skin verisi yüklenemedi';
+    }
+
+    empty.hidden =
+      false;
+
+    results.hidden =
+      true;
+
+    const emptyTitle =
+      empty.querySelector(
+        'h2'
+      );
+
+    const emptyText =
+      empty.querySelector(
+        'p'
+      );
+
+    if (emptyTitle) {
+      emptyTitle.textContent =
+        'Skin verileri yüklenemedi';
+    }
+
+    if (emptyText) {
+      emptyText.textContent =
+        'data/skins.json dosyasının mevcut olduğundan ve geçerli JSON içerdiğinden emin olun.';
+    }
+  }
 }
+
+/* =========================================
+   BAŞLAT
+   ========================================= */
+
+updateFavoriteCount();
+
+setFavoriteFilter(
+  false
+);
+
+await loadData();
