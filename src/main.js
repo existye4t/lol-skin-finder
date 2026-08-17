@@ -1,0 +1,108 @@
+import './style.css';
+
+const search = document.querySelector('#search');
+const results = document.querySelector('#results');
+const empty = document.querySelector('#empty');
+const meta = document.querySelector('#meta');
+const title = document.querySelector('#result-title');
+const template = document.querySelector('#skin-template');
+const modal = document.querySelector('#skin-modal');
+const downloadList = document.querySelector('#download-list');
+const fantomeFiles = new Set();
+let skins = [];
+let skinGroups = [];
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
+
+const normalize = (value) => value.toLocaleLowerCase('tr-TR')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .replace(/ı/g, 'i').replace(/[^a-z0-9]/g, '');
+
+function render() {
+  const query = normalize(search.value);
+  const found = skinGroups.filter((group) => normalize(group.skins.map((skin) => `${skin.name} ${skin.champion} ${skin.id}`).join(' ')).includes(query));
+  const visible = found.slice(0, query ? 80 : 24);
+  results.replaceChildren(...visible.map((group) => {
+    const skin = group.primary;
+    const card = template.content.cloneNode(true);
+    const image = card.querySelector('img');
+    image.src = skin.image;
+    image.alt = `${skin.name} — ${skin.champion}`;
+    card.querySelector('.champion').textContent = skin.champion;
+    card.querySelector('h3').textContent = skin.name;
+    card.querySelector('.skin-id').textContent = `ID: ${skin.id}`;
+    const article = card.querySelector('.skin-card');
+    article.tabIndex = 0;
+    article.setAttribute('role', 'button');
+    article.setAttribute('aria-label', `${skin.name} detayını aç`);
+    article.addEventListener('click', () => openModal(group));
+    article.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openModal(group); } });
+    return card;
+  }));
+  const count = found.length;
+  title.textContent = query ? `${count} sonuç bulundu` : 'Skinleri keşfet';
+  empty.hidden = count !== 0;
+  results.hidden = count === 0;
+}
+
+function openModal(group) {
+  const skin = group.primary;
+  document.querySelector('#modal-image').src = skin.image;
+  document.querySelector('#modal-image').alt = `${skin.name} — ${skin.champion}`;
+  document.querySelector('#modal-champion').textContent = skin.champion;
+  document.querySelector('#modal-skin-name').textContent = skin.name;
+  document.querySelector('#modal-skin-id').textContent = `RIOT SKIN ID: ${skin.id}`;
+  downloadList.replaceChildren(...group.skins.map((item) => {
+    const hasFile = fantomeFiles.has(item.id);
+    const link = document.createElement(hasFile ? 'a' : 'span');
+    link.className = `download-item${hasFile ? '' : ' unavailable'}`;
+    link.textContent = item === skin ? `Ana skin · ${item.id}` : `${item.name.match(/\(([^)]+)\)$/)?.[1] ?? item.name} · ${item.id}`;
+    if (hasFile) {
+      link.href = assetUrl(`fantome/${item.id}.fantome`);
+      link.download = `${item.id}.fantome`;
+      link.title = `${item.id}.fantome indir`;
+    } else link.title = 'Bu dosya klasörde bulunamadı';
+    return link;
+  }));
+  modal.showModal();
+}
+
+document.querySelector('.modal-close').addEventListener('click', () => modal.close());
+modal.addEventListener('click', (event) => { if (event.target === modal) modal.close(); });
+
+search.addEventListener('input', render);
+search.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') { search.value = ''; render(); search.blur(); }
+});
+document.querySelectorAll('[data-query]').forEach((button) => button.addEventListener('click', () => {
+  search.value = button.dataset.query;
+  render();
+  search.focus();
+}));
+
+try {
+  const [data, files] = await Promise.all([fetch(assetUrl('data/skins.json')).then((response) => {
+    if (!response.ok) throw new Error('Veri dosyası bulunamadı');
+    return response.json();
+  }), fetch(assetUrl('data/fantome-files.json')).then((response) => response.ok ? response.json() : [])]);
+  files.forEach((id) => fantomeFiles.add(id));
+  skins = data.skins;
+  const groups = new Map();
+  skins.forEach((skin) => {
+    const baseName = skin.name.trim().replace(/\s*\([^)]+\)$/, '');
+    const key = `${skin.championId}:${baseName}`;
+    if (!groups.has(key)) groups.set(key, { primary: skin, skins: [] });
+    const group = groups.get(key);
+    group.skins.push(skin);
+    if (skin.name.trim() === baseName) group.primary = skin;
+  });
+  skinGroups = [...groups.values()].map((group) => ({
+    ...group,
+    skins: group.skins.sort((a, b) => (a === group.primary ? -1 : b === group.primary ? 1 : a.name.localeCompare(b.name, 'tr')))
+  }));
+  meta.textContent = skins.length ? `${skinGroups.length.toLocaleString('tr-TR')} ana skin • Yama ${data.version}` : 'Önce veri güncellemesi gerekli';
+  render();
+} catch {
+  meta.textContent = 'Skin verisi yüklenemedi';
+  empty.hidden = false;
+  results.hidden = true;
+}

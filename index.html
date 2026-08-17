@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070b18" />
+    <title>LoL Skin Bulucu</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <p class="eyebrow">LEAGUE OF LEGENDS • SKIN VERİTABANI</p>
+        <h1>Aradığın skin<br /><em>burada.</em></h1>
+        <p class="intro">Skin adını, şampiyonu veya Riot skin ID’sini yaz. Sonuçlar anında filtrelenir.</p>
+        <label class="search-box" for="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" autocomplete="off" placeholder="Örn. Omega Timi Twitch veya 29004" autofocus />
+          <kbd>ESC</kbd>
+        </label>
+        <div class="quick-searches" aria-label="Örnek aramalar">
+          <button type="button" data-query="Omega Timi Twitch">Omega Timi Twitch</button>
+          <button type="button" data-query="Ahri">Ahri</button>
+          <button type="button" data-query="29004">ID: 29004</button>
+        </div>
+      </section>
+
+      <section class="results-section" aria-live="polite">
+        <div class="results-header">
+          <div><p class="eyebrow">SONUÇLAR</p><h2 id="result-title">Skinleri keşfet</h2></div>
+          <p id="meta">Veriler yükleniyor…</p>
+        </div>
+        <div id="results" class="results-grid"></div>
+        <div id="empty" class="empty-state" hidden>
+          <span>◇</span><h2>Sonuç bulunamadı</h2><p>Skin adı, şampiyon adı veya ID ile yeniden deneyin.</p>
+        </div>
+      </section>
+    </main>
+    <template id="skin-template">
+      <article class="skin-card">
+        <img loading="lazy" alt="" />
+        <div class="card-shade"></div>
+        <div class="card-content"><p class="champion"></p><h3></h3><p class="skin-id"></p></div>
+      </article>
+    </template>
+    <dialog id="skin-modal" class="skin-modal" aria-labelledby="modal-skin-name">
+      <button class="modal-close" type="button" aria-label="Kapat">×</button>
+      <img id="modal-image" alt="" />
+      <div class="modal-body">
+        <div class="modal-copy">
+          <p id="modal-champion" class="champion"></p>
+          <h2 id="modal-skin-name"></h2>
+          <p id="modal-skin-id" class="modal-id"></p>
+        </div>
+        <section class="download-list-wrap" aria-label="Skin ve chroma indirmeleri">
+          <p class="download-heading">İNDİRMELER</p>
+          <div id="download-list" class="download-list"></div>
+        </section>
+      </div>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

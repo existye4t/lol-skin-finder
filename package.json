@@ -1,0 +1,16 @@
+{
+  "name": "lol-skin-bulucu",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "update-data": "node scripts/update-skins.mjs",
+    "prepare-fantome": "node scripts/prepare-fantome.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build --base=./",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
