@@ -7,6 +7,13 @@
       content="width=device-width, initial-scale=1.0"
     />
 
+    <!-- FAVICON -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="/favicon.png"
+    />
+
     <meta
       name="theme-color"
       content="#070b18"
@@ -178,10 +185,6 @@
 
     <main class="page-shell">
 
-      <!-- =======================================
-           HERO
-           ======================================= -->
-
       <section class="hero">
 
         <p class="eyebrow">
@@ -197,11 +200,6 @@
           Skin adını, şampiyonu veya Riot skin ID’sini yaz.
           Sonuçlar anında filtrelenir.
         </p>
-
-
-        <!-- =====================================
-             ARAMA + FİLTRE
-             ===================================== -->
 
         <div class="search-row">
 
@@ -227,9 +225,6 @@
             </kbd>
 
           </label>
-
-
-          <!-- FAVORİ FİLTRESİ -->
 
           <button
             id="favorite-filter"
@@ -261,11 +256,6 @@
           </button>
 
         </div>
-
-
-        <!-- =====================================
-             HIZLI ARAMALAR
-             ===================================== -->
 
         <div
           class="quick-searches"
@@ -370,16 +360,10 @@
 
         </div>
 
-
         <div
           id="results"
           class="results-grid"
         ></div>
-
-
-        <!-- =====================================
-             SONUÇ YOK
-             ===================================== -->
 
         <div
           id="empty"
@@ -418,8 +402,6 @@
         role="button"
       >
 
-        <!-- FAVORİ -->
-
         <button
           class="favorite-button"
           type="button"
@@ -437,19 +419,12 @@
 
         </button>
 
-
-        <!-- SKIN RESMİ -->
-
         <img
           loading="lazy"
           alt=""
         />
 
-
         <div class="card-shade"></div>
-
-
-        <!-- KART BİLGİLERİ -->
 
         <div class="card-content">
 
@@ -484,12 +459,10 @@
         ×
       </button>
 
-
       <img
         id="modal-image"
         alt=""
       />
-
 
       <div class="modal-body">
 
@@ -500,19 +473,12 @@
             class="champion"
           ></p>
 
-
           <h2 id="modal-skin-name"></h2>
-
 
           <p
             id="modal-skin-id"
             class="modal-id"
           ></p>
-
-
-          <!-- =================================
-               MODAL FAVORİ
-               ================================= -->
 
           <button
             id="modal-favorite"
@@ -535,11 +501,6 @@
           </button>
 
         </div>
-
-
-        <!-- =================================
-             İNDİRMELER
-             ================================= -->
 
         <section
           class="download-list-wrap"
@@ -577,7 +538,6 @@
         aria-hidden="true"
       ></div>
 
-
       <button
         id="discord-modal-close"
         class="discord-modal-close"
@@ -586,7 +546,6 @@
       >
         ×
       </button>
-
 
       <div class="discord-modal-content">
 
@@ -601,31 +560,25 @@
           >
 
             <path
-              d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"
+              d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84 0 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"
             />
 
           </svg>
 
         </div>
 
-
         <p class="discord-modal-eyebrow">
           DISCORD İLETİŞİM
         </p>
-
 
         <h2 id="discord-modal-title">
           Bir sorun mu var?
         </h2>
 
-
         <p class="discord-modal-description">
           Problem, öneri veya sorularınız için Discord üzerinden
           bana ulaşabilirsiniz.
         </p>
-
-
-        <!-- DISCORD PROFİL -->
 
         <div class="discord-profile">
 
@@ -640,7 +593,6 @@
 
           </div>
 
-
           <div class="discord-profile-info">
 
             <span class="discord-profile-label">
@@ -654,7 +606,6 @@
           </div>
 
         </div>
-
 
         <div class="discord-modal-hint">
 
