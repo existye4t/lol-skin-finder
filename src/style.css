@@ -1525,9 +1525,29 @@ dialog::backdrop {
   outline-offset: 3px;
 }
 
-.lang-switch-flag {
-  font-size: 17px;
-  line-height: 1;
+.lang-flag {
+  display: flex;
+
+  flex: 0 0 auto;
+
+  overflow: hidden;
+
+  border-radius: 3px;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .18),
+    0 2px 6px rgba(0, 0, 0, .35);
+}
+
+.lang-flag svg {
+  display: block;
+
+  width: 22px;
+  height: auto;
+}
+
+.lang-menu-option .lang-flag svg {
+  width: 20px;
 }
 
 .lang-switch-code {
