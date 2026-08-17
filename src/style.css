@@ -1,7 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
 
-:root { color: #f1f5ff; background: #070b18; font-family: Manrope, sans-serif; }
-* { box-sizing: border-box; }
+:root {
+  color: #f1f5ff;
+  background: #070b18;
+  font-family: Manrope, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -12,8 +19,16 @@ body {
     #070b18;
 }
 
-.page-shell { max-width: 1320px; margin: auto; padding: 80px 36px 72px; }
-.hero { max-width: 780px; padding: 30px 0 92px; }
+.page-shell {
+  max-width: 1320px;
+  margin: auto;
+  padding: 80px 36px 72px;
+}
+
+.hero {
+  max-width: 780px;
+  padding: 30px 0 92px;
+}
 
 .eyebrow {
   margin: 0 0 13px;
@@ -358,7 +373,11 @@ kbd {
   border-radius: 12px;
   color: #f1f5ff;
   background:
-    linear-gradient(135deg, rgba(88, 73, 145, .28), rgba(17, 24, 43, .92));
+    linear-gradient(
+      135deg,
+      rgba(88, 73, 145, .28),
+      rgba(17, 24, 43, .92)
+    );
   box-shadow:
     0 12px 35px rgba(0, 0, 0, .35),
     inset 0 1px 0 rgba(255, 255, 255, .06);
@@ -376,7 +395,11 @@ kbd {
   transform: translateY(-2px);
   border-color: #7d73d4;
   background:
-    linear-gradient(135deg, rgba(104, 86, 177, .38), rgba(17, 24, 43, .94));
+    linear-gradient(
+      135deg,
+      rgba(104, 86, 177, .38),
+      rgba(17, 24, 43, .94)
+    );
   box-shadow:
     0 16px 42px rgba(0, 0, 0, .42),
     0 0 25px rgba(91, 76, 166, .16);
@@ -451,7 +474,11 @@ kbd {
   border-radius: 20px;
   color: #f1f5ff;
   background:
-    radial-gradient(circle at 50% -15%, rgba(99, 86, 174, .3), transparent 48%),
+    radial-gradient(
+      circle at 50% -15%,
+      rgba(99, 86, 174, .3),
+      transparent 48%
+    ),
     linear-gradient(145deg, #11182b, #090e1d);
   box-shadow:
     0 35px 110px rgba(0, 0, 0, .72),
@@ -506,7 +533,11 @@ kbd {
   font-size: 21px;
   line-height: 1;
   cursor: pointer;
-  transition: color .2s, background .2s, border-color .2s, transform .2s;
+  transition:
+    color .2s,
+    background .2s,
+    border-color .2s,
+    transform .2s;
 }
 
 .discord-modal-close:hover {
@@ -526,7 +557,11 @@ kbd {
   border-radius: 18px;
   color: #c1b9ff;
   background:
-    linear-gradient(145deg, rgba(111, 96, 198, .32), rgba(60, 48, 112, .2));
+    linear-gradient(
+      145deg,
+      rgba(111, 96, 198, .32),
+      rgba(60, 48, 112, .2)
+    );
   box-shadow:
     0 12px 30px rgba(0, 0, 0, .25),
     0 0 28px rgba(105, 91, 190, .12);
@@ -559,6 +594,10 @@ kbd {
   line-height: 1.65;
 }
 
+/* ================================
+   DISCORD PROFİL
+   ================================ */
+
 .discord-profile {
   display: flex;
   align-items: center;
@@ -571,32 +610,41 @@ kbd {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
 }
 
+/* GIF AVATAR */
 .discord-profile-avatar {
   position: relative;
-  display: grid;
+  display: block;
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-  place-items: center;
   overflow: hidden;
   border: 1px solid rgba(210, 177, 117, .35);
   border-radius: 13px;
-  color: #d2b175;
-  background:
-    linear-gradient(145deg, #283a70, #171d3a);
-  font-size: 18px;
-  font-weight: 800;
+  background: #171d3a;
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, .3);
 }
 
+/* GIF'in kendisi */
+.discord-profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Online noktası */
 .discord-profile-avatar i {
   position: absolute;
   right: 1px;
   bottom: 1px;
+  z-index: 2;
   width: 11px;
   height: 11px;
   border: 2px solid #131b30;
   border-radius: 50%;
   background: #65d391;
+  box-shadow: 0 0 8px rgba(101, 211, 145, .35);
 }
 
 .discord-profile-info {
@@ -631,7 +679,9 @@ kbd {
   font-size: 8px;
 }
 
-/* Discord animasyonları */
+/* ================================
+   ANİMASYONLAR
+   ================================ */
 
 @keyframes discordModalIn {
   from {
@@ -660,6 +710,7 @@ kbd {
    ================================ */
 
 @media (max-width: 620px) {
+
   .modal-body {
     grid-template-columns: 1fr;
   }
@@ -707,9 +758,7 @@ kbd {
   .discord-modal h2 {
     font-size: 1.55rem;
   }
-}
 
-@media (max-width: 620px) {
   .page-shell {
     padding: 44px 18px;
   }
