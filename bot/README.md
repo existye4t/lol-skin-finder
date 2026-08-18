@@ -20,6 +20,11 @@ Environment variables (.env)
 - BOT_OWNER_ID (optional)
 - GUILD_ID (optional, use to register guild commands during development)
 
+How to get GUILD_ID (for development testing)
+- In Discord, enable Developer Mode: User Settings -> Advanced -> Developer Mode.
+- Right-click the server (guild) icon and choose "Copy ID". Paste that value into GUILD_ID in your bot/.env.
+- When GUILD_ID is set, the bot will register slash commands only for that guild (they appear immediately). If omitted, the bot registers global commands (which may take up to an hour to propagate).
+
 Notes
 - The bot reads skins.json from the local repo if available, otherwise from GitHub raw.
 - Download links point to raw.githubusercontent.com constructed from repo/branch/path.

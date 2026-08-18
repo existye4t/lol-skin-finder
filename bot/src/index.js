@@ -313,11 +313,17 @@ async function registerCommands() {
     }
 
     const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
-    if (GUILD_ID) {
-      await rest.put(Routes.applicationGuildCommands(client.application.id, GUILD_ID), { body: commands });
-      console.log('Registered guild commands');
+    const guildId = (GUILD_ID || '').toString().trim() || null;
+    // application id may be available on client.application.id; fall back to client.user.id
+    const applicationId = (client.application && client.application.id) ? client.application.id : (client.user && client.user.id) ? client.user.id : null;
+    if (!applicationId) {
+      throw new Error('Application id not available to register commands.');
+    }
+    if (guildId) {
+      await rest.put(Routes.applicationGuildCommands(applicationId, guildId), { body: commands });
+      console.log(`Registered commands to guild ${guildId}`);
     } else {
-      await rest.put(Routes.applicationCommands(client.application.id), { body: commands });
+      await rest.put(Routes.applicationCommands(applicationId), { body: commands });
       console.log('Registered global commands');
     }
   } catch (err) {
