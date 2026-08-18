@@ -2171,6 +2171,25 @@ dialog::backdrop {
   transform: translateY(0);
 }
 
+.discord-join-button .discord-join-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  flex: 0 0 auto;
+}
+
+.discord-join-button .discord-join-text {
+  display: inline-block;
+}
+
+/* make sure the button is fully clickable and accessible */
+.discord-join-button {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+
 /* ================================
    ANIMATIONS
 ================================ */
