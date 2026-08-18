@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+﻿import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -308,7 +308,7 @@ async function registerCommands() {
     // validate commands before sending to Discord
     for (const c of commands) {
       if (!validateCommandOptions(c)) {
-        throw new Error(`Command '${c.name}' has required options after optional ones. Reorder required options before optional ones.`);
+        throw new Error(Command '' has required options after optional ones. Reorder required options before optional ones.);
       }
     }
 
@@ -446,3 +446,4 @@ client.login(DISCORD_TOKEN).catch(err => {
   console.error('Failed to login:', err.message);
   process.exit(1);
 });
+
