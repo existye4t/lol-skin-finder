@@ -308,7 +308,7 @@ async function registerCommands() {
     // validate commands before sending to Discord
     for (const c of commands) {
       if (!validateCommandOptions(c)) {
-        throw new Error(Command '' has required options after optional ones. Reorder required options before optional ones.);
+        throw new Error(`Command '${c.name}' has required options after optional ones. Reorder required options before optional ones.`);
       }
     }
 
