@@ -885,30 +885,55 @@ jobs:
               skin = dict(
                   skin
               )
-
+ 
               skin["id"] = skin_id
-
+ 
               skin["name"] = str(
                   skin.get(
                       "name",
                       ""
                   )
               ).strip()
-
+ 
               skin["champion"] = str(
                   skin.get(
                       "champion",
                       ""
                   )
               ).strip()
-
+ 
               skin["championId"] = str(
                   skin.get(
                       "championId",
                       ""
                   )
               ).strip()
-
+ 
+              # ---------------------------------------
+              # Add English translations when available
+              # ---------------------------------------
+              en_entry = riot_index.get(skin_id) or cdragon_index.get(skin_id)
+              if en_entry:
+                  skin["nameEn"] = str(en_entry.get("name", "")).strip()
+                  skin["championEn"] = str(en_entry.get("champion", "")).strip()
+              else:
+                  # Fallback: try to find matching riot entry by championId + skinNum
+                  found = None
+                  for r in riot_index.values():
+                      try:
+                          if str(r.get("championId", "")) == str(skin.get("championId", "")) and r.get("skinNum") == skin.get("skinNum"):
+                              found = r
+                              break
+                      except Exception:
+                          continue
+                  if found:
+                      skin["nameEn"] = str(found.get("name", "")).strip()
+                      skin["championEn"] = str(found.get("champion", "")).strip()
+                  else:
+                      # As a last resort, mirror the primary fields so frontend always has values
+                      skin["nameEn"] = skin.get("name", "")
+                      skin["championEn"] = skin.get("champion", "")
+ 
               # ====================================================
               # IMAGE HANDLING
               #
@@ -922,36 +947,36 @@ jobs:
               # If unavailable:
               # CommunityDragon splash.
               # ====================================================
-
+ 
               current_image = str(
                   skin.get(
                       "image",
                       ""
                   )
               ).strip()
-
+ 
               skin_num = skin.get(
                   "skinNum"
               )
-
+ 
               champion_id = skin.get(
                   "championId",
                   ""
               )
-
+ 
               # If Riot metadata gave us skinNum,
               # always construct the normal splash.
               if champion_id and skin_num is not None:
-
+ 
                   splash = riot_splash(
                       champion_id,
                       skin_num
                   )
-
+ 
                   if splash:
-
+ 
                       skin["image"] = splash
-
+ 
               elif not (
                   current_image.startswith(
                       "http://"
@@ -960,27 +985,27 @@ jobs:
                       "https://"
                   )
               ):
-
+ 
                   skin["image"] = ""
-
+ 
               # ====================================================
               # Remove internal fields
               # ====================================================
-
+ 
               skin.pop(
                   "sourcePath",
                   None
               )
-
+ 
               skin.pop(
                   "_metadataSource",
                   None
               )
-
+ 
               # ====================================================
               # Keep source only internally
               # ====================================================
-
+ 
               matched[skin_id] = skin
 
           # ========================================================
