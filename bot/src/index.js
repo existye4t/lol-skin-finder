@@ -259,13 +259,37 @@ async function tryAttachFantome(interaction, id, locale) {
 }
 
 // Commands
+// Ensure required options are defined before optional ones to satisfy Discord API validation.
 const commands = [
-  new SlashCommandBuilder().setName('skin').setDescription('Search for a skin').addStringOption(opt => opt.setName('query').setDescription('Skin name').setRequired(true)),
-  new SlashCommandBuilder().setName('skinid').setDescription('Lookup skin by id').addStringOption(opt => opt.setName('id').setDescription('Skin ID').setRequired(true)),
-  new SlashCommandBuilder().setName('randomskin').setDescription('Get a random skin'),
-  new SlashCommandBuilder().setName('report').setDescription('Report a problem').addStringOption(opt => opt.setName('skin_id').setDescription('Skin ID').setRequired(false)).addStringOption(opt => opt.setName('message').setDescription('Report text').setRequired(true)),
-  new SlashCommandBuilder().setName('suggest').setDescription('Suggest a feature').addStringOption(opt => opt.setName('message').setDescription('Suggestion text').setRequired(true)),
-  new SlashCommandBuilder().setName('help').setDescription('Show bot help')
+  new SlashCommandBuilder()
+    .setName('skin')
+    .setDescription('Search for a skin')
+    .addStringOption(opt => opt.setName('query').setDescription('Skin name').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('skinid')
+    .setDescription('Lookup skin by id')
+    .addStringOption(opt => opt.setName('id').setDescription('Skin ID').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('randomskin')
+    .setDescription('Get a random skin'),
+
+  // For report: required 'message' must come before optional 'skin_id'
+  new SlashCommandBuilder()
+    .setName('report')
+    .setDescription('Report a problem')
+    .addStringOption(opt => opt.setName('message').setDescription('Report text').setRequired(true))
+    .addStringOption(opt => opt.setName('skin_id').setDescription('Skin ID').setRequired(false)),
+
+  new SlashCommandBuilder()
+    .setName('suggest')
+    .setDescription('Suggest a feature')
+    .addStringOption(opt => opt.setName('message').setDescription('Suggestion text').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Show bot help')
 ].map(c => c.toJSON());
 
 async function registerCommands() {
@@ -283,11 +307,19 @@ async function registerCommands() {
   }
 }
 
-client.once('ready', async () => {
+// Use a resilient ready handler: prefer 'clientReady' when available but fall back to 'ready'.
+let _readyHandled = false;
+async function onClientReady() {
+  if (_readyHandled) return;
+  _readyHandled = true;
   console.log('Bot ready:', client.user.tag);
   await ensureSkinsLoaded();
   await registerCommands();
-});
+}
+
+// Register both events so the bot works with discord.js versions that emit either.
+client.once('clientReady', onClientReady);
+client.once('ready', onClientReady);
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
