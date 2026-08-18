@@ -497,6 +497,7 @@ function setLang(lang) {
   );
 
   render();
+  syncAllFavoriteButtons();
 
   track('language_change', {
     language: lang
@@ -726,6 +727,9 @@ function updateFavoriteButton(
   const favorite =
     isFavorite(skinId);
 
+  button.dataset.skinId =
+    String(skinId);
+
   button.classList.toggle(
     'is-favorite',
     favorite
@@ -785,6 +789,37 @@ function updateFavoriteButton(
         ? '★'
         : '☆';
   }
+}
+
+function syncFavoriteButtons(
+  skinId
+) {
+  const targetId =
+    String(skinId);
+
+  document
+    .querySelectorAll(
+      `.favorite-button[data-skin-id="${targetId}"]`
+    )
+    .forEach((button) => {
+      updateFavoriteButton(
+        button,
+        targetId
+      );
+    });
+}
+
+function syncAllFavoriteButtons() {
+  document
+    .querySelectorAll(
+      '.favorite-button[data-skin-id]'
+    )
+    .forEach((button) => {
+      updateFavoriteButton(
+        button,
+        button.dataset.skinId
+      );
+    });
 }
 
 /* =========================================
@@ -867,6 +902,8 @@ function toggleFavorite(
     button,
     id
   );
+
+  syncFavoriteButtons(id);
 
   /* ---------------------------------------
      Favori ekleme animasyonu
@@ -1218,6 +1255,9 @@ function createSkinCard(
   favoriteButton.type =
     'button';
 
+  favoriteButton.dataset.skinId =
+    String(skin.id);
+
   updateFavoriteButton(
     favoriteButton,
     skin.id
@@ -1559,25 +1599,28 @@ function openModal(
       });
   }
 
-     const modalFavoriteButton =
-       document.querySelector(
+  const modalFavoriteButton =
+    document.querySelector(
      '#modal-favorite'
-       );
+    );
 
-     if (modalFavoriteButton) {
-       updateFavoriteButton(
+  if (modalFavoriteButton) {
+    modalFavoriteButton.dataset.skinId =
+     String(skin.id);
+
+    updateFavoriteButton(
      modalFavoriteButton,
      skin.id
-       );
+    );
 
-       modalFavoriteButton.onclick =
+    modalFavoriteButton.onclick =
      () => {
        toggleFavorite(
          skin.id,
          modalFavoriteButton
        );
      };
-     }
+  }
 
      /* ---------------------------------------
      Fantome dosyaları
