@@ -162,6 +162,103 @@ async function ensureSkinsLoaded() {
   await loadSkinsFromGitHub();
 }
 
+// Localization strings
+const TRANSLATIONS = {
+  en: {
+    no_match: 'No matching skin found.',
+    no_id: 'No skin found for that ID.',
+    report_channel_not_config: 'Report channel not configured.',
+    report_channel_not_found: 'Report channel not found or missing permission.',
+    report_submitted: 'Report submitted, thank you.',
+    suggestion_channel_not_config: 'Suggestion channel not configured.',
+    suggestion_channel_not_found: 'Suggestion channel not found or missing permission.',
+    suggestion_submitted: 'Suggestion submitted, thank you.',
+    command_error: 'An error occurred while processing the command.',
+    processing: 'Processing...',
+    file_too_large: 'File is too large to upload; here is a download link:',
+    report_rate_limited: 'You are sending reports too quickly. Please wait and try again later.'
+  },
+  tr: {
+    no_match: 'Eşleşen skin bulunamadı.',
+    no_id: 'ID ile eşleşen skin bulunamadı.',
+    report_channel_not_config: 'Rapor kanalı yapılandırılmamış.',
+    report_channel_not_found: 'Rapor kanalı bulunamadı veya erişim izni yok.',
+    report_submitted: 'Rapor gönderildi, teşekkürler.',
+    suggestion_channel_not_config: 'Öneri kanalı yapılandırılmamış.',
+    suggestion_channel_not_found: 'Öneri kanalı bulunamadı veya erişim izni yok.',
+    suggestion_submitted: 'Öneriniz gönderildi, teşekkürler.',
+    command_error: 'Komut işlenirken hata oluştu.',
+    processing: 'İşleniyor...',
+    file_too_large: 'Dosya yüklenemeyecek kadar büyük; indirme bağlantısı:',
+    report_rate_limited: 'Çok hızlı rapor gönderiyorsunuz. Lütfen biraz bekleyip tekrar deneyin.'
+  }
+};
+
+function t(key, locale) {
+  const lang = (locale || 'en').startsWith('tr') ? 'tr' : 'en';
+  return TRANSLATIONS[lang][key] || TRANSLATIONS['en'][key] || key;
+}
+
+// Rate limiting for reports to prevent spam
+const reportCooldownMs = 30 * 1000; // 30s
+const lastReport = new Map();
+
+// File upload limits
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB conservative
+
+async function headContentLength(url) {
+  try {
+    const res = await fetch(url, { method: 'HEAD' });
+    if (!res.ok) return null;
+    const len = res.headers.get('content-length');
+    return len ? parseInt(len, 10) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function fetchBufferWithLimit(url, limit) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  // try content-length first
+  const len = res.headers.get('content-length');
+  if (len && parseInt(len, 10) > limit) {
+    const err = new Error('Too large');
+    err.code = 'TOO_LARGE';
+    throw err;
+  }
+  const arrayBuffer = await res.arrayBuffer();
+  const buf = Buffer.from(arrayBuffer);
+  if (buf.length > limit) {
+    const err = new Error('Too large');
+    err.code = 'TOO_LARGE';
+    throw err;
+  }
+  return buf;
+}
+
+async function tryAttachFantome(interaction, id, locale) {
+  const url = githubRawFantomeUrl(id);
+  // check content-length
+  const cl = await headContentLength(url);
+  if (cl && cl > MAX_UPLOAD_BYTES) {
+    await interaction.followUp({ content: `${t('file_too_large', locale)} ${url}`, ephemeral: true });
+    return;
+  }
+  try {
+    const buf = await fetchBufferWithLimit(url, MAX_UPLOAD_BYTES);
+    // send as follow-up as a file
+    await interaction.followUp({ files: [{ attachment: buf, name: `${id}.fantome` }] });
+  } catch (err) {
+    if (err.code === 'TOO_LARGE') {
+      await interaction.followUp({ content: `${t('file_too_large', locale)} ${url}`, ephemeral: true });
+      return;
+    }
+    console.warn('Failed to fetch fantome:', err.message);
+    await interaction.followUp({ content: `${t('command_error', locale)} (${err.message})`, ephemeral: true });
+  }
+}
+
 // Commands
 const commands = [
   new SlashCommandBuilder().setName('skin').setDescription('Search for a skin').addStringOption(opt => opt.setName('query').setDescription('Skin name').setRequired(true)),
@@ -211,6 +308,8 @@ client.on('interactionCreate', async (interaction) => {
         new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(first.id))
       );
       await interaction.reply({ embeds: [embed], components: [row] });
+      // Attempt to attach the fantome file if it is small enough; otherwise provide the raw link
+      tryAttachFantome(interaction, first.id, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'skinid') {
       const id = interaction.options.getString('id');
       const found = findSkinById(id);
@@ -224,6 +323,7 @@ client.on('interactionCreate', async (interaction) => {
         new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(found.id))
       );
       await interaction.reply({ embeds: [embed], components: [row] });
+      tryAttachFantome(interaction, found.id, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'randomskin') {
       if (!skins.length) await ensureSkinsLoaded();
       const skin = skins[Math.floor(Math.random() * skins.length)];
@@ -233,17 +333,26 @@ client.on('interactionCreate', async (interaction) => {
         new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(skin.id))
       );
       await interaction.reply({ embeds: [embed], components: [row] });
+      tryAttachFantome(interaction, skin.id, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'report') {
       const skinId = interaction.options.getString('skin_id');
       const message = interaction.options.getString('message');
+      // rate limit per user
+      const last = lastReport.get(interaction.user.id) || 0;
+      const now = Date.now();
+      if (now - last < reportCooldownMs) {
+        await interaction.reply({ content: t('report_rate_limited', locale), ephemeral: true });
+        return;
+      }
+      lastReport.set(interaction.user.id, now);
       // send to report channel
       if (!REPORT_CHANNEL_ID) {
-        await interaction.reply({ content: locale.startsWith('tr') ? 'Rapor kanalı yapılandırılmamış.' : 'Report channel not configured.', ephemeral: true });
+        await interaction.reply({ content: t('report_channel_not_config', locale), ephemeral: true });
         return;
       }
       const reportChannel = await client.channels.fetch(REPORT_CHANNEL_ID).catch(()=>null);
       if (!reportChannel) {
-        await interaction.reply({ content: locale.startsWith('tr') ? 'Rapor kanalı bulunamadı veya erişim izni yok.' : 'Report channel not found or missing permission.', ephemeral: true });
+        await interaction.reply({ content: t('report_channel_not_found', locale), ephemeral: true });
         return;
       }
       const userTag = `${interaction.user.username}#${interaction.user.discriminator}`;
@@ -253,7 +362,7 @@ client.on('interactionCreate', async (interaction) => {
         { name: 'Message', value: message }
       ).setTimestamp();
       await reportChannel.send({ embeds: [embed] });
-      await interaction.reply({ content: locale.startsWith('tr') ? 'Rapor gönderildi, teşekkürler.' : 'Report submitted, thank you.', ephemeral: true });
+      await interaction.reply({ content: t('report_submitted', locale), ephemeral: true });
     } else if (interaction.commandName === 'suggest') {
       const message = interaction.options.getString('message');
       if (!SUGGESTION_CHANNEL_ID) {
