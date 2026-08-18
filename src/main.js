@@ -726,6 +726,9 @@ function updateFavoriteButton(
   const favorite =
     isFavorite(skinId);
 
+  button.dataset.skinId =
+    String(skinId);
+
   button.classList.toggle(
     'is-favorite',
     favorite
@@ -785,6 +788,24 @@ function updateFavoriteButton(
         ? '★'
         : '☆';
   }
+}
+
+function syncFavoriteButtons(
+  skinId
+) {
+  const targetId =
+    String(skinId);
+
+  document
+    .querySelectorAll(
+      `.favorite-button[data-skin-id="${targetId}"]`
+    )
+    .forEach((button) => {
+      updateFavoriteButton(
+        button,
+        targetId
+      );
+    });
 }
 
 /* =========================================
@@ -867,6 +888,8 @@ function toggleFavorite(
     button,
     id
   );
+
+  syncFavoriteButtons(id);
 
   /* ---------------------------------------
      Favori ekleme animasyonu
@@ -1218,6 +1241,9 @@ function createSkinCard(
   favoriteButton.type =
     'button';
 
+  favoriteButton.dataset.skinId =
+    String(skin.id);
+
   updateFavoriteButton(
     favoriteButton,
     skin.id
@@ -1565,6 +1591,9 @@ function openModal(
        );
 
      if (modalFavoriteButton) {
+       modalFavoriteButton.dataset.skinId =
+     String(skin.id);
+
        updateFavoriteButton(
      modalFavoriteButton,
      skin.id
