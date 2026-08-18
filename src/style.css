@@ -2162,6 +2162,49 @@ dialog::backdrop {
   transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease, background 0.18s ease;
 }
 
+/* Small elegant join button inside modal */
+.discord-join-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 10px 0 12px;
+
+  padding: 8px 12px;
+  border-radius: 8px;
+
+  background: linear-gradient(135deg, rgba(91,76,166,0.06), rgba(17,24,43,0.92));
+  border: 1px solid rgba(125,117,212,0.08);
+
+  color: #f3f4ff;
+  font-weight: 600;
+  font-size: 0.93rem;
+
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(9,8,20,0.45);
+
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s ease, background 0.14s ease;
+}
+
+.discord-join-small:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(9,8,20,0.5);
+}
+
+.discord-join-small:active {
+  transform: translateY(0);
+}
+
+.discord-join-small .discord-join-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.discord-join-small .discord-join-small-text {
+  display: inline-block;
+}
+
 .discord-join-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 18px 48px rgba(9,8,20,0.6);
