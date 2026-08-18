@@ -1,0 +1,173 @@
+name: Sync League Skins
+
+on:
+  schedule:
+    # Every 6 hours
+    - cron: "0 */6 * * *"
+
+  # Allows manual execution from Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout website repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout LeagueSkins repository
+        uses: actions/checkout@v4
+        with:
+          repository: Alban1911/LeagueSkins
+          path: source-skins
+          fetch-depth: 1
+
+      - name: Sync Fantome files
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p fantome
+          mkdir -p data
+
+          echo "Finding Fantome files..."
+
+          find source-skins/skins \
+            -type f \
+            -iname "*.fantome" \
+            -print0 |
+          while IFS= read -r -d '' file; do
+            filename="$(basename "$file")"
+            cp -f "$file" "fantome/$filename"
+          done
+
+          echo "Fantome files synced."
+
+      - name: Generate fantome-files.json
+        shell: bash
+        run: |
+          set -e
+
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+
+          folder = Path("fantome")
+
+          files = sorted(
+              path.name
+              for path in folder.iterdir()
+              if path.is_file()
+              and path.suffix.lower() == ".fantome"
+          )
+
+          output = folder.parent / "data" / "fantome-files.json"
+
+          output.parent.mkdir(
+              parents=True,
+              exist_ok=True
+          )
+
+          output.write_text(
+              json.dumps(
+                  files,
+                  ensure_ascii=False,
+                  indent=2
+              ) + "\n",
+              encoding="utf-8"
+          )
+
+          print(f"Found {len(files)} Fantome files.")
+          print(f"Written to {output}")
+          PY
+
+      - name: Remove deleted Fantome files
+        shell: bash
+        run: |
+          set -e
+
+          python3 <<'PY'
+          from pathlib import Path
+
+          source_ids = {
+              path.name
+              for path in Path("source-skins/skins").rglob("*.fantome")
+          }
+
+          destination = Path("fantome")
+
+          removed = 0
+
+          for file in destination.glob("*.fantome"):
+              if file.name not in source_ids:
+                  file.unlink()
+                  removed += 1
+                  print(f"Removed: {file.name}")
+
+          print(f"Removed {removed} obsolete files.")
+          PY
+
+      - name: Regenerate fantome-files.json
+        shell: bash
+        run: |
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+
+          folder = Path("fantome")
+
+          files = sorted(
+              p.name
+              for p in folder.iterdir()
+              if p.is_file()
+              and p.suffix.lower() == ".fantome"
+          )
+
+          output = Path("data/fantome-files.json")
+
+          output.parent.mkdir(
+              parents=True,
+              exist_ok=True
+          )
+
+          output.write_text(
+              json.dumps(
+                  files,
+                  ensure_ascii=False,
+                  indent=2
+              ) + "\n",
+              encoding="utf-8"
+          )
+          PY
+
+      - name: Check for changes
+        id: changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Changes detected."
+            git status --short
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add fantome data/fantome-files.json
+
+          git commit -m "chore: sync League skins"
+
+          git push
