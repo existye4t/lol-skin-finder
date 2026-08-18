@@ -952,35 +952,172 @@ const normalize = (value) =>
     );
 
 /* =========================================
-   ARAMA EŞLEŞMESİ
+   ARAMA RELEVANS SKORU
 ========================================= */
+
+function scoreTextMatch(text, query) {
+  const normalizedText = normalize(
+   String(text ?? '')
+  );
+  const normalizedQuery = normalize(
+   String(query ?? '')
+  );
+
+  if (!normalizedText || !normalizedQuery) {
+   return 0;
+  }
+
+  if (normalizedText === normalizedQuery) {
+   return 1_000_000;
+  }
+
+  if (
+   normalizedText.startsWith(
+     normalizedQuery
+   )
+  ) {
+   return (
+     900_000 +
+     Math.max(
+       0,
+       normalizedText.length -
+         normalizedQuery.length
+     ) *
+       25
+   );
+  }
+
+  const tokens =
+   normalizedText
+     .split(/[^a-z0-9]+/)
+     .filter(Boolean);
+
+  if (
+   tokens.some(
+     (token) =>
+       token === normalizedQuery
+   )
+  ) {
+   return (
+     700_000 +
+     normalizedQuery.length *
+       200
+   );
+  }
+
+  if (
+   normalizedText.includes(
+     normalizedQuery
+   )
+  ) {
+   return (
+     500_000 +
+     Math.max(
+       0,
+       2000 -
+         Math.abs(
+           normalizedText.length -
+             normalizedQuery.length
+         ) *
+           12
+     )
+   );
+  }
+
+  let lastIndex = -1;
+  let orderedCount = 0;
+  let consecutiveCount = 0;
+  let totalGapDistance = 0;
+
+  for (const character of normalizedQuery) {
+   const nextIndex =
+     normalizedText.indexOf(
+       character,
+       lastIndex + 1
+     );
+
+   if (nextIndex === -1) {
+     return 0;
+   }
+
+   if (nextIndex > lastIndex) {
+     orderedCount += 1;
+   }
+
+   if (
+     lastIndex !== -1 &&
+     nextIndex === lastIndex + 1
+   ) {
+     consecutiveCount += 1;
+   }
+
+   if (lastIndex !== -1) {
+     totalGapDistance +=
+       nextIndex - lastIndex;
+   }
+
+   lastIndex = nextIndex;
+  }
+
+  if (orderedCount !== normalizedQuery.length) {
+   return 0;
+  }
+
+  const fuzzyScore =
+   orderedCount * 150 +
+   consecutiveCount * 120 -
+   totalGapDistance * 25;
+
+  return fuzzyScore > 0
+   ? fuzzyScore
+   : 1;
+}
+
+function getGroupSearchScore(
+  group,
+  query
+) {
+  const normalizedQuery = normalize(
+   String(query ?? '')
+  );
+
+  if (!normalizedQuery) {
+   return 0;
+  }
+
+  let bestScore = 0;
+
+  group.skins.forEach((skin) => {
+   [
+     skin.name,
+     skin.nameEn,
+     skin.champion,
+     skin.championEn,
+     String(skin.id)
+   ]
+     .filter(Boolean)
+     .forEach((text) => {
+       bestScore = Math.max(
+         bestScore,
+         scoreTextMatch(
+           text,
+           normalizedQuery
+         )
+       );
+     });
+  });
+
+  return bestScore;
+}
 
 function groupMatchesSearch(
   group,
   query
 ) {
-  if (!query) {
-    return true;
-  }
-
-  const searchableText =
-    group.skins
-      .map((skin) =>
-        [
-          skin.name,
-          skin.nameEn,
-          skin.champion,
-          skin.championEn,
-          skin.id
-        ]
-          .filter(Boolean)
-          .join(' ')
-      )
-      .join(' ');
-
-  return normalize(
-    searchableText
-  ).includes(query);
+  return getGroupSearchScore(
+   group,
+   query
+  ) > 0;
 }
 
 /* =========================================
@@ -1282,13 +1419,23 @@ function render() {
     normalize(search.value);
 
   let found =
-    skinGroups.filter(
-      (group) =>
-        groupMatchesSearch(
-          group,
-          query
-        )
-    );
+    skinGroups
+     .map((group) => ({
+       group,
+       score: getGroupSearchScore(
+         group,
+         query
+       )
+     }))
+     .filter(
+       ({ score }) =>
+         !query || score > 0
+     )
+     .sort(
+       (a, b) =>
+         b.score - a.score
+     )
+     .map(({ group }) => group);
 
   /* ---------------------------------------
      Favori filtresi
@@ -1298,8 +1445,8 @@ function render() {
     isFavoriteFilterActive()
   ) {
     found = found.filter(
-      (group) =>
-        groupHasFavorite(group)
+     (group) =>
+       groupHasFavorite(group)
     );
   }
 
