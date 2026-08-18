@@ -292,8 +292,26 @@ const commands = [
     .setDescription('Show bot help')
 ].map(c => c.toJSON());
 
+function validateCommandOptions(cmdJson) {
+  if (!cmdJson.options || !Array.isArray(cmdJson.options)) return true;
+  let seenOptional = false;
+  for (const opt of cmdJson.options) {
+    const req = !!opt.required;
+    if (!req) seenOptional = true;
+    if (seenOptional && req) return false;
+  }
+  return true;
+}
+
 async function registerCommands() {
   try {
+    // validate commands before sending to Discord
+    for (const c of commands) {
+      if (!validateCommandOptions(c)) {
+        throw new Error(`Command '${c.name}' has required options after optional ones. Reorder required options before optional ones.`);
+      }
+    }
+
     const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
     if (GUILD_ID) {
       await rest.put(Routes.applicationGuildCommands(client.application.id, GUILD_ID), { body: commands });
