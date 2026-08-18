@@ -101,12 +101,12 @@ const TRANSLATIONS = {
     en: 'You haven’t added any skins to your favorites yet.'
   },
   addFavorite: {
-    tr: 'Favorilere ekle',
-    en: 'Add to favorites'
+    tr: 'Favorilere Ekle',
+    en: 'Add to Favorites'
   },
   removeFavorite: {
-    tr: 'Favorilerden çıkar',
-    en: 'Remove from favorites'
+    tr: 'Favorilerde',
+    en: 'In Favorites'
   },
   close: {
     tr: 'Kapat',
@@ -757,6 +757,30 @@ function updateFavoriteButton(
 
   if (icon) {
     icon.textContent =
+      favorite
+        ? '★'
+        : '☆';
+  }
+
+  const modalText =
+    button.querySelector(
+      '.modal-favorite-text'
+    );
+
+  if (modalText) {
+    modalText.textContent =
+      favorite
+        ? t('removeFavorite')
+        : t('addFavorite');
+  }
+
+  const modalIcon =
+    button.querySelector(
+      '.modal-favorite-icon'
+    );
+
+  if (modalIcon) {
+    modalIcon.textContent =
       favorite
         ? '★'
         : '☆';
@@ -1535,7 +1559,27 @@ function openModal(
       });
   }
 
-  /* ---------------------------------------
+     const modalFavoriteButton =
+       document.querySelector(
+     '#modal-favorite'
+       );
+
+     if (modalFavoriteButton) {
+       updateFavoriteButton(
+     modalFavoriteButton,
+     skin.id
+       );
+
+       modalFavoriteButton.onclick =
+     () => {
+       toggleFavorite(
+         skin.id,
+         modalFavoriteButton
+       );
+     };
+     }
+
+     /* ---------------------------------------
      Fantome dosyaları
      --------------------------------------- */
 
