@@ -132,63 +132,44 @@ a:focus-visible,
 .page-shell {
   width: 100%;
   max-width: 1320px;
-
   margin: 0 auto;
-
   padding: 80px 36px 72px;
 }
 
 .hero {
   max-width: 780px;
-
   padding: 30px 0 92px;
-
   animation: heroReveal 0.8s var(--ease-out) both;
 }
 
 .eyebrow {
   margin: 0 0 13px;
-
   color: var(--blue);
-
   font: 12px/1.2 "DM Mono", monospace;
-
   letter-spacing: 0.15em;
 }
 
 h1 {
   margin: 0;
-
   font-size: clamp(3.4rem, 8vw, 7.1rem);
-
   font-weight: 800;
-
   line-height: 0.91;
-
   letter-spacing: -0.075em;
 }
 
 h1 em {
   color: var(--gold);
-
   font-family: "Playfair Display", serif;
   font-weight: 700;
-
-  text-shadow:
-    0 0 30px rgba(210, 177, 117, 0.08);
+  text-shadow: 0 0 30px rgba(210, 177, 117, 0.08);
 }
 
 .intro {
   max-width: 560px;
-
   margin: 29px 0;
-
   color: #b5bfd7;
-
   font-size: 1.1rem;
-
   line-height: 1.65;
-
   animation: fadeUp 0.7s 0.12s var(--ease-out) both;
 }
 
@@ -212,7 +193,6 @@ h1 em {
   height: 68px;
 
   gap: 14px;
-
   padding: 0 14px 0 23px;
 
   border: 1px solid #546999;
@@ -241,13 +221,11 @@ h1 em {
   content: "";
 
   position: absolute;
-
   inset: -1px;
 
   border-radius: inherit;
 
   pointer-events: none;
-
   opacity: 0;
 
   background:
@@ -280,9 +258,7 @@ h1 em {
   flex: 0 0 auto;
 
   color: var(--gold);
-
   font-size: 35px;
-
   line-height: 1;
 
   transform: rotate(-18deg);
@@ -294,15 +270,11 @@ h1 em {
 
 .search-box:focus-within > span {
   color: var(--gold-light);
-
-  transform:
-    rotate(-18deg)
-    scale(1.08);
+  transform: rotate(-18deg) scale(1.08);
 }
 
 .search-box input {
   flex: 1;
-
   min-width: 0;
   width: 100%;
 
@@ -310,17 +282,13 @@ h1 em {
   border: 0;
 
   color: #fff;
-
   background: transparent;
 
-  font:
-    600 1rem "Manrope",
-    sans-serif;
+  font: 600 1rem "Manrope", sans-serif;
 }
 
 .search-box input::placeholder {
   color: #8290ad;
-
   font-weight: 500;
 }
 
@@ -339,9 +307,7 @@ kbd {
 
   color: #9ba7c0;
 
-  font:
-    11px "DM Mono",
-    monospace;
+  font: 11px "DM Mono", monospace;
 
   transition:
     color 0.2s ease,
@@ -351,9 +317,7 @@ kbd {
 
 .search-box:focus-within kbd {
   color: #d8dfef;
-
   border-color: #7383aa;
-
   background: rgba(255, 255, 255, 0.035);
 }
 
@@ -369,7 +333,6 @@ kbd {
   flex: 0 0 auto;
 
   gap: 7px;
-
   min-width: 125px;
 
   padding: 0 15px;
@@ -388,9 +351,7 @@ kbd {
 
   cursor: pointer;
 
-  font:
-    600 12px "Manrope",
-    sans-serif;
+  font: 600 12px "Manrope", sans-serif;
 
   transition:
     color 0.25s ease,
@@ -402,7 +363,6 @@ kbd {
 
 .favorite-filter:hover {
   color: #fff;
-
   border-color: var(--gold);
 
   background:
@@ -421,7 +381,6 @@ kbd {
 
 .favorite-filter[aria-pressed="true"] {
   color: var(--gold-light);
-
   border-color: rgba(210, 177, 117, 0.65);
 
   background:
@@ -454,12 +413,9 @@ kbd {
   border-radius: 50%;
 
   color: #070b18;
-
   background: var(--gold);
 
-  font:
-    700 10px "DM Mono",
-    monospace;
+  font: 700 10px "DM Mono", monospace;
 }
 
 .favorite-count[hidden] {
@@ -475,7 +431,6 @@ kbd {
   flex-wrap: wrap;
 
   gap: 8px;
-
   margin-top: 17px;
 
   animation: fadeUp 0.7s 0.3s var(--ease-out) both;
@@ -483,7 +438,6 @@ kbd {
 
 .quick-searches button {
   position: relative;
-
   overflow: hidden;
 
   padding: 7px 12px;
@@ -502,9 +456,7 @@ kbd {
 
   cursor: pointer;
 
-  font:
-    500 12px "Manrope",
-    sans-serif;
+  font: 500 12px "Manrope", sans-serif;
 
   transition:
     color 0.25s ease,
@@ -540,7 +492,6 @@ kbd {
 
 .quick-searches button:hover {
   color: #fff;
-
   border-color: var(--gold);
 
   background:
@@ -575,7 +526,6 @@ kbd {
   justify-content: space-between;
 
   gap: 20px;
-
   margin-bottom: 25px;
 }
 
@@ -583,7 +533,6 @@ kbd {
   margin: 0;
 
   font-size: 1.6rem;
-
   letter-spacing: -0.045em;
 }
 
@@ -592,9 +541,7 @@ kbd {
 
   color: var(--text-muted);
 
-  font:
-    12px "DM Mono",
-    monospace;
+  font: 12px "DM Mono", monospace;
 
   text-align: right;
 }
@@ -632,7 +579,6 @@ kbd {
   background: var(--card);
 
   isolation: isolate;
-
   cursor: pointer;
 
   opacity: 0;
@@ -649,8 +595,7 @@ kbd {
     box-shadow 0.4s ease;
 }
 
-.skin-card:hover,
-.skin-card:focus-visible {
+.skin-card:hover {
   transform:
     translateY(-7px)
     scale(1.008);
@@ -666,7 +611,6 @@ kbd {
   content: "";
 
   position: absolute;
-
   inset: 0;
 
   z-index: 4;
@@ -694,7 +638,6 @@ kbd {
 
 .skin-card:hover::before {
   opacity: 1;
-
   transform: translateX(100%);
 }
 
@@ -782,12 +725,9 @@ kbd {
 
   color: var(--gold);
 
-  font:
-    11px "DM Mono",
-    monospace;
+  font: 11px "DM Mono", monospace;
 
   text-transform: uppercase;
-
   letter-spacing: 0.09em;
 }
 
@@ -813,18 +753,15 @@ kbd {
 
   background: rgba(255, 255, 255, 0.08);
 
-  font:
-    11px "DM Mono",
-    monospace;
+  font: 11px "DM Mono", monospace;
 
   transition:
     background 0.25s ease,
     color 0.25s ease;
 }
 
-.skin-card .skin-id {
+.skin-card:hover .skin-id {
   color: #e7edf9;
-
   background: rgba(255, 255, 255, 0.095);
 }
 
@@ -888,7 +825,6 @@ kbd {
 }
 
 .skin-card:hover .favorite-button,
-.skin-card:focus-visible .favorite-button,
 .favorite-button.is-favorite {
   opacity: 1;
 
@@ -901,7 +837,6 @@ kbd {
   content: "";
 
   position: absolute;
-
   inset: -1px;
 
   border-radius: inherit;
@@ -933,7 +868,6 @@ kbd {
   display: block;
 
   font-size: 21px;
-
   line-height: 1;
 
   transform: translateY(-1px);
@@ -1002,12 +936,10 @@ kbd {
   animation: favoritePop 0.45s var(--ease-spring);
 }
 
-/* Favorite add */
 .favorite-button.favorite-pop span {
   animation: favorite-pop 0.45s var(--ease-spring);
 }
 
-/* Favorite remove */
 .favorite-button.favorite-remove span {
   animation: favorite-remove 0.35s var(--ease-spring);
 }
@@ -1018,83 +950,61 @@ kbd {
 
 @keyframes favoritePop {
   0% {
-    transform:
-      scale(0.5)
-      rotate(-20deg);
+    transform: scale(0.5) rotate(-20deg);
     opacity: 0.5;
   }
 
   55% {
-    transform:
-      scale(1.3)
-      rotate(8deg);
+    transform: scale(1.3) rotate(8deg);
     opacity: 1;
   }
 
   100% {
-    transform:
-      scale(1)
-      rotate(0);
+    transform: scale(1) rotate(0);
     opacity: 1;
   }
 }
 
 @keyframes favorite-pop {
   0% {
-    transform:
-      scale(0.5)
-      rotate(-20deg);
+    transform: scale(0.5) rotate(-20deg);
     opacity: 0.5;
   }
 
   45% {
-    transform:
-      scale(1.3)
-      rotate(8deg);
+    transform: scale(1.3) rotate(8deg);
     opacity: 1;
   }
 
   70% {
-    transform:
-      scale(0.9)
-      rotate(-3deg);
+    transform: scale(0.9) rotate(-3deg);
     opacity: 1;
   }
 
   100% {
-    transform:
-      scale(1)
-      rotate(0);
+    transform: scale(1) rotate(0);
     opacity: 1;
   }
 }
 
 @keyframes favorite-remove {
   0% {
-    transform:
-      scale(1)
-      rotate(0);
+    transform: scale(1) rotate(0);
     opacity: 1;
   }
 
   35% {
-    transform:
-      scale(0.82)
-      rotate(-8deg);
+    transform: scale(0.82) rotate(-8deg);
     opacity: 0.8;
   }
 
   70% {
-    transform:
-      scale(1.12)
-      rotate(6deg);
+    transform: scale(1.12) rotate(6deg);
     opacity: 0.65;
   }
 
   100% {
-    transform:
-      scale(0.5)
-      rotate(20deg);
+    transform: scale(0.5) rotate(20deg);
     opacity: 0;
   }
 }
@@ -1113,7 +1023,6 @@ kbd {
   justify-content: space-between;
 
   gap: 20px;
-
   margin-bottom: 25px;
 }
 
@@ -1121,7 +1030,6 @@ kbd {
   margin: 0;
 
   font-size: 1.6rem;
-
   letter-spacing: -0.045em;
 }
 
@@ -1137,9 +1045,7 @@ kbd {
 
   cursor: pointer;
 
-  font:
-    600 11px "Manrope",
-    sans-serif;
+  font: 600 11px "Manrope", sans-serif;
 
   transition:
     color 0.2s ease,
@@ -1183,7 +1089,6 @@ kbd {
   display: inline-block;
 
   color: var(--gold);
-
   font-size: 2rem;
 
   animation: emptyFloat 2.8s ease-in-out infinite;
@@ -1191,7 +1096,6 @@ kbd {
 
 .empty-state h2 {
   margin-bottom: 8px;
-
   color: #eaf0ff;
 }
 
@@ -1226,8 +1130,8 @@ dialog {
   border: 0;
 }
 
-dialog:not([open]) {
-  display: none;
+dialog[open] {
+  display: block;
 }
 
 dialog::backdrop {
@@ -1336,7 +1240,6 @@ dialog::backdrop {
   background: #091021bd;
 
   font-size: 25px;
-
   line-height: 1;
 
   cursor: pointer;
@@ -1410,7 +1313,6 @@ dialog::backdrop {
 
 .modal-favorite-icon {
   font-size: 18px;
-
   line-height: 1;
 }
 
@@ -1427,9 +1329,7 @@ dialog::backdrop {
 
   color: var(--gold);
 
-  font:
-    11px "DM Mono",
-    monospace;
+  font: 11px "DM Mono", monospace;
 
   letter-spacing: 0.12em;
 }
@@ -1472,17 +1372,13 @@ dialog::backdrop {
 
 .download-item:hover {
   border-color: var(--gold);
-
   background: #253354;
-
   transform: translateX(3px);
 }
 
 .download-item.unavailable {
   color: #74809a;
-
   background: #141b2c;
-
   cursor: not-allowed;
 }
 
@@ -1518,11 +1414,7 @@ dialog::backdrop {
 
   gap: 11px;
 
-  padding:
-    10px
-    12px
-    10px
-    10px;
+  padding: 10px 12px 10px 10px;
 
   border: 1px solid #4b4c86;
   border-radius: 12px;
@@ -1628,9 +1520,7 @@ dialog::backdrop {
 .discord-contact-label {
   color: #8f91b8;
 
-  font:
-    9px "DM Mono",
-    monospace;
+  font: 9px "DM Mono", monospace;
 
   letter-spacing: 0.14em;
 }
@@ -1639,7 +1529,6 @@ dialog::backdrop {
   color: #f3f4ff;
 
   font-size: 12px;
-
   font-weight: 700;
 }
 
@@ -1762,9 +1651,7 @@ dialog::backdrop {
 .lang-switch-code {
   color: #f3f4ff;
 
-  font:
-    12px "DM Mono",
-    monospace;
+  font: 12px "DM Mono", monospace;
 
   letter-spacing: 0.06em;
 }
@@ -1870,7 +1757,6 @@ dialog::backdrop {
 
 .lang-menu-option span {
   font-size: 16px;
-
   line-height: 1;
 }
 
@@ -2001,7 +1887,6 @@ dialog::backdrop {
   background: rgba(7, 11, 24, 0.65);
 
   font-size: 21px;
-
   line-height: 1;
 
   cursor: pointer;
@@ -2069,9 +1954,7 @@ dialog::backdrop {
 
   color: #8f86ca;
 
-  font:
-    10px "DM Mono",
-    monospace;
+  font: 10px "DM Mono", monospace;
 
   letter-spacing: 0.16em;
 }
@@ -2210,9 +2093,7 @@ dialog::backdrop {
 .discord-profile-label {
   color: #77839f;
 
-  font:
-    9px "DM Mono",
-    monospace;
+  font: 9px "DM Mono", monospace;
 
   letter-spacing: 0.13em;
 }
@@ -2259,13 +2140,11 @@ dialog::backdrop {
 @keyframes heroReveal {
   from {
     opacity: 0;
-
     transform: translateY(18px);
   }
 
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }
@@ -2273,13 +2152,11 @@ dialog::backdrop {
 @keyframes fadeUp {
   from {
     opacity: 0;
-
     transform: translateY(14px);
   }
 
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }
@@ -2436,20 +2313,17 @@ dialog::backdrop {
 
   .download-list-wrap {
     border-top: 1px solid #31405d;
-
     border-left: 0;
   }
 
   .skin-modal > img {
     max-height: 190px;
-
     aspect-ratio: 16 / 8;
   }
 
   .top-actions {
     top: 14px;
     right: 14px;
-
     gap: 8px;
   }
 
@@ -2478,7 +2352,6 @@ dialog::backdrop {
 
   .lang-switch {
     padding: 8px;
-
     border-radius: 11px;
   }
 
@@ -2517,7 +2390,6 @@ dialog::backdrop {
 
   .search-box {
     height: 61px;
-
     padding-left: 15px;
   }
 
@@ -2532,7 +2404,6 @@ dialog::backdrop {
 
   .results-header {
     align-items: flex-start;
-
     flex-direction: column;
   }
 
@@ -2542,7 +2413,6 @@ dialog::backdrop {
 
   .favorites-header {
     align-items: flex-start;
-
     flex-direction: column;
   }
 
@@ -2558,7 +2428,6 @@ dialog::backdrop {
 
   .skin-card {
     min-height: 240px;
-
     border-radius: 11px;
   }
 
@@ -2706,9 +2575,7 @@ dialog::backdrop {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-
     animation-iteration-count: 1 !important;
-
     transition-duration: 0.01ms !important;
   }
 }

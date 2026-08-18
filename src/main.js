@@ -1599,28 +1599,28 @@ function openModal(
       });
   }
 
-     const modalFavoriteButton =
-       document.querySelector(
+  const modalFavoriteButton =
+    document.querySelector(
      '#modal-favorite'
-       );
+    );
 
-     if (modalFavoriteButton) {
-       modalFavoriteButton.dataset.skinId =
+  if (modalFavoriteButton) {
+    modalFavoriteButton.dataset.skinId =
      String(skin.id);
 
-       updateFavoriteButton(
+    updateFavoriteButton(
      modalFavoriteButton,
      skin.id
-       );
+    );
 
-       modalFavoriteButton.onclick =
+    modalFavoriteButton.onclick =
      () => {
        toggleFavorite(
          skin.id,
          modalFavoriteButton
        );
      };
-     }
+  }
 
      /* ---------------------------------------
      Fantome dosyaları
