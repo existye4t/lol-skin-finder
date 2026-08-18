@@ -761,6 +761,30 @@ function updateFavoriteButton(
         ? '★'
         : '☆';
   }
+
+  const modalText =
+    button.querySelector(
+      '.modal-favorite-text'
+    );
+
+  if (modalText) {
+    modalText.textContent =
+      favorite
+        ? t('removeFavorite')
+        : t('addFavorite');
+  }
+
+  const modalIcon =
+    button.querySelector(
+      '.modal-favorite-icon'
+    );
+
+  if (modalIcon) {
+    modalIcon.textContent =
+      favorite
+        ? '★'
+        : '☆';
+  }
 }
 
 /* =========================================
@@ -1535,7 +1559,27 @@ function openModal(
       });
   }
 
-  /* ---------------------------------------
+     const modalFavoriteButton =
+       document.querySelector(
+     '#modal-favorite'
+       );
+
+     if (modalFavoriteButton) {
+       updateFavoriteButton(
+     modalFavoriteButton,
+     skin.id
+       );
+
+       modalFavoriteButton.onclick =
+     () => {
+       toggleFavorite(
+         skin.id,
+         modalFavoriteButton
+       );
+     };
+     }
+
+     /* ---------------------------------------
      Fantome dosyaları
      --------------------------------------- */
 
