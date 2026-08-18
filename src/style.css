@@ -89,7 +89,7 @@ a {
   user-select: none;
 }
 
-/* Only show focus outline when keyboard navigating */
+/* Keyboard focus only */
 button:focus-visible,
 input:focus-visible,
 a:focus-visible,
@@ -117,12 +117,12 @@ a:focus-visible,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #53678f;
+  background: #687ca5;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #687ca5;
+  background: #7b8fb9;
 }
 
 /* ================================
@@ -1372,7 +1372,9 @@ dialog::backdrop {
 
 .download-item:hover {
   border-color: var(--gold);
+
   background: #253354;
+
   transform: translateX(3px);
 }
 
@@ -2329,9 +2331,7 @@ dialog::backdrop {
 
   .discord-contact {
     min-width: 0;
-
     padding: 8px;
-
     border-radius: 11px;
   }
 
@@ -2342,7 +2342,6 @@ dialog::backdrop {
   .discord-contact-icon {
     width: 32px;
     height: 32px;
-
     flex-basis: 32px;
   }
 
@@ -2459,8 +2458,8 @@ dialog::backdrop {
     font-size: 18px;
   }
 
-  .favorite-button.is-favorite,
-  .favorite-button:hover {
+  .favorite-button:hover,
+  .favorite-button.is-favorite {
     transform:
       translateY(-1px)
       scale(1.04);
@@ -2582,16 +2581,18 @@ dialog::backdrop {
 
 /* =========================================
    DISCORD SUNUCU BUTONU
-   ========================================= */
+========================================= */
 
 .discord-server-button {
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 10px;
 
   width: 100%;
   min-height: 52px;
+
   margin-top: 22px;
   padding: 0 18px;
 
@@ -2606,7 +2607,9 @@ dialog::backdrop {
     );
 
   color: #ffffff;
+
   text-decoration: none;
+
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -2625,7 +2628,8 @@ dialog::backdrop {
 .discord-server-button:hover {
   transform: translateY(-2px);
 
-  border-color: rgba(88, 101, 242, 0.8);
+  border-color:
+    rgba(88, 101, 242, 0.8);
 
   background:
     linear-gradient(
@@ -2663,6 +2667,7 @@ dialog::backdrop {
   margin-left: auto;
 
   font-size: 17px;
+
   opacity: 0.7;
 
   transition:
@@ -2671,6 +2676,8 @@ dialog::backdrop {
 }
 
 .discord-server-button:hover .discord-server-button-arrow {
-  transform: translate(2px, -2px);
+  transform:
+    translate(2px, -2px);
+
   opacity: 1;
 }
