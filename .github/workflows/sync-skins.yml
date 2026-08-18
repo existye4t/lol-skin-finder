@@ -199,7 +199,7 @@ jobs:
           PY
 
       # ==========================================
-      # 8. BUILD COMPLETE SKIN INDEX
+      # 8. BUILD COMPLETE RIOT SKIN INDEX
       # ==========================================
 
       - name: Build complete skin metadata index
@@ -282,11 +282,6 @@ jobs:
                           parent_skin is not None
                       )
 
-                      # Riot splash art.
-                      #
-                      # Chromas normally do not have
-                      # their own splash art, so use
-                      # the parent skin's splash.
                       image_num = num
 
                       if is_chroma:
@@ -365,7 +360,57 @@ jobs:
           PY
 
       # ==========================================
-      # 9. GENERATE skins.json FROM FANTOMES
+      # 9. DOWNLOAD COMMUNITYDRAGON FALLBACK
+      # ==========================================
+
+      - name: Download CommunityDragon skin metadata
+        shell: bash
+        run: |
+          set -e
+
+          echo "=========================================="
+          echo "COMMUNITYDRAGON FALLBACK"
+          echo "=========================================="
+
+          curl -L \
+            --fail \
+            --retry 5 \
+            --retry-delay 2 \
+            -sS \
+            -o /tmp/communitydragon-skins.json \
+            "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/skins.json"
+
+          python3 <<'PY'
+          import json
+          from pathlib import Path
+
+          file = Path(
+              "/tmp/communitydragon-skins.json"
+          )
+
+          data = json.loads(
+              file.read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          if isinstance(data, dict):
+              if isinstance(data.get("skins"), list):
+                  count = len(data["skins"])
+              else:
+                  count = len(data)
+          elif isinstance(data, list):
+              count = len(data)
+          else:
+              count = 0
+
+          print(
+              f"CommunityDragon metadata loaded: {count}"
+          )
+          PY
+
+      # ==========================================
+      # 10. GENERATE skins.json
       # ==========================================
 
       - name: Generate skins.json
@@ -377,16 +422,108 @@ jobs:
           import json
           import re
           from pathlib import Path
+          from datetime import datetime, timezone
 
           fantome_dir = Path("fantome")
-          index_file = Path("/tmp/skin-index.json")
-          output_file = Path("data/skins.json")
 
-          index = json.loads(
-              index_file.read_text(
+          riot_index_file = Path(
+              "/tmp/skin-index.json"
+          )
+
+          cdragon_file = Path(
+              "/tmp/communitydragon-skins.json"
+          )
+
+          output_file = Path(
+              "data/skins.json"
+          )
+
+          # ------------------------------------------
+          # RIOT INDEX
+          # ------------------------------------------
+
+          riot_index = json.loads(
+              riot_index_file.read_text(
                   encoding="utf-8"
               )
           )
+
+          # ------------------------------------------
+          # COMMUNITYDRAGON INDEX
+          # ------------------------------------------
+
+          raw_cdragon = json.loads(
+              cdragon_file.read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          cdragon_index = {}
+
+          if isinstance(raw_cdragon, list):
+
+              for item in raw_cdragon:
+
+                  if not isinstance(item, dict):
+                      continue
+
+                  skin_id = str(
+                      item.get(
+                          "id",
+                          ""
+                      )
+                  ).strip()
+
+                  if skin_id:
+                      cdragon_index[skin_id] = item
+
+          elif isinstance(raw_cdragon, dict):
+
+              if isinstance(
+                  raw_cdragon.get("skins"),
+                  list
+              ):
+
+                  for item in raw_cdragon["skins"]:
+
+                      if not isinstance(item, dict):
+                          continue
+
+                      skin_id = str(
+                          item.get(
+                              "id",
+                              ""
+                          )
+                      ).strip()
+
+                      if skin_id:
+                          cdragon_index[skin_id] = item
+
+              else:
+
+                  for key, item in raw_cdragon.items():
+
+                      if not isinstance(item, dict):
+                          continue
+
+                      skin_id = str(
+                          item.get(
+                              "id",
+                              key
+                          )
+                      ).strip()
+
+                      if skin_id:
+                          cdragon_index[skin_id] = item
+
+          print(
+              f"CommunityDragon indexed IDs: "
+              f"{len(cdragon_index)}"
+          )
+
+          # ------------------------------------------
+          # FANTOME FILES
+          # ------------------------------------------
 
           fantome_files = sorted(
               [
@@ -405,52 +542,275 @@ jobs:
           )
 
           matched = []
+          fallback_matched = []
           not_found = []
+
+          # ------------------------------------------
+          # HELPERS
+          # ------------------------------------------
+
+          def clean(value):
+              if value is None:
+                  return ""
+
+              return str(value).strip()
+
+          def first_value(item, *keys):
+              for key in keys:
+                  value = item.get(key)
+
+                  if value is not None:
+                      value = clean(value)
+
+                      if value:
+                          return value
+
+              return ""
+
+          def build_fallback_entry(
+              skin_id,
+              item
+          ):
+
+              # CommunityDragon uses slightly
+              # different metadata structures
+              # between versions, so support
+              # several possible field names.
+
+              name = first_value(
+                  item,
+                  "name",
+                  "displayName"
+              )
+
+              champion_name = first_value(
+                  item,
+                  "championName",
+                  "champion",
+                  "characterName"
+              )
+
+              champion_id = first_value(
+                  item,
+                  "championId",
+                  "characterId",
+                  "championKey"
+              )
+
+              skin_num = item.get(
+                  "num"
+              )
+
+              # --------------------------------------
+              # Try nested champion data
+              # --------------------------------------
+
+              champion = item.get(
+                  "champion"
+              )
+
+              if isinstance(
+                  champion,
+                  dict
+              ):
+
+                  if not champion_name:
+                      champion_name = first_value(
+                          champion,
+                          "name",
+                          "displayName"
+                      )
+
+                  if not champion_id:
+                      champion_id = first_value(
+                          champion,
+                          "id",
+                          "key"
+                      )
+
+              # --------------------------------------
+              # Image
+              # --------------------------------------
+
+              image = first_value(
+                  item,
+                  "splash",
+                  "splashPath",
+                  "image",
+                  "uncenteredSplashPath",
+                  "tilePath"
+              )
+
+              # If CommunityDragon provides
+              # an absolute URL, keep it.
+              #
+              # If it gives an internal path,
+              # convert it to a CommunityDragon URL.
+
+              if image:
+
+                  if image.startswith(
+                      "/"
+                  ):
+
+                      image = (
+                          "https://raw.communitydragon.org/latest"
+                          + image
+                      )
+
+                  elif image.startswith(
+                      "http://"
+                  ):
+
+                      image = (
+                          "https://"
+                          + image[7:]
+                      )
+
+              # --------------------------------------
+              # Fallback image from Riot splash
+              # --------------------------------------
+
+              if (
+                  not image
+                  and champion_id
+                  and skin_num is not None
+              ):
+
+                  # champion_id may be a numeric Riot
+                  # key. CommunityDragon may also give
+                  # champion name separately.
+
+                  champion_key = (
+                      champion_name
+                      if champion_name
+                      else champion_id
+                  )
+
+                  image = (
+                      "https://ddragon.leagueoflegends.com/"
+                      "cdn/img/champion/splash/"
+                      f"{champion_key}_{skin_num}.jpg"
+                  )
+
+              if not name:
+                  name = (
+                      f"Skin {skin_id}"
+                  )
+
+              if not champion_name:
+                  champion_name = (
+                      "Unknown"
+                  )
+
+              if not champion_id:
+                  champion_id = (
+                      champion_name
+                  )
+
+              entry = {
+                  "id": skin_id,
+                  "skinNum": skin_num,
+                  "name": name,
+                  "champion": champion_name,
+                  "championId": champion_id,
+                  "image": image
+              }
+
+              # Preserve parent skin if available.
+
+              parent_skin = item.get(
+                  "parentSkin"
+              )
+
+              if parent_skin is not None:
+
+                  entry["parentSkin"] = str(
+                      parent_skin
+                  )
+
+              return entry
+
+          # ------------------------------------------
+          # MATCH EVERY FANTOME
+          # ------------------------------------------
 
           for file in fantome_files:
 
               skin_id = file.stem.strip()
 
-              # Direct ID match
-              skin = index.get(
+              numeric_match = re.search(
+                  r"\d+",
                   skin_id
               )
 
-              # If the filename contains
-              # additional characters, try
-              # extracting numeric ID.
+              numeric_id = (
+                  numeric_match.group(0)
+                  if numeric_match
+                  else skin_id
+              )
+
+              # ======================================
+              # 1. RIOT DATA DRAGON
+              # ======================================
+
+              skin = riot_index.get(
+                  skin_id
+              )
+
               if skin is None:
 
-                  match = re.search(
-                      r"\d+",
-                      skin_id
+                  skin = riot_index.get(
+                      numeric_id
                   )
 
-                  if match:
-                      numeric_id = match.group(
-                          0
-                      )
+              if skin is not None:
 
-                      skin = index.get(
-                          numeric_id
-                      )
-
-                      if skin is not None:
-                          skin_id = numeric_id
-
-              if skin is None:
-
-                  not_found.append(
-                      skin_id
+                  matched.append(
+                      skin
                   )
 
                   continue
 
-              matched.append(
-                  skin
+              # ======================================
+              # 2. COMMUNITYDRAGON FALLBACK
+              # ======================================
+
+              cdragon_skin = cdragon_index.get(
+                  skin_id
               )
 
-          # Remove duplicate IDs
+              if cdragon_skin is None:
+
+                  cdragon_skin = cdragon_index.get(
+                      numeric_id
+                  )
+
+              if cdragon_skin is not None:
+
+                  fallback = build_fallback_entry(
+                      numeric_id,
+                      cdragon_skin
+                  )
+
+                  fallback_matched.append(
+                      fallback
+                  )
+
+                  continue
+
+              # ======================================
+              # 3. NOT FOUND
+              # ======================================
+
+              not_found.append(
+                  numeric_id
+              )
+
+          # ------------------------------------------
+          # MERGE
+          # ------------------------------------------
+
           unique = {}
 
           for skin in matched:
@@ -458,36 +818,68 @@ jobs:
                   str(skin["id"])
               ] = skin
 
-          matched = list(
+          for skin in fallback_matched:
+              unique[
+                  str(skin["id"])
+              ] = skin
+
+          result_skins = list(
               unique.values()
           )
 
-          # Stable ordering
-          matched.sort(
-              key=lambda item: (
-                  str(
-                      item.get(
-                          "champion",
-                          ""
-                      )
-                  ).lower(),
-                  int(
+          # ------------------------------------------
+          # SORT
+          # ------------------------------------------
+
+          def sort_key(item):
+
+              champion = str(
+                  item.get(
+                      "champion",
+                      ""
+                  )
+              ).lower()
+
+              try:
+                  skin_id = int(
                       str(
                           item.get(
                               "id",
                               "0"
                           )
                       )
-                      if str(
-                          item.get(
-                              "id",
-                              "0"
-                          )
-                      ).isdigit()
-                      else 0
                   )
+
+              except Exception:
+                  skin_id = 0
+
+              return (
+                  champion,
+                  skin_id
               )
+
+          result_skins.sort(
+              key=sort_key
           )
+
+          # ------------------------------------------
+          # REMOVE DUPLICATE NOT FOUND IDS
+          # ------------------------------------------
+
+          not_found = sorted(
+              set(
+                  not_found
+              ),
+              key=lambda x: int(
+                  x
+              )
+              if x.isdigit()
+              else 0
+          )
+
+          # ------------------------------------------
+          # OUTPUT
+          # ------------------------------------------
 
           riot_version = Path(
               "/tmp/riot-version.txt"
@@ -497,14 +889,10 @@ jobs:
 
           result = {
               "version": riot_version,
-              "updatedAt": __import__(
-                  "datetime"
-              ).datetime.now(
-                  __import__(
-                      "datetime"
-                  ).timezone.utc
+              "updatedAt": datetime.now(
+                  timezone.utc
               ).isoformat(),
-              "skins": matched
+              "skins": result_skins
           }
 
           output_file.parent.mkdir(
@@ -521,37 +909,57 @@ jobs:
               encoding="utf-8"
           )
 
+          # ------------------------------------------
+          # REPORT
+          # ------------------------------------------
+
           print("")
           print("==============================")
           print("SKIN SYNC RESULT")
           print("==============================")
           print(
-              f"Fantome files: {len(fantome_files)}"
+              f"Fantome files:       {len(fantome_files)}"
           )
           print(
-              f"Matched skins: {len(matched)}"
+              f"Riot matched:        {len(matched)}"
           )
           print(
-              f"Not found: {len(not_found)}"
+              f"CommunityDragon:     {len(fallback_matched)}"
+          )
+          print(
+              f"Total matched:       {len(result_skins)}"
+          )
+          print(
+              f"Not found:           {len(not_found)}"
           )
           print("==============================")
+
+          if fallback_matched:
+
+              print("")
+              print(
+                  "CommunityDragon fallback IDs:"
+              )
+
+              for skin in fallback_matched:
+                  print(
+                      f"  {skin['id']} "
+                      f"-> "
+                      f"{skin['champion']} "
+                      f"-> "
+                      f"{skin['name']}"
+                  )
 
           if not_found:
 
               print("")
               print(
-                  "First 100 not found IDs:"
+                  "Not found IDs:"
               )
 
               for skin_id in not_found[:100]:
                   print(
                       f"  {skin_id}"
-                  )
-
-              if len(not_found) > 100:
-                  print(
-                      f"... and "
-                      f"{len(not_found) - 100} more."
                   )
 
           print("")
@@ -561,7 +969,7 @@ jobs:
           PY
 
       # ==========================================
-      # 10. GENERATE FANTOME FILE LIST
+      # 11. GENERATE FANTOME FILE LIST
       # ==========================================
 
       - name: Generate fantome-files.json
@@ -606,7 +1014,7 @@ jobs:
           PY
 
       # ==========================================
-      # 11. VERIFY DATA
+      # 12. VERIFY GENERATED DATA
       # ==========================================
 
       - name: Verify generated data
@@ -664,7 +1072,7 @@ jobs:
           PY
 
       # ==========================================
-      # 12. SHOW CHANGES
+      # 13. SHOW CHANGES
       # ==========================================
 
       - name: Check for changes
@@ -688,7 +1096,7 @@ jobs:
           fi
 
       # ==========================================
-      # 13. COMMIT
+      # 14. COMMIT
       # ==========================================
 
       - name: Commit and push changes
