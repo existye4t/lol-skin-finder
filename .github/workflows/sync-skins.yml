@@ -2,7 +2,6 @@ name: Sync League Skins
 
 on:
   schedule:
-    # Every 6 hours
     - cron: "0 */6 * * *"
 
   workflow_dispatch:
@@ -20,18 +19,18 @@ jobs:
 
     steps:
 
-      # ==========================================
+      # ============================================================
       # 1. WEBSITE REPOSITORY
-      # ==========================================
+      # ============================================================
 
       - name: Checkout website repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      # ==========================================
+      # ============================================================
       # 2. LEAGUESKINS REPOSITORY
-      # ==========================================
+      # ============================================================
 
       - name: Checkout LeagueSkins repository
         uses: actions/checkout@v6
@@ -40,18 +39,18 @@ jobs:
           path: source-skins
           fetch-depth: 1
 
-      # ==========================================
+      # ============================================================
       # 3. PYTHON
-      # ==========================================
+      # ============================================================
 
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
-      # ==========================================
+      # ============================================================
       # 4. PREPARE DIRECTORIES
-      # ==========================================
+      # ============================================================
 
       - name: Prepare directories
         shell: bash
@@ -63,9 +62,9 @@ jobs:
 
           echo "Directories ready."
 
-      # ==========================================
+      # ============================================================
       # 5. SYNC FANTOME FILES
-      # ==========================================
+      # ============================================================
 
       - name: Sync Fantome files
         shell: bash
@@ -97,9 +96,9 @@ jobs:
           echo ""
           echo "Fantome files copied: $count"
 
-      # ==========================================
+      # ============================================================
       # 6. DOWNLOAD RIOT VERSION
-      # ==========================================
+      # ============================================================
 
       - name: Download latest Riot Data Dragon version
         shell: bash
@@ -128,13 +127,13 @@ jobs:
           PY
           )
 
-          echo "Riot Data Dragon version: $VERSION"
+          echo "Riot version: $VERSION"
 
           echo "$VERSION" > /tmp/riot-version.txt
 
-      # ==========================================
+      # ============================================================
       # 7. DOWNLOAD RIOT CHAMPION METADATA
-      # ==========================================
+      # ============================================================
 
       - name: Download champion metadata
         shell: bash
@@ -144,8 +143,6 @@ jobs:
           VERSION="$(cat /tmp/riot-version.txt)"
 
           mkdir -p /tmp/champions
-
-          echo "Downloading champion list..."
 
           curl -L \
             --fail \
@@ -166,17 +163,13 @@ jobs:
               encoding="utf-8"
           ).strip()
 
-          with open(
-              "/tmp/champion.json",
-              "r",
-              encoding="utf-8"
-          ) as f:
-              data = json.load(f)
-
-          champions = data.get(
-              "data",
-              {}
+          data = json.loads(
+              Path("/tmp/champion.json").read_text(
+                  encoding="utf-8"
+              )
           )
+
+          champions = data.get("data", {})
 
           print(
               f"Champions found: {len(champions)}"
@@ -212,14 +205,12 @@ jobs:
                   check=True
               )
 
-          print(
-              "All champion metadata downloaded."
-          )
+          print("All champion metadata downloaded.")
           PY
 
-      # ==========================================
+      # ============================================================
       # 8. BUILD RIOT SKIN INDEX
-      # ==========================================
+      # ============================================================
 
       - name: Build Riot skin metadata index
         shell: bash
@@ -230,14 +221,9 @@ jobs:
           import json
           from pathlib import Path
 
-          champion_dir = Path(
-              "/tmp/champions"
-          )
+          champion_dir = Path("/tmp/champions")
 
           index = {}
-
-          total_skins = 0
-          total_chromas = 0
 
           for file in sorted(
               champion_dir.glob("*.json")
@@ -249,18 +235,13 @@ jobs:
                           encoding="utf-8"
                       )
                   )
-              except Exception as e:
-                  print(
-                      f"WARNING: Could not read {file}: {e}"
-                  )
+              except Exception:
                   continue
 
-              champion_data = data.get(
+              for champion_key, champion in data.get(
                   "data",
                   {}
-              )
-
-              for champion_key, champion in champion_data.items():
+              ).items():
 
                   champion_name = str(
                       champion.get(
@@ -293,14 +274,7 @@ jobs:
                       if not skin_id:
                           continue
 
-                      name = str(
-                          skin.get(
-                              "name",
-                              ""
-                          )
-                      ).strip()
-
-                      num = skin.get(
+                      skin_num = skin.get(
                           "num"
                       )
 
@@ -308,38 +282,24 @@ jobs:
                           "parentSkin"
                       )
 
-                      is_chroma = (
-                          parent_skin is not None
-                      )
+                      image_num = skin_num
 
-                      image_num = num
+                      if parent_skin is not None:
 
-                      if is_chroma:
+                          for parent in skins:
 
-                          try:
-                              parent_num = int(
+                              if str(
+                                  parent.get(
+                                      "num",
+                                      ""
+                                  )
+                              ) == str(
                                   parent_skin
-                              )
-
-                              for possible_parent in skins:
-
-                                  if str(
-                                      possible_parent.get(
-                                          "num",
-                                          ""
-                                      )
-                                  ) == str(
-                                      parent_num
-                                  ):
-                                      image_num = (
-                                          possible_parent.get(
-                                              "num"
-                                          )
-                                      )
-                                      break
-
-                          except Exception:
-                              pass
+                              ):
+                                  image_num = parent.get(
+                                      "num"
+                                  )
+                                  break
 
                       image = (
                           "https://ddragon.leagueoflegends.com/"
@@ -349,24 +309,24 @@ jobs:
 
                       entry = {
                           "id": skin_id,
-                          "skinNum": num,
-                          "name": name,
+                          "skinNum": skin_num,
+                          "name": str(
+                              skin.get(
+                                  "name",
+                                  ""
+                              )
+                          ).strip(),
                           "champion": champion_name,
                           "championId": champion_id,
                           "image": image
                       }
 
-                      if is_chroma:
+                      if parent_skin is not None:
                           entry["parentSkin"] = str(
                               parent_skin
                           )
 
                       index[skin_id] = entry
-
-                      total_skins += 1
-
-                      if is_chroma:
-                          total_chromas += 1
 
           Path(
               "/tmp/riot-skin-index.json"
@@ -379,25 +339,14 @@ jobs:
               encoding="utf-8"
           )
 
-          print("")
-          print("==========================================")
-          print("RIOT SKIN INDEX")
-          print("==========================================")
           print(
-              f"Indexed IDs:      {len(index)}"
+              f"Riot indexed IDs: {len(index)}"
           )
-          print(
-              f"Total skins:      {total_skins}"
-          )
-          print(
-              f"Total chromas:    {total_chromas}"
-          )
-          print("==========================================")
           PY
 
-      # ==========================================
-      # 9. DOWNLOAD COMMUNITYDRAGON SKINS
-      # ==========================================
+      # ============================================================
+      # 9. DOWNLOAD COMMUNITYDRAGON DATA
+      # ============================================================
 
       - name: Download CommunityDragon skin metadata
         shell: bash
@@ -416,21 +365,13 @@ jobs:
             -o /tmp/cdragon-skins.json \
             "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/skins.json"
 
-          curl -L \
-            --fail \
-            --retry 5 \
-            --retry-delay 2 \
-            -sS \
-            -o /tmp/cdragon-championskins.json \
-            "https://raw.communitydragon.org/latest/game/global/champions/championskins.info.json"
+          echo "CommunityDragon downloaded."
 
-          echo "CommunityDragon skins downloaded."
+      # ============================================================
+      # 10. BUILD COMMUNITYDRAGON INDEX
+      # ============================================================
 
-      # ==========================================
-      # 10. NORMALIZE COMMUNITYDRAGON DATA
-      # ==========================================
-
-      - name: Build CommunityDragon fallback index
+      - name: Build CommunityDragon index
         shell: bash
         run: |
           set -e
@@ -439,23 +380,55 @@ jobs:
           import json
           from pathlib import Path
 
-          def load_json(path):
-              try:
-                  return json.loads(
-                      Path(path).read_text(
-                          encoding="utf-8"
-                      )
-                  )
-              except Exception as e:
-                  print(
-                      f"WARNING: Could not load {path}: {e}"
-                  )
-                  return None
+          source = json.loads(
+              Path(
+                  "/tmp/cdragon-skins.json"
+              ).read_text(
+                  encoding="utf-8"
+              )
+          )
 
-          def add_entry(index, entry):
+          index = {}
 
-              if not isinstance(entry, dict):
-                  return
+          if isinstance(source, list):
+
+              entries = source
+
+          elif isinstance(source, dict):
+
+              if isinstance(
+                  source.get("skins"),
+                  list
+              ):
+                  entries = source["skins"]
+
+              elif isinstance(
+                  source.get("data"),
+                  list
+              ):
+                  entries = source["data"]
+
+              elif isinstance(
+                  source.get("data"),
+                  dict
+              ):
+                  entries = list(
+                      source["data"].values()
+                  )
+
+              else:
+                  entries = []
+
+          else:
+              entries = []
+
+          for entry in entries:
+
+              if not isinstance(
+                  entry,
+                  dict
+              ):
+                  continue
 
               possible_ids = [
                   entry.get("id"),
@@ -472,28 +445,20 @@ jobs:
                   if value is None:
                       continue
 
-                  value = str(value).strip()
+                  value = str(
+                      value
+                  ).strip()
 
                   if value.isdigit():
-                      skin_id = value
+
+                      skin_id = str(
+                          int(value)
+                      )
+
                       break
 
               if not skin_id:
-                  return
-
-              champion_name = (
-                  entry.get("championName")
-                  or entry.get("champion")
-                  or entry.get("characterName")
-                  or entry.get("character")
-                  or ""
-              )
-
-              champion_id = (
-                  entry.get("championId")
-                  or entry.get("characterId")
-                  or ""
-              )
+                  continue
 
               name = (
                   entry.get("name")
@@ -502,11 +467,15 @@ jobs:
                   or ""
               )
 
-              image = (
-                  entry.get("image")
-                  or entry.get("splash")
-                  or entry.get("splashPath")
-                  or entry.get("loadScreenPath")
+              champion_name = (
+                  entry.get("championName")
+                  or entry.get("champion")
+                  or ""
+              )
+
+              champion_id = (
+                  entry.get("championId")
+                  or entry.get("characterId")
                   or ""
               )
 
@@ -518,52 +487,16 @@ jobs:
                   ).strip(),
                   "championId": str(
                       champion_id
-                  ).strip(),
-                  "image": str(
-                      image
                   ).strip()
               }
 
-              if skin_id not in index:
-                  index[skin_id] = result
+              if entry.get("isBase") is not True:
+                  if "skinLine" in entry:
+                      result["skinLine"] = entry.get(
+                          "skinLine"
+                      )
 
-          index = {}
-
-          data = load_json(
-              "/tmp/cdragon-skins.json"
-          )
-
-          def walk(value):
-
-              if isinstance(value, dict):
-
-                  # Try this object itself.
-                  add_entry(
-                      index,
-                      value
-                  )
-
-                  for child in value.values():
-                      walk(child)
-
-              elif isinstance(value, list):
-
-                  for child in value:
-                      walk(child)
-
-          if data is not None:
-              walk(data)
-
-          before = len(index)
-
-          data2 = load_json(
-              "/tmp/cdragon-championskins.json"
-          )
-
-          if data2 is not None:
-              walk(data2)
-
-          after = len(index)
+              index[skin_id] = result
 
           Path(
               "/tmp/cdragon-skin-index.json"
@@ -576,22 +509,113 @@ jobs:
               encoding="utf-8"
           )
 
-          print("")
-          print("==========================================")
-          print("COMMUNITYDRAGON INDEX")
-          print("==========================================")
           print(
-              f"From skins.json:              {before}"
+              f"CommunityDragon indexed IDs: {len(index)}"
           )
-          print(
-              f"After championskins fallback: {after}"
-          )
-          print("==========================================")
           PY
 
-      # ==========================================
-      # 11. GENERATE skins.json
-      # ==========================================
+      # ============================================================
+      # 11. BUILD LEAGUESKINS PATH INDEX
+      #
+      # Example:
+      #
+      # skins/21/21016/21997/21997.fantome
+      #
+      # We keep the original source path information here.
+      # ============================================================
+
+      - name: Build LeagueSkins source index
+        shell: bash
+        run: |
+          set -e
+
+          python3 <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path(
+              "source-skins/skins"
+          )
+
+          index = {}
+
+          files = list(
+              root.rglob("*.fantome")
+          )
+
+          print(
+              f"LeagueSkins Fantome files: {len(files)}"
+          )
+
+          for file in files:
+
+              filename_id = file.stem.strip()
+
+              if not filename_id.isdigit():
+                  continue
+
+              skin_id = str(
+                  int(filename_id)
+              )
+
+              relative = file.relative_to(
+                  root
+              )
+
+              parts = relative.parts
+
+              champion_numeric_id = ""
+              champion_skin_numeric_id = ""
+
+              if len(parts) >= 4:
+
+                  # Example:
+                  # 21 / 21016 / 21997 / 21997.fantome
+
+                  if parts[0].isdigit():
+                      champion_numeric_id = str(
+                          int(parts[0])
+                      )
+
+                  if parts[1].isdigit():
+                      champion_skin_numeric_id = str(
+                          int(parts[1])
+                      )
+
+              index[skin_id] = {
+                  "id": skin_id,
+                  "sourcePath": str(
+                      relative
+                  ).replace(
+                      "\\",
+                      "/"
+                  ),
+                  "championNumericId":
+                      champion_numeric_id,
+                  "championSkinNumericId":
+                      champion_skin_numeric_id
+              }
+
+          Path(
+              "/tmp/leagueskins-index.json"
+          ).write_text(
+              json.dumps(
+                  index,
+                  ensure_ascii=False,
+                  indent=2
+              ),
+              encoding="utf-8"
+          )
+
+          print(
+              f"LeagueSkins indexed IDs: {len(index)}"
+          )
+          PY
+
+      # ============================================================
+      # 12. GENERATE skins.json
+      # ============================================================
 
       - name: Generate skins.json
         shell: bash
@@ -624,6 +648,14 @@ jobs:
               )
           )
 
+          leagueskins_index = json.loads(
+              Path(
+                  "/tmp/leagueskins-index.json"
+              ).read_text(
+                  encoding="utf-8"
+              )
+          )
+
           fantome_files = sorted(
               [
                   p
@@ -644,8 +676,11 @@ jobs:
           )
 
           matched = {}
+
           riot_matched = 0
           cdragon_matched = 0
+          fallback_matched = 0
+
           not_found = []
 
           def normalize_id(value):
@@ -655,6 +690,7 @@ jobs:
               ).strip()
 
               if value.isdigit():
+
                   return str(
                       int(value)
                   )
@@ -665,15 +701,39 @@ jobs:
               )
 
               if match:
+
                   return str(
                       int(
-                          match.group(
-                              0
-                          )
+                          match.group(0)
                       )
                   )
 
               return None
+
+          # --------------------------------------------------------
+          # Helper: Riot splash
+          # --------------------------------------------------------
+
+          def riot_splash(
+              champion_id,
+              skin_num
+          ):
+
+              if not champion_id:
+                  return ""
+
+              if skin_num is None:
+                  return ""
+
+              return (
+                  "https://ddragon.leagueoflegends.com/"
+                  "cdn/img/champion/splash/"
+                  f"{champion_id}_{skin_num}.jpg"
+              )
+
+          # --------------------------------------------------------
+          # Process every Fantome
+          # --------------------------------------------------------
 
           for file in fantome_files:
 
@@ -684,10 +744,16 @@ jobs:
               )
 
               if not skin_id:
+
                   not_found.append(
                       original_id
                   )
+
                   continue
+
+              # ====================================================
+              # A. RIOT
+              # ====================================================
 
               skin = riot_index.get(
                   skin_id
@@ -696,9 +762,15 @@ jobs:
               source = "Riot"
 
               if skin is not None:
+
                   riot_matched += 1
 
+              # ====================================================
+              # B. COMMUNITYDRAGON
+              # ====================================================
+
               else:
+
                   skin = cdragon_index.get(
                       skin_id
                   )
@@ -706,12 +778,108 @@ jobs:
                   source = "CommunityDragon"
 
                   if skin is not None:
+
                       cdragon_matched += 1
 
+              # ====================================================
+              # C. LEAGUESKINS SOURCE FALLBACK
+              #
+              # We DON'T invent a skin name.
+              #
+              # However, if the source path itself contains
+              # useful numeric information, keep that information
+              # available for later resolution.
+              # ====================================================
+
               if skin is None:
+
+                  source_info = (
+                      leagueskins_index.get(
+                          skin_id
+                      )
+                  )
+
+                  if source_info:
+
+                      champion_numeric_id = (
+                          source_info.get(
+                              "championNumericId",
+                              ""
+                          )
+                      )
+
+                      champion_skin_numeric_id = (
+                          source_info.get(
+                              "championSkinNumericId",
+                              ""
+                          )
+                      )
+
+                      # ------------------------------------------------
+                      # Try to derive the champion from the Riot
+                      # champion numeric key.
+                      # ------------------------------------------------
+
+                      champion = None
+                      champion_key = None
+
+                      if champion_numeric_id:
+
+                          for riot_skin in riot_index.values():
+
+                              if str(
+                                  riot_skin.get(
+                                      "championId",
+                                      ""
+                                  )
+                              ) == str(
+                                  champion_numeric_id
+                              ):
+
+                                  champion = riot_skin.get(
+                                      "champion"
+                                  )
+
+                                  champion_key = riot_skin.get(
+                                      "championId"
+                                  )
+
+                                  break
+
+                      # ------------------------------------------------
+                      # If we can determine champion, create a safe
+                      # fallback entry.
+                      #
+                      # We still don't invent a skin title.
+                      # ------------------------------------------------
+
+                      if champion:
+
+                          skin = {
+                              "id": skin_id,
+                              "skinNum": None,
+                              "name": f"Skin {skin_id}",
+                              "champion": champion,
+                              "championId": champion_key,
+                              "image": ""
+                          }
+
+                          fallback_matched += 1
+
+                          source = (
+                              "LeagueSkinsFallback"
+                          )
+
+              # ====================================================
+              # D. NOTHING FOUND
+              # ====================================================
+
+              if skin is None:
+
                   not_found.append(
                       original_id
                   )
+
                   continue
 
               skin = dict(
@@ -719,10 +887,6 @@ jobs:
               )
 
               skin["id"] = skin_id
-
-              # ----------------------------------
-              # Cleanup
-              # ----------------------------------
 
               skin["name"] = str(
                   skin.get(
@@ -745,63 +909,87 @@ jobs:
                   )
               ).strip()
 
-              skin["image"] = str(
+              # ====================================================
+              # IMAGE HANDLING
+              #
+              # IMPORTANT:
+              #
+              # We do NOT use 21997.png from LeagueSkins.
+              #
+              # First preference:
+              # Riot Data Dragon splash.
+              #
+              # If unavailable:
+              # CommunityDragon splash.
+              # ====================================================
+
+              current_image = str(
                   skin.get(
                       "image",
                       ""
                   )
               ).strip()
 
-              # ----------------------------------
-              # If CommunityDragon image is an
-              # internal asset path, use Riot
-              # splash as a safe fallback.
-              # ----------------------------------
+              skin_num = skin.get(
+                  "skinNum"
+              )
 
-              image = skin.get(
-                  "image",
+              champion_id = skin.get(
+                  "championId",
                   ""
               )
 
-              if (
-                  image
-                  and not image.startswith(
+              # If Riot metadata gave us skinNum,
+              # always construct the normal splash.
+              if champion_id and skin_num is not None:
+
+                  splash = riot_splash(
+                      champion_id,
+                      skin_num
+                  )
+
+                  if splash:
+
+                      skin["image"] = splash
+
+              elif not (
+                  current_image.startswith(
                       "http://"
                   )
-                  and not image.startswith(
+                  or current_image.startswith(
                       "https://"
                   )
               ):
-                  champion_id = skin.get(
-                      "championId",
-                      ""
-                  )
 
-                  skin_num = skin.get(
-                      "skinNum"
-                  )
+                  skin["image"] = ""
 
-                  if (
-                      champion_id
-                      and skin_num is not None
-                  ):
-                      skin["image"] = (
-                          "https://ddragon.leagueoflegends.com/"
-                          "cdn/img/champion/splash/"
-                          f"{champion_id}_{skin_num}.jpg"
-                      )
+              # ====================================================
+              # Remove internal fields
+              # ====================================================
 
-              skin["_metadataSource"] = source
+              skin.pop(
+                  "sourcePath",
+                  None
+              )
+
+              skin.pop(
+                  "_metadataSource",
+                  None
+              )
+
+              # ====================================================
+              # Keep source only internally
+              # ====================================================
 
               matched[skin_id] = skin
+
+          # ========================================================
+          # SORT
+          # ========================================================
 
           skins = list(
               matched.values()
           )
-
-          # --------------------------------------
-          # Stable ordering
-          # --------------------------------------
 
           def sort_key(item):
 
@@ -813,6 +1001,7 @@ jobs:
               ).lower()
 
               try:
+
                   numeric_id = int(
                       str(
                           item.get(
@@ -821,7 +1010,9 @@ jobs:
                           )
                       )
                   )
+
               except Exception:
+
                   numeric_id = 0
 
               return (
@@ -833,13 +1024,9 @@ jobs:
               key=sort_key
           )
 
-          # Remove internal source field before
-          # writing public JSON.
-          for skin in skins:
-              skin.pop(
-                  "_metadataSource",
-                  None
-              )
+          # ========================================================
+          # OUTPUT
+          # ========================================================
 
           riot_version = Path(
               "/tmp/riot-version.txt"
@@ -873,6 +1060,10 @@ jobs:
               encoding="utf-8"
           )
 
+          # ========================================================
+          # LOG
+          # ========================================================
+
           print("")
           print("==============================")
           print("SKIN SYNC RESULT")
@@ -885,6 +1076,9 @@ jobs:
           )
           print(
               f"CommunityDragon:     {cdragon_matched}"
+          )
+          print(
+              f"LeagueSkins fallback:{fallback_matched}"
           )
           print(
               f"Total matched:       {len(skins)}"
@@ -902,13 +1096,9 @@ jobs:
               )
 
               for skin_id in not_found[:100]:
+
                   print(
                       f"  {skin_id}"
-                  )
-
-              if len(not_found) > 100:
-                  print(
-                      f"... and {len(not_found) - 100} more."
                   )
 
           print("")
@@ -917,9 +1107,9 @@ jobs:
           )
           PY
 
-      # ==========================================
-      # 12. GENERATE FANTOME FILE LIST
-      # ==========================================
+      # ============================================================
+      # 13. GENERATE FANTOME FILE LIST
+      # ============================================================
 
       - name: Generate fantome-files.json
         shell: bash
@@ -964,9 +1154,9 @@ jobs:
           )
           PY
 
-      # ==========================================
-      # 13. VERIFY GENERATED DATA
-      # ==========================================
+      # ============================================================
+      # 14. VERIFY
+      # ============================================================
 
       - name: Verify generated data
         shell: bash
@@ -1007,25 +1197,39 @@ jobs:
               list
           )
 
-          skin_ids = {
-              str(
+          ids = set()
+
+          for skin in skins["skins"]:
+
+              skin_id = str(
                   skin.get(
-                      "id"
+                      "id",
+                      ""
                   )
               )
-              for skin in skins["skins"]
-          }
 
-          fantome_ids = {
-              Path(
-                  name
-              ).stem
-              for name in fantomes
-          }
+              assert skin_id
+
+              assert skin.get(
+                  "champion"
+              ) is not None
+
+              assert skin.get(
+                  "name"
+              ) is not None
+
+              ids.add(
+                  skin_id
+              )
 
           print(
               f"skins.json entries: "
               f"{len(skins['skins'])}"
+          )
+
+          print(
+              f"Unique skin IDs: "
+              f"{len(ids)}"
           )
 
           print(
@@ -1034,23 +1238,20 @@ jobs:
           )
 
           print(
-              f"Unique skin IDs: "
-              f"{len(skin_ids)}"
-          )
-
-          print(
               "Generated JSON files are valid."
           )
           PY
 
-      # ==========================================
-      # 14. CHECK CHANGES
-      # ==========================================
+      # ============================================================
+      # 15. CHECK CHANGES
+      # ============================================================
 
       - name: Check for changes
         id: changes
         shell: bash
         run: |
+          set -e
+
           git status --short
 
           if git diff --quiet -- \
@@ -1073,9 +1274,9 @@ jobs:
 
           fi
 
-      # ==========================================
-      # 15. COMMIT AND PUSH
-      # ==========================================
+      # ============================================================
+      # 16. COMMIT AND PUSH
+      # ============================================================
 
       - name: Commit and push changes
         if: steps.changes.outputs.changed == 'true'
