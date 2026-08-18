@@ -52,6 +52,41 @@ const TRANSLATIONS = {
     en: 'Favorites'
   },
 
+  filtersLabel: {
+    tr: 'Filtreler',
+    en: 'Filters'
+  },
+
+  filterPanelTitle: {
+    tr: 'Şampiyon filtresi',
+    en: 'Champion filter'
+  },
+
+  filterSearchPlaceholder: {
+    tr: 'Şampiyon ara',
+    en: 'Search champions'
+  },
+
+  selectAll: {
+    tr: 'Tümünü Seç',
+    en: 'Select All'
+  },
+
+  clearFilters: {
+    tr: 'Temizle',
+    en: 'Clear'
+  },
+
+  applyFilters: {
+    tr: 'Filtreleri Uygula',
+    en: 'Apply Filters'
+  },
+
+  championsSelected: {
+    tr: '{count} şampiyon seçildi',
+    en: '{count} champions selected'
+  },
+
   quickSearchesAriaLabel: {
     tr: 'Örnek aramalar',
     en: 'Example searches'
@@ -523,6 +558,8 @@ function setLang(lang) {
   setFavoriteFilter(
     isFavoriteFilterActive()
   );
+  updateFilterButtonState();
+  renderChampionFilterOptions();
 
   render();
   syncAllFavoriteButtons();
@@ -603,7 +640,12 @@ const fantomeFiles = new Set();
 const FAVORITES_STORAGE_KEY =
   'exist-lol-skin-favorites';
 
+const CHAMPION_FILTER_STORAGE_KEY =
+  'exist-lol-skin-champion-filters';
+
 let favorites = new Set();
+let appliedChampionFilters = new Set();
+let draftChampionFilters = new Set();
 
 try {
   const savedFavorites = JSON.parse(
@@ -624,6 +666,36 @@ try {
   );
 
   favorites = new Set();
+}
+
+try {
+  const savedChampionFilters = JSON.parse(
+    localStorage.getItem(
+      CHAMPION_FILTER_STORAGE_KEY
+    ) || '[]'
+  );
+
+  if (Array.isArray(savedChampionFilters)) {
+    appliedChampionFilters = new Set(
+      savedChampionFilters
+        .map((value) =>
+          String(value)
+        )
+        .filter(Boolean)
+    );
+
+    draftChampionFilters = new Set(
+      appliedChampionFilters
+    );
+  }
+} catch (error) {
+  console.warn(
+    'Şampiyon filtreleri yüklenemedi:',
+    error
+  );
+
+  appliedChampionFilters = new Set();
+  draftChampionFilters = new Set();
 }
 
 /* =========================================
@@ -828,6 +900,56 @@ const favoriteFilter =
     '#favorite-filter'
   );
 
+const filterButton =
+  document.querySelector(
+    '#filter-button'
+  );
+
+const filterPanel =
+  document.querySelector(
+    '#champion-filter-panel'
+  );
+
+const filterCount =
+  document.querySelector(
+    '#filter-count'
+  );
+
+const filterSearchInput =
+  document.querySelector(
+    '#filter-search-input'
+  );
+
+const filterOptionList =
+  document.querySelector(
+    '#filter-option-list'
+  );
+
+const filterSummary =
+  document.querySelector(
+    '#filter-summary'
+  );
+
+const filterSelectAllButton =
+  document.querySelector(
+    '#filter-select-all'
+  );
+
+const filterClearButton =
+  document.querySelector(
+    '#filter-clear'
+  );
+
+const applyFiltersButton =
+  document.querySelector(
+    '#apply-filters'
+  );
+
+const filterPanelClose =
+  document.querySelector(
+    '.filter-panel-close'
+  );
+
 function isFavoriteFilterActive() {
   return Boolean(
     favoriteFilter?.classList.contains(
@@ -862,6 +984,239 @@ function setFavoriteFilter(active) {
     active
       ? t('showAll')
       : t('showFavorites');
+}
+
+function getChampionOptions() {
+  const options = new Map();
+
+  skins.forEach((skin) => {
+   const names = [
+     skin?.champion,
+     skin?.championEn
+   ].filter(Boolean);
+
+   names.forEach((name) => {
+     const key = normalize(name);
+
+     if (!key) {
+       return;
+     }
+
+     const displayName =
+       currentLang === 'en'
+         ? skin?.championEn || skin?.champion
+         : skin?.champion || skin?.championEn;
+
+     if (!options.has(key)) {
+       options.set(key, {
+         key,
+         label: displayName || name
+       });
+     }
+   });
+  });
+
+  return [...options.values()].sort(
+   (a, b) =>
+     a.label.localeCompare(b.label, currentLang === 'tr' ? 'tr' : 'en', {
+       sensitivity: 'base'
+     })
+  );
+}
+
+function saveChampionFilters() {
+  try {
+   localStorage.setItem(
+     CHAMPION_FILTER_STORAGE_KEY,
+     JSON.stringify([...appliedChampionFilters])
+   );
+  } catch (error) {
+   console.warn(
+     'Şampiyon filtreleri kaydedilemedi:',
+     error
+   );
+  }
+}
+
+function updateFilterButtonState() {
+  if (!filterButton || !filterCount) {
+   return;
+  }
+
+  const count = appliedChampionFilters.size;
+  const active = count > 0;
+
+  filterButton.classList.toggle(
+   'is-active',
+   active
+  );
+
+  filterButton.setAttribute(
+   'aria-pressed',
+   active ? 'true' : 'false'
+  );
+
+  filterButton.setAttribute(
+   'aria-label',
+   `${t('filtersLabel')}${active ? ` (${count})` : ''}`
+  );
+
+  filterButton.title =
+   `${t('filtersLabel')}${active ? ` (${count})` : ''}`;
+
+  filterCount.hidden = !active;
+  filterCount.textContent = String(count);
+}
+
+function updateFilterSummary() {
+  if (!filterSummary) {
+   return;
+  }
+
+  filterSummary.textContent = t(
+   'championsSelected',
+   {
+     count: draftChampionFilters.size
+   }
+  );
+}
+
+function renderChampionFilterOptions() {
+  if (!filterOptionList) {
+   return;
+  }
+
+  const query =
+   normalize(
+     filterSearchInput?.value || ''
+   );
+
+  const options = getChampionOptions().filter(
+   ({ label }) =>
+     !query ||
+     normalize(label).includes(query)
+  );
+
+  filterOptionList.replaceChildren(
+   ...options.map(({ key, label }) => {
+     const option = document.createElement(
+       'label'
+     );
+
+     option.className = 'filter-option';
+     option.innerHTML = `
+       <input
+         type="checkbox"
+         value="${key}"
+         ${draftChampionFilters.has(key) ? 'checked' : ''}
+       />
+       <span>${label}</span>
+     `;
+
+     const checkbox =
+       option.querySelector('input');
+
+     checkbox?.addEventListener(
+       'change',
+       () => {
+         if (checkbox.checked) {
+           draftChampionFilters.add(key);
+         } else {
+           draftChampionFilters.delete(key);
+         }
+
+         updateFilterSummary();
+       }
+     );
+
+     return option;
+   })
+  );
+
+  updateFilterSummary();
+}
+
+function openChampionFilterPanel() {
+  if (!filterPanel) {
+   return;
+  }
+
+  draftChampionFilters = new Set(
+   appliedChampionFilters
+  );
+
+  renderChampionFilterOptions();
+  filterPanel.hidden = false;
+  filterButton?.setAttribute(
+   'aria-expanded',
+   'true'
+  );
+  filterSearchInput?.focus();
+}
+
+function closeChampionFilterPanel() {
+  if (!filterPanel) {
+   return;
+  }
+
+  filterPanel.hidden = true;
+  filterButton?.setAttribute(
+   'aria-expanded',
+   'false'
+  );
+}
+
+function applyChampionFilters() {
+  appliedChampionFilters = new Set(
+   draftChampionFilters
+  );
+
+  saveChampionFilters();
+  updateFilterButtonState();
+  render();
+  closeChampionFilterPanel();
+}
+
+function selectAllChampionDraft() {
+  draftChampionFilters = new Set(
+   getChampionOptions().map(
+     ({ key }) => key
+   )
+  );
+
+  renderChampionFilterOptions();
+}
+
+function clearChampionDraft() {
+  draftChampionFilters = new Set();
+  renderChampionFilterOptions();
+}
+
+function skinMatchesChampionFilter(skin) {
+  if (appliedChampionFilters.size === 0) {
+   return true;
+  }
+
+  const keys = [
+   skin?.champion,
+   skin?.championEn
+  ]
+   .filter(Boolean)
+   .map((name) => normalize(name));
+
+  return keys.some((key) =>
+   appliedChampionFilters.has(key)
+  );
+}
+
+function groupMatchesChampionFilter(group) {
+  if (appliedChampionFilters.size === 0) {
+   return true;
+  }
+
+  return group.skins.some((skin) =>
+   skinMatchesChampionFilter(skin)
+  );
 }
 
 /* =========================================
@@ -1428,8 +1783,9 @@ function render() {
        )
      }))
      .filter(
-       ({ score }) =>
-         !query || score > 0
+       ({ group, score }) =>
+         (!query || score > 0) &&
+         groupMatchesChampionFilter(group)
      )
      .sort(
        (a, b) =>
@@ -1602,6 +1958,7 @@ function render() {
   }
 
   updateFavoriteCount();
+  updateFilterButtonState();
 }
 
 /* =========================================
@@ -2011,6 +2368,93 @@ favoriteFilter?.addEventListener(
         active: active ? 1 : 0
       }
     );
+  }
+);
+
+filterButton?.addEventListener(
+  'click',
+  (event) => {
+   event.stopPropagation();
+
+   if (!filterPanel) {
+     return;
+   }
+
+   if (filterPanel.hidden) {
+     openChampionFilterPanel();
+   } else {
+     closeChampionFilterPanel();
+   }
+  }
+);
+
+filterPanelClose?.addEventListener(
+  'click',
+  () => {
+   closeChampionFilterPanel();
+  }
+);
+
+filterSelectAllButton?.addEventListener(
+  'click',
+  () => {
+   selectAllChampionDraft();
+  }
+);
+
+filterClearButton?.addEventListener(
+  'click',
+  () => {
+   clearChampionDraft();
+  }
+);
+
+applyFiltersButton?.addEventListener(
+  'click',
+  () => {
+   applyChampionFilters();
+  }
+);
+
+filterSearchInput?.addEventListener(
+  'input',
+  () => {
+   renderChampionFilterOptions();
+  }
+);
+
+document.addEventListener(
+  'click',
+  (event) => {
+   if (
+     !filterPanel ||
+     !filterButton ||
+     filterPanel.hidden
+   ) {
+     return;
+   }
+
+   if (
+     filterPanel.contains(event.target) ||
+     filterButton.contains(event.target)
+   ) {
+     return;
+   }
+
+   closeChampionFilterPanel();
+  }
+);
+
+document.addEventListener(
+  'keydown',
+  (event) => {
+   if (
+     event.key === 'Escape' &&
+     filterPanel &&
+     !filterPanel.hidden
+   ) {
+     closeChampionFilterPanel();
+   }
   }
 );
 

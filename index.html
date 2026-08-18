@@ -534,6 +534,131 @@
 
         </button>
 
+        <button
+          id="filter-button"
+          class="filter-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-pressed="false"
+          data-i18n-title="filtersLabel"
+          title="Filtreler"
+        >
+          <svg
+            class="filter-button-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16" />
+            <path d="M7 12h10" />
+            <path d="M10 18h4" />
+            <path d="M6.5 6l2.5 6v4l3 1.5V12l2.5-6" />
+          </svg>
+
+          <span data-i18n="filtersLabel">
+            Filtreler
+          </span>
+
+          <span
+            id="filter-count"
+            class="filter-count"
+            hidden
+          >
+            0
+          </span>
+        </button>
+
+      </div>
+
+      <div
+        id="champion-filter-panel"
+        class="champion-filter-panel"
+        hidden
+      >
+        <div class="filter-panel-header">
+          <div>
+            <p class="filter-panel-kicker" data-i18n="filtersLabel">
+              Filtreler
+            </p>
+            <h3 data-i18n="filterPanelTitle">
+              Şampiyon filtresi
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            class="filter-panel-close"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        <label
+          class="filter-search-box"
+          for="filter-search-input"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="5.5"></circle>
+            <path d="M16 16l4 4"></path>
+          </svg>
+
+          <input
+            id="filter-search-input"
+            type="search"
+            data-i18n-placeholder="filterSearchPlaceholder"
+            placeholder="Şampiyon ara"
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="filter-panel-tools">
+          <button
+            type="button"
+            class="filter-panel-action"
+            id="filter-select-all"
+            data-i18n="selectAll"
+          >
+            Tümünü Seç
+          </button>
+
+          <button
+            type="button"
+            class="filter-panel-action secondary"
+            id="filter-clear"
+            data-i18n="clearFilters"
+          >
+            Temizle
+          </button>
+        </div>
+
+        <div
+          id="filter-summary"
+          class="filter-summary"
+        >
+          0 şampiyon seçildi
+        </div>
+
+        <div
+          id="filter-option-list"
+          class="filter-option-list"
+          role="listbox"
+          aria-label="Champion filters"
+        ></div>
+
+        <button
+          id="apply-filters"
+          class="apply-filters"
+          type="button"
+          data-i18n="applyFilters"
+        >
+          Filtreleri Uygula
+        </button>
       </div>
 
       <div
