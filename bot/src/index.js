@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+﻿import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -259,17 +259,59 @@ async function tryAttachFantome(interaction, id, locale) {
 }
 
 // Commands
+// Ensure required options are defined before optional ones to satisfy Discord API validation.
 const commands = [
-  new SlashCommandBuilder().setName('skin').setDescription('Search for a skin').addStringOption(opt => opt.setName('query').setDescription('Skin name').setRequired(true)),
-  new SlashCommandBuilder().setName('skinid').setDescription('Lookup skin by id').addStringOption(opt => opt.setName('id').setDescription('Skin ID').setRequired(true)),
-  new SlashCommandBuilder().setName('randomskin').setDescription('Get a random skin'),
-  new SlashCommandBuilder().setName('report').setDescription('Report a problem').addStringOption(opt => opt.setName('skin_id').setDescription('Skin ID').setRequired(false)).addStringOption(opt => opt.setName('message').setDescription('Report text').setRequired(true)),
-  new SlashCommandBuilder().setName('suggest').setDescription('Suggest a feature').addStringOption(opt => opt.setName('message').setDescription('Suggestion text').setRequired(true)),
-  new SlashCommandBuilder().setName('help').setDescription('Show bot help')
+  new SlashCommandBuilder()
+    .setName('skin')
+    .setDescription('Search for a skin')
+    .addStringOption(opt => opt.setName('query').setDescription('Skin name').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('skinid')
+    .setDescription('Lookup skin by id')
+    .addStringOption(opt => opt.setName('id').setDescription('Skin ID').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('randomskin')
+    .setDescription('Get a random skin'),
+
+  // For report: required 'message' must come before optional 'skin_id'
+  new SlashCommandBuilder()
+    .setName('report')
+    .setDescription('Report a problem')
+    .addStringOption(opt => opt.setName('message').setDescription('Report text').setRequired(true))
+    .addStringOption(opt => opt.setName('skin_id').setDescription('Skin ID').setRequired(false)),
+
+  new SlashCommandBuilder()
+    .setName('suggest')
+    .setDescription('Suggest a feature')
+    .addStringOption(opt => opt.setName('message').setDescription('Suggestion text').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Show bot help')
 ].map(c => c.toJSON());
+
+function validateCommandOptions(cmdJson) {
+  if (!cmdJson.options || !Array.isArray(cmdJson.options)) return true;
+  let seenOptional = false;
+  for (const opt of cmdJson.options) {
+    const req = !!opt.required;
+    if (!req) seenOptional = true;
+    if (seenOptional && req) return false;
+  }
+  return true;
+}
 
 async function registerCommands() {
   try {
+    // validate commands before sending to Discord
+    for (const c of commands) {
+      if (!validateCommandOptions(c)) {
+        throw new Error(Command '' has required options after optional ones. Reorder required options before optional ones.);
+      }
+    }
+
     const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
     if (GUILD_ID) {
       await rest.put(Routes.applicationGuildCommands(client.application.id, GUILD_ID), { body: commands });
@@ -283,11 +325,19 @@ async function registerCommands() {
   }
 }
 
-client.once('ready', async () => {
+// Use a resilient ready handler: prefer 'clientReady' when available but fall back to 'ready'.
+let _readyHandled = false;
+async function onClientReady() {
+  if (_readyHandled) return;
+  _readyHandled = true;
   console.log('Bot ready:', client.user.tag);
   await ensureSkinsLoaded();
   await registerCommands();
-});
+}
+
+// Register both events so the bot works with discord.js versions that emit either.
+client.once('clientReady', onClientReady);
+client.once('ready', onClientReady);
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
@@ -396,3 +446,4 @@ client.login(DISCORD_TOKEN).catch(err => {
   console.error('Failed to login:', err.message);
   process.exit(1);
 });
+
