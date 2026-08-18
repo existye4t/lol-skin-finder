@@ -223,18 +223,22 @@ const TRANSLATIONS = {
   },
 
   discordTitle: {
-    tr: 'Bir sorun mu var?',
-    en: 'Got an issue?'
+    tr: 'Discord Sunucumuza Katıl',
+    en: 'Join our Discord'
   },
 
   discordDescription: {
-    tr: 'Problem, öneri veya sorularınız için Discord üzerinden bana ulaşabilirsiniz.',
-    en: 'Reach out to me on Discord for any issues, suggestions, or questions.'
+    tr: 'Güncellemeleri takip etmek, hata bildirmek, favori skinlerini paylaşmak ve diğer üyelerle sohbet etmek için topluluğumuza katıl.',
+    en: 'Join our community to get updates, report bugs, share your favorite skins and chat with other members.'
+  },
+  discordJoinButton: {
+    tr: "Discord'a Katıl",
+    en: 'Join Discord'
   },
 
   discordHint: {
     tr: 'Yardım etmek için buradayım.',
-    en: 'I’m here to help.'
+    en: 'I\u2019m here to help.'
   },
 
   closeDiscord: {
