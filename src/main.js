@@ -497,6 +497,7 @@ function setLang(lang) {
   );
 
   render();
+  syncAllFavoriteButtons();
 
   track('language_change', {
     language: lang
@@ -804,6 +805,19 @@ function syncFavoriteButtons(
       updateFavoriteButton(
         button,
         targetId
+      );
+    });
+}
+
+function syncAllFavoriteButtons() {
+  document
+    .querySelectorAll(
+      '.favorite-button[data-skin-id]'
+    )
+    .forEach((button) => {
+      updateFavoriteButton(
+        button,
+        button.dataset.skinId
       );
     });
 }
