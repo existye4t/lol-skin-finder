@@ -2,7 +2,7 @@ import './style.css';
 
 /* =========================================
    DİL / i18n
-   ========================================= */
+========================================= */
 
 const LANG_STORAGE_KEY = 'exist-lol-skin-lang';
 
@@ -16,174 +16,217 @@ const TRANSLATIONS = {
     tr: 'LEAGUE OF LEGENDS • SKIN VERİTABANI',
     en: 'LEAGUE OF LEGENDS • SKIN DATABASE'
   },
+
   heroTitleLine: {
     tr: 'Aradığın skin',
     en: 'The skin you want'
   },
+
   heroTitleEm: {
     tr: 'burada.',
     en: 'is here.'
   },
+
   heroIntro: {
     tr: 'Skin adını, şampiyonu veya Riot skin ID’sini yaz. Sonuçlar anında filtrelenir.',
     en: 'Type the skin name, champion, or Riot skin ID. Results filter instantly.'
   },
+
   searchPlaceholder: {
     tr: 'Örn. Omega Timi Twitch veya 29004',
     en: 'E.g. Omega Squad Twitch or 29004'
   },
+
   showFavorites: {
     tr: 'Favorileri göster',
     en: 'Show favorites'
   },
+
   showAll: {
     tr: 'Tüm skinleri göster',
     en: 'Show all skins'
   },
+
   favoritesLabel: {
     tr: 'Favoriler',
     en: 'Favorites'
   },
+
   quickSearchesAriaLabel: {
     tr: 'Örnek aramalar',
     en: 'Example searches'
   },
+
   savedEyebrow: {
     tr: 'KAYDEDİLENLER',
     en: 'SAVED'
   },
+
   favoritesHeading: {
     tr: 'Favori skinlerin',
     en: 'Your favorite skins'
   },
+
   clearFavorites: {
     tr: 'Favorileri temizle',
     en: 'Clear favorites'
   },
+
   resultsEyebrow: {
     tr: 'SONUÇLAR',
     en: 'RESULTS'
   },
+
   exploreSkins: {
     tr: 'Skinleri keşfet',
     en: 'Explore skins'
   },
+
   loadingData: {
     tr: 'Veriler yükleniyor…',
     en: 'Loading data…'
   },
+
   noResults: {
     tr: 'Sonuç bulunamadı',
     en: 'No results found'
   },
+
   noResultsHint: {
     tr: 'Skin adı, şampiyon adı veya ID ile yeniden deneyin.',
     en: 'Try again with a skin name, champion name, or ID.'
   },
+
   noFavoritesYet: {
     tr: 'Henüz favorin yok',
     en: 'No favorites yet'
   },
+
   noFavoritesYetHint: {
     tr: 'Skin kartındaki yıldız simgesine tıklayarak favorilerine ekleyebilirsin.',
     en: 'Tap the star icon on a skin card to add it to your favorites.'
   },
+
   noFavoriteResults: {
     tr: 'Favori skin bulunamadı',
     en: 'No favorite skins found'
   },
+
   noFavoriteResultsSearchHint: {
     tr: 'Bu arama için favorilerinde eşleşen skin bulunamadı.',
     en: 'No matching skins found in your favorites for this search.'
   },
+
   noFavoriteResultsHint: {
     tr: 'Henüz favorilerine eklediğin bir skin yok.',
     en: 'You haven’t added any skins to your favorites yet.'
   },
+
   addFavorite: {
     tr: 'Favorilere Ekle',
     en: 'Add to Favorites'
   },
+
   removeFavorite: {
     tr: 'Favorilerde',
     en: 'In Favorites'
   },
+
   close: {
     tr: 'Kapat',
     en: 'Close'
   },
+
   downloadsHeading: {
     tr: 'İNDİRMELER',
     en: 'DOWNLOADS'
   },
+
   downloadsAriaLabel: {
     tr: 'Skin ve chroma indirmeleri',
     en: 'Skin and chroma downloads'
   },
+
   mainSkin: {
     tr: 'Ana skin',
     en: 'Base skin'
   },
+
   fileNotFound: {
     tr: 'Bu dosya klasörde bulunamadı',
     en: 'This file was not found in the folder'
   },
+
   downloadFantomeTitle: {
     tr: '{id}.fantome indir',
     en: 'Download {id}.fantome'
   },
+
   downloadFantomeAriaLabel: {
     tr: '{name} fantome dosyasını indir',
     en: 'Download the {name} fantome file'
   },
+
   riotSkinId: {
     tr: 'RIOT SKIN ID: {id}',
     en: 'RIOT SKIN ID: {id}'
   },
+
   cardAriaLabel: {
     tr: '{name}, {champion}, ID {id}. Detayları aç',
     en: '{name}, {champion}, ID {id}. Open details'
   },
+
   favoriteResultsCount: {
     tr: '{count} favori sonuç',
     en: '{count} favorite results'
   },
+
   favoriteCount: {
     tr: '{count} favori',
     en: '{count} favorites'
   },
+
   resultsCount: {
     tr: '{count} sonuç bulundu',
     en: '{count} results found'
   },
+
   showingCount: {
     tr: '{visible}/{total} gösteriliyor',
     en: 'Showing {visible}/{total}'
   },
+
   metaVersion: {
     tr: '{count} ana skin • Yama {version}',
     en: '{count} base skins • Patch {version}'
   },
+
   dataLoadFailedMeta: {
     tr: 'Skin verisi yüklenemedi',
     en: 'Skin data could not be loaded'
   },
+
   dataLoadFailedTitle: {
     tr: 'Skin verileri yüklenemedi',
     en: 'Skin data could not be loaded'
   },
+
   dataLoadFailedHint: {
     tr: 'data/skins.json dosyasının mevcut olduğundan ve geçerli JSON içerdiğinden emin olun.',
     en: 'Make sure data/skins.json exists and contains valid JSON.'
   },
+
   discordEyebrow: {
     tr: 'DISCORD İLETİŞİM',
     en: 'DISCORD CONTACT'
   },
+
   discordTitle: {
     tr: 'Discord Sunucumuza Katıl',
     en: 'Join our Discord'
   },
+
   discordDescription: {
     tr: 'Güncellemeleri takip etmek, hata bildirmek, favori skinlerini paylaşmak ve diğer üyelerle sohbet etmek için topluluğumuza katıl.',
     en: 'Join our community to get updates, report bugs, share your favorite skins and chat with other members.'
@@ -192,30 +235,31 @@ const TRANSLATIONS = {
     tr: "Discord'a Katıl",
     en: 'Join Discord'
   },
+
   discordHint: {
     tr: 'Yardım etmek için buradayım.',
     en: 'I\u2019m here to help.'
   },
+
   closeDiscord: {
     tr: 'Discord penceresini kapat',
     en: 'Close the Discord window'
   }
 };
 
+/* =========================================
+   DİL
+========================================= */
+
 function getLang() {
   try {
-    const saved = localStorage.getItem(
-      LANG_STORAGE_KEY
-    );
+    const saved = localStorage.getItem(LANG_STORAGE_KEY);
 
     if (saved === 'tr' || saved === 'en') {
       return saved;
     }
   } catch (error) {
-    console.warn(
-      'Dil tercihi okunamadı:',
-      error
-    );
+    console.warn('Dil tercihi okunamadı:', error);
   }
 
   return 'tr';
@@ -224,64 +268,39 @@ function getLang() {
 let currentLang = getLang();
 
 function t(key, vars) {
-  const entry =
-    TRANSLATIONS[key];
+  const entry = TRANSLATIONS[key];
 
   if (!entry) {
-    console.warn(
-      `Çeviri bulunamadı: ${key}`
-    );
-
+    console.warn(`Çeviri bulunamadı: ${key}`);
     return key;
   }
 
-  let text =
-    entry[currentLang] ||
-    entry.tr ||
-    key;
+  let text = entry[currentLang] || entry.tr || key;
 
   if (vars) {
-    Object.keys(vars).forEach(
-      (varKey) => {
-        text = text.replace(
-          `{${varKey}}`,
-          vars[varKey]
-        );
-      }
-    );
+    Object.keys(vars).forEach((varKey) => {
+      text = text.replace(
+        new RegExp(`\\{${varKey}\\}`, 'g'),
+        String(vars[varKey])
+      );
+    });
   }
 
   return text;
 }
 
 function formatNumber(value) {
-  return Number(
-    value
-  ).toLocaleString(
-    LOCALE_MAP[currentLang] ||
-      'tr-TR'
+  return Number(value).toLocaleString(
+    LOCALE_MAP[currentLang] || 'tr-TR'
   );
 }
 
-/* ---------------------------------------
-   Skin adı / şampiyon adı yerelleştirme
-
-   Not: data/skins.json şu an sadece
-   Türkçe (tr_TR) verisiyle üretiliyor.
-   scripts/update-skins.mjs güncellendi;
-   `npm run update-data` yeniden
-   çalıştırıldığında İngilizce alanlar
-   (nameEn / championEn) da dosyaya
-   eklenecek. O zamana kadar İngilizce
-   modda otomatik olarak Türkçe isimlere
-   geri dönülür.
-   --------------------------------------- */
+/* =========================================
+   SKIN / ŞAMPİYON YERELLEŞTİRME
+========================================= */
 
 function localizedName(skin) {
-  if (
-    currentLang === 'en' &&
-    skin?.nameEn
-  ) {
+  if (currentLang === 'en' && skin?.nameEn) {
     return skin.nameEn;
   }
 
@@ -289,130 +308,144 @@ function localizedName(skin) {
 }
 
 function localizedChampion(skin) {
-  if (
-    currentLang === 'en' &&
-    skin?.championEn
-  ) {
+  if (currentLang === 'en' && skin?.championEn) {
     return skin.championEn;
   }
 
   return skin?.champion || '';
 }
 
-/* ---------------------------------------
-   Statik metinleri uygula
-   --------------------------------------- */
+/* =========================================
+   STATİK ÇEVİRİLER
+========================================= */
 
 function applyStaticTranslations() {
-  document.documentElement.lang =
-    currentLang;
+  document.documentElement.lang = currentLang;
 
   document
     .querySelectorAll('[data-i18n]')
     .forEach((element) => {
-      const key =
-        element.dataset.i18n;
-
-      element.textContent =
-        t(key);
+      element.textContent = t(element.dataset.i18n);
     });
 
   document
-    .querySelectorAll(
-      '[data-i18n-placeholder]'
-    )
+    .querySelectorAll('[data-i18n-placeholder]')
     .forEach((element) => {
-      element.placeholder =
-        t(
-          element.dataset
-            .i18nPlaceholder
-        );
-    });
-
-  document
-    .querySelectorAll(
-      '[data-i18n-title]'
-    )
-    .forEach((element) => {
-      element.title =
-        t(
-          element.dataset
-            .i18nTitle
-        );
-    });
-
-  document
-    .querySelectorAll(
-      '[data-i18n-aria-label]'
-    )
-    .forEach((element) => {
-      element.setAttribute(
-        'aria-label',
-        t(
-          element.dataset
-            .i18nAriaLabel
-        )
+      element.placeholder = t(
+        element.dataset.i18nPlaceholder
       );
     });
 
   document
-    .querySelectorAll(
-      '[data-query-tr]'
-    )
+    .querySelectorAll('[data-i18n-title]')
+    .forEach((element) => {
+      element.title = t(
+        element.dataset.i18nTitle
+      );
+    });
+
+  document
+    .querySelectorAll('[data-i18n-aria-label]')
+    .forEach((element) => {
+      element.setAttribute(
+        'aria-label',
+        t(element.dataset.i18nAriaLabel)
+      );
+    });
+
+  document
+    .querySelectorAll('[data-query-tr]')
     .forEach((button) => {
       const query =
         currentLang === 'en'
-          ? button.dataset
-              .queryEn ||
-            button.dataset
-              .queryTr
-          : button.dataset
-              .queryTr;
+          ? button.dataset.queryEn ||
+            button.dataset.queryTr
+          : button.dataset.queryTr;
 
       const label =
         currentLang === 'en'
-          ? button.dataset
-              .labelEn ||
-            button.dataset
-              .labelTr
-          : button.dataset
-              .labelTr;
+          ? button.dataset.labelEn ||
+            button.dataset.labelTr
+          : button.dataset.labelTr;
 
-      button.dataset.query =
-        query;
-
-      button.textContent =
-        label;
+      button.dataset.query = query || '';
+      button.textContent = label || '';
     });
 }
 
-/* ---------------------------------------
-   Dil butonu / menüsü
-   --------------------------------------- */
+/* =========================================
+   DİL BUTONU
+========================================= */
 
-const langSwitch =
-  document.querySelector(
-    '#lang-switch'
-  );
-
-const langMenu =
-  document.querySelector(
-    '#lang-menu'
-  );
-
-const langSwitchFlag =
-  document.querySelector(
-    '#lang-switch-flag'
-  );
-
-const langSwitchCode =
-  document.querySelector(
-    '#lang-switch-code'
-  );
+const langSwitch = document.querySelector('#lang-switch');
+const langMenu = document.querySelector('#lang-menu');
+const langSwitchFlag = document.querySelector('#lang-switch-flag');
+const langSwitchCode = document.querySelector('#lang-switch-code');
 
 const LANG_FLAGS = {
-  tr: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#E30A17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.4" cy="10" r="4" fill="#E30A17"/><polygon points="17.3,8.6 17.62,9.56 18.63,9.57 17.82,10.17 18.12,11.13 17.3,10.55 16.48,11.13 16.78,10.17 15.97,9.57 16.98,9.56" fill="#fff"/></svg>',
-  en: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect y="0" width="30" height="1.54" fill="#B22234"/><rect y="3.08" width="30" height="1.54" fill="#B22234"/><rect y="6.15" width="30" height="1.54" fill="#B22234"/><rect y="9.23" width="30" height="1.54" fill="#B22234"/><rect y="12.31" width="30" height="1.54" fill="#B22234"/><rect y="15.38" width="30" height="1.54" fill="#B22234"/><rect y="18.46" width="30" height="1.54" fill="#B22234"/><rect width="12" height="10.77" fill="#3C3B6E"/><g fill="#fff"><circle cx="2" cy="1.5" r="0.45"/><circle cx="5" cy="1.5" r="0.45"/><circle cx="8" cy="1.5" r="0.45"/><circle cx="11" cy="1.5" r="0.45"/><circle cx="3.5" cy="3" r="0.45"/><circle cx="6.5" cy="3" r="0.45"/><circle cx="9.5" cy="3" r="0.45"/><circle cx="2" cy="4.5" r="0.45"/><circle cx="5" cy="4.5" r="0.45"/><circle cx="8" cy="4.5" r="0.45"/><circle cx="11" cy="4.5" r="0.45"/><circle cx="3.5" cy="6" r="0.45"/><circle cx="6.5" cy="6" r="0.45"/><circle cx="9.5" cy="6" r="0.45"/><circle cx="2" cy="7.5" r="0.45"/><circle cx="5" cy="7.5" r="0.45"/><circle cx="8" cy="7.5" r="0.45"/><circle cx="11" cy="7.5" r="0.45"/><circle cx="3.5" cy="9" r="0.45"/><circle cx="6.5" cy="9" r="0.45"/><circle cx="9.5" cy="9" r="0.45"/></g></svg>'
+  tr: `
+    <svg
+      viewBox="0 0 30 20"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect width="30" height="20" fill="#E30A17"/>
+      <circle cx="11" cy="10" r="5" fill="#fff"/>
+      <circle cx="12.4" cy="10" r="4" fill="#E30A17"/>
+      <polygon
+        points="17.3,8.6 17.62,9.56 18.63,9.57 17.82,10.17 18.12,11.13 17.3,10.55 16.48,11.13 16.78,10.17 15.97,9.57 16.98,9.56"
+        fill="#fff"
+      />
+    </svg>
+  `,
+
+  en: `
+    <svg
+      viewBox="0 0 30 20"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect width="30" height="20" fill="#fff"/>
+      <rect y="0" width="30" height="1.54" fill="#B22234"/>
+      <rect y="3.08" width="30" height="1.54" fill="#B22234"/>
+      <rect y="6.15" width="30" height="1.54" fill="#B22234"/>
+      <rect y="9.23" width="30" height="1.54" fill="#B22234"/>
+      <rect y="12.31" width="30" height="1.54" fill="#B22234"/>
+      <rect y="15.38" width="30" height="1.54" fill="#B22234"/>
+      <rect y="18.46" width="30" height="1.54" fill="#B22234"/>
+
+      <rect width="12" height="10.77" fill="#3C3B6E"/>
+
+      <g fill="#fff">
+        <circle cx="2" cy="1.5" r="0.45"/>
+        <circle cx="5" cy="1.5" r="0.45"/>
+        <circle cx="8" cy="1.5" r="0.45"/>
+        <circle cx="11" cy="1.5" r="0.45"/>
+
+        <circle cx="3.5" cy="3" r="0.45"/>
+        <circle cx="6.5" cy="3" r="0.45"/>
+        <circle cx="9.5" cy="3" r="0.45"/>
+
+        <circle cx="2" cy="4.5" r="0.45"/>
+        <circle cx="5" cy="4.5" r="0.45"/>
+        <circle cx="8" cy="4.5" r="0.45"/>
+        <circle cx="11" cy="4.5" r="0.45"/>
+
+        <circle cx="3.5" cy="6" r="0.45"/>
+        <circle cx="6.5" cy="6" r="0.45"/>
+        <circle cx="9.5" cy="6" r="0.45"/>
+
+        <circle cx="2" cy="7.5" r="0.45"/>
+        <circle cx="5" cy="7.5" r="0.45"/>
+        <circle cx="8" cy="7.5" r="0.45"/>
+        <circle cx="11" cy="7.5" r="0.45"/>
+
+        <circle cx="3.5" cy="9" r="0.45"/>
+        <circle cx="6.5" cy="9" r="0.45"/>
+        <circle cx="9.5" cy="9" r="0.45"/>
+      </g>
+    </svg>
+  `
 };
 
 function updateLangSwitchUI() {
@@ -427,19 +460,14 @@ function updateLangSwitchUI() {
   }
 
   document
-    .querySelectorAll(
-      '.lang-menu-option'
-    )
+    .querySelectorAll('.lang-menu-option')
     .forEach((option) => {
       const active =
-        option.dataset.lang ===
-        currentLang;
+        option.dataset.lang === currentLang;
 
       option.setAttribute(
         'aria-selected',
-        active
-          ? 'true'
-          : 'false'
+        active ? 'true' : 'false'
       );
     });
 }
@@ -471,10 +499,7 @@ function openLangMenu() {
 }
 
 function setLang(lang) {
-  if (
-    lang !== 'tr' &&
-    lang !== 'en'
-  ) {
+  if (lang !== 'tr' && lang !== 'en') {
     return;
   }
 
@@ -493,7 +518,6 @@ function setLang(lang) {
   }
 
   applyStaticTranslations();
-
   updateLangSwitchUI();
 
   setFavoriteFilter(
@@ -522,63 +546,42 @@ langSwitch?.addEventListener(
 );
 
 document
-  .querySelectorAll(
-    '.lang-menu-option'
-  )
+  .querySelectorAll('.lang-menu-option')
   .forEach((option) => {
-    option.addEventListener(
-      'click',
-      () => {
-        setLang(
-          option.dataset.lang
-        );
-
-        closeLangMenu();
-      }
-    );
+    option.addEventListener('click', () => {
+      setLang(option.dataset.lang);
+      closeLangMenu();
+    });
   });
 
-document.addEventListener(
-  'click',
-  (event) => {
-    if (
-      !langMenu ||
-      langMenu.hidden
-    ) {
-      return;
-    }
+document.addEventListener('click', (event) => {
+  if (!langMenu || langMenu.hidden) {
+    return;
+  }
 
-    if (
-      langMenu.contains(
-        event.target
-      ) ||
-      langSwitch?.contains(
-        event.target
-      )
-    ) {
-      return;
-    }
+  if (
+    langMenu.contains(event.target) ||
+    langSwitch?.contains(event.target)
+  ) {
+    return;
+  }
 
+  closeLangMenu();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (
+    event.key === 'Escape' &&
+    langMenu &&
+    !langMenu.hidden
+  ) {
     closeLangMenu();
   }
-);
-
-document.addEventListener(
-  'keydown',
-  (event) => {
-    if (
-      event.key === 'Escape' &&
-      langMenu &&
-      !langMenu.hidden
-    ) {
-      closeLangMenu();
-    }
-  }
-);
+});
 
 /* =========================================
    DOM
-   ========================================= */
+========================================= */
 
 const search = document.querySelector('#search');
 const results = document.querySelector('#results');
@@ -588,13 +591,14 @@ const title = document.querySelector('#result-title');
 const template = document.querySelector('#skin-template');
 
 const modal = document.querySelector('#skin-modal');
-const downloadList = document.querySelector('#download-list');
+const downloadList =
+  document.querySelector('#download-list');
 
 const fantomeFiles = new Set();
 
 /* =========================================
    FAVORİLER
-   ========================================= */
+========================================= */
 
 const FAVORITES_STORAGE_KEY =
   'exist-lol-skin-favorites';
@@ -624,16 +628,13 @@ try {
 
 /* =========================================
    ANALYTICS
-   ========================================= */
+========================================= */
 
 const track = (
   eventName,
   parameters = {}
 ) => {
-  if (
-    typeof window.gtag ===
-    'function'
-  ) {
+  if (typeof window.gtag === 'function') {
     window.gtag(
       'event',
       eventName,
@@ -644,18 +645,21 @@ const track = (
 
 /* =========================================
    ASSET URL
-   ========================================= */
+========================================= */
 
 const assetUrl = (path) => {
   const base =
     import.meta.env?.BASE_URL || '/';
 
-  return `${base}${String(path).replace(/^\/+/, '')}`;
+  return `${base}${String(path).replace(
+    /^\/+/,
+    ''
+  )}`;
 };
 
 /* =========================================
    VERİLER
-   ========================================= */
+========================================= */
 
 let skins = [];
 let skinGroups = [];
@@ -665,15 +669,13 @@ let lastTrackedSearch = '';
 
 /* =========================================
    FAVORİLERİ KAYDET
-   ========================================= */
+========================================= */
 
 function saveFavorites() {
   try {
     localStorage.setItem(
       FAVORITES_STORAGE_KEY,
-      JSON.stringify(
-        [...favorites]
-      )
+      JSON.stringify([...favorites])
     );
   } catch (error) {
     console.warn(
@@ -685,17 +687,15 @@ function saveFavorites() {
 
 /* =========================================
    FAVORİ KONTROLÜ
-   ========================================= */
+========================================= */
 
 function isFavorite(skinId) {
-  return favorites.has(
-    String(skinId)
-  );
+  return favorites.has(String(skinId));
 }
 
 /* =========================================
    FAVORİ SAYISI
-   ========================================= */
+========================================= */
 
 function updateFavoriteCount() {
   const favoriteCount =
@@ -708,9 +708,7 @@ function updateFavoriteCount() {
   }
 
   favoriteCount.textContent =
-    formatNumber(
-      favorites.size
-    );
+    formatNumber(favorites.size);
 
   favoriteCount.hidden =
     favorites.size === 0;
@@ -718,7 +716,7 @@ function updateFavoriteCount() {
 
 /* =========================================
    FAVORİ BUTONU
-   ========================================= */
+========================================= */
 
 function updateFavoriteButton(
   button,
@@ -728,8 +726,7 @@ function updateFavoriteButton(
     return;
   }
 
-  const favorite =
-    isFavorite(skinId);
+  const favorite = isFavorite(skinId);
 
   button.dataset.skinId =
     String(skinId);
@@ -741,9 +738,7 @@ function updateFavoriteButton(
 
   button.setAttribute(
     'aria-pressed',
-    favorite
-      ? 'true'
-      : 'false'
+    favorite ? 'true' : 'false'
   );
 
   button.setAttribute(
@@ -765,9 +760,7 @@ function updateFavoriteButton(
 
   if (icon) {
     icon.textContent =
-      favorite
-        ? '★'
-        : '☆';
+      favorite ? '★' : '☆';
   }
 
   const modalText =
@@ -789,27 +782,27 @@ function updateFavoriteButton(
 
   if (modalIcon) {
     modalIcon.textContent =
-      favorite
-        ? '★'
-        : '☆';
+      favorite ? '★' : '☆';
   }
 }
 
-function syncFavoriteButtons(
-  skinId
-) {
-  const targetId =
-    String(skinId);
+function syncFavoriteButtons(skinId) {
+  const targetId = String(skinId);
 
   document
     .querySelectorAll(
-      `.favorite-button[data-skin-id="${targetId}"]`
+      '.favorite-button[data-skin-id]'
     )
     .forEach((button) => {
-      updateFavoriteButton(
-        button,
+      if (
+        String(button.dataset.skinId) ===
         targetId
-      );
+      ) {
+        updateFavoriteButton(
+          button,
+          targetId
+        );
+      }
     });
 }
 
@@ -828,7 +821,7 @@ function syncAllFavoriteButtons() {
 
 /* =========================================
    FAVORİ FİLTRESİ
-   ========================================= */
+========================================= */
 
 const favoriteFilter =
   document.querySelector(
@@ -843,9 +836,7 @@ function isFavoriteFilterActive() {
   );
 }
 
-function setFavoriteFilter(
-  active
-) {
+function setFavoriteFilter(active) {
   if (!favoriteFilter) {
     return;
   }
@@ -857,9 +848,7 @@ function setFavoriteFilter(
 
   favoriteFilter.setAttribute(
     'aria-pressed',
-    active
-      ? 'true'
-      : 'false'
+    active ? 'true' : 'false'
   );
 
   favoriteFilter.setAttribute(
@@ -877,7 +866,7 @@ function setFavoriteFilter(
 
 /* =========================================
    FAVORİ DEĞİŞTİR
-   ========================================= */
+========================================= */
 
 function toggleFavorite(
   skinId,
@@ -887,10 +876,7 @@ function toggleFavorite(
     return;
   }
 
-  const id = String(
-    skinId
-  );
-
+  const id = String(skinId);
   const wasFavorite =
     favorites.has(id);
 
@@ -908,10 +894,6 @@ function toggleFavorite(
   );
 
   syncFavoriteButtons(id);
-
-  /* ---------------------------------------
-     Favori ekleme animasyonu
-     --------------------------------------- */
 
   button.classList.remove(
     'favorite-pop',
@@ -938,53 +920,32 @@ function toggleFavorite(
 
   updateFavoriteCount();
 
-  /* ---------------------------------------
-     Favoriler filtresi açıksa render
-     --------------------------------------- */
-
-  if (
-    isFavoriteFilterActive()
-  ) {
-    window.setTimeout(
-      () => {
-        render();
-      },
-      220
-    );
+  if (isFavoriteFilterActive()) {
+    window.setTimeout(() => {
+      render();
+    }, 220);
   }
 
-  track(
-    'favorite_toggle',
-    {
-      skin_id: id,
-      is_favorite:
-        favorites.has(id)
-          ? 1
-          : 0
-    }
-  );
+  track('favorite_toggle', {
+    skin_id: id,
+    is_favorite:
+      favorites.has(id) ? 1 : 0
+  });
 }
 
 /* =========================================
    NORMALIZE
-   ========================================= */
+========================================= */
 
-const normalize = (
-  value
-) =>
+const normalize = (value) =>
   String(value ?? '')
-    .toLocaleLowerCase(
-      'tr-TR'
-    )
+    .toLocaleLowerCase('tr-TR')
     .normalize('NFD')
     .replace(
       /[\u0300-\u036f]/g,
       ''
     )
-    .replace(
-      /ı/g,
-      'i'
-    )
+    .replace(/ı/g, 'i')
     .replace(
       /[^a-z0-9]/g,
       ''
@@ -992,7 +953,7 @@ const normalize = (
 
 /* =========================================
    ARAMA EŞLEŞMESİ
-   ========================================= */
+========================================= */
 
 function groupMatchesSearch(
   group,
@@ -1004,17 +965,16 @@ function groupMatchesSearch(
 
   const searchableText =
     group.skins
-      .map(
-        (skin) =>
-          [
-            skin.name,
-            skin.nameEn,
-            skin.champion,
-            skin.championEn,
-            skin.id
-          ]
-            .filter(Boolean)
-            .join(' ')
+      .map((skin) =>
+        [
+          skin.name,
+          skin.nameEn,
+          skin.champion,
+          skin.championEn,
+          skin.id
+        ]
+          .filter(Boolean)
+          .join(' ')
       )
       .join(' ');
 
@@ -1025,11 +985,9 @@ function groupMatchesSearch(
 
 /* =========================================
    FAVORİ GRUP KONTROLÜ
-   ========================================= */
+========================================= */
 
-function groupHasFavorite(
-  group
-) {
+function groupHasFavorite(group) {
   return group.skins.some(
     (skin) =>
       isFavorite(skin.id)
@@ -1038,11 +996,9 @@ function groupHasFavorite(
 
 /* =========================================
    GÜVENLİ SKIN VERİSİ
-   ========================================= */
+========================================= */
 
-function normalizeSkin(
-  skin
-) {
+function normalizeSkin(skin) {
   if (
     !skin ||
     typeof skin !== 'object'
@@ -1050,32 +1006,27 @@ function normalizeSkin(
     return null;
   }
 
-  const id =
-    String(
-      skin.id ?? ''
-    ).trim();
+  const id = String(
+    skin.id ?? ''
+  ).trim();
 
-  const name =
-    String(
-      skin.name ?? ''
-    ).trim();
+  const name = String(
+    skin.name ?? ''
+  ).trim();
 
-  const champion =
-    String(
-      skin.champion ?? ''
-    ).trim();
+  const champion = String(
+    skin.champion ?? ''
+  ).trim();
 
-  const image =
-    String(
-      skin.image ?? ''
-    ).trim();
+  const image = String(
+    skin.image ?? ''
+  ).trim();
 
-  const nameEn =
-    skin.nameEn
-      ? String(
-          skin.nameEn
-        ).trim()
-      : '';
+  const nameEn = skin.nameEn
+    ? String(
+        skin.nameEn
+      ).trim()
+    : '';
 
   const championEn =
     skin.championEn
@@ -1105,11 +1056,9 @@ function normalizeSkin(
 
 /* =========================================
    SKIN KARTI
-   ========================================= */
+========================================= */
 
-function createSkinCard(
-  group
-) {
+function createSkinCard(group) {
   if (
     !group ||
     !group.primary
@@ -1117,12 +1066,9 @@ function createSkinCard(
     return null;
   }
 
-  const skin =
-    group.primary;
+  const skin = group.primary;
 
-  if (
-    !template?.content
-  ) {
+  if (!template?.content) {
     console.error(
       '#skin-template bulunamadı.'
     );
@@ -1136,9 +1082,7 @@ function createSkinCard(
     );
 
   const image =
-    card.querySelector(
-      'img'
-    );
+    card.querySelector('img');
 
   const championElement =
     card.querySelector(
@@ -1146,9 +1090,7 @@ function createSkinCard(
     );
 
   const nameElement =
-    card.querySelector(
-      'h3'
-    );
+    card.querySelector('h3');
 
   const idElement =
     card.querySelector(
@@ -1168,29 +1110,25 @@ function createSkinCard(
     return null;
   }
 
-  /* ---------------------------------------
-     Görsel
-     --------------------------------------- */
-
   const displayName =
     localizedName(skin);
 
   const displayChampion =
     localizedChampion(skin);
 
+  /* ---------------------------------------
+     Görsel
+  --------------------------------------- */
+
   if (image) {
     image.src =
-      skin.image ||
-      '';
+      skin.image || '';
 
     image.alt =
       `${displayName} — ${displayChampion}`;
 
-    image.loading =
-      'lazy';
-
-    image.decoding =
-      'async';
+    image.loading = 'lazy';
+    image.decoding = 'async';
 
     image.addEventListener(
       'error',
@@ -1206,7 +1144,7 @@ function createSkinCard(
 
   /* ---------------------------------------
      Metin
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (championElement) {
     championElement.textContent =
@@ -1225,7 +1163,7 @@ function createSkinCard(
 
   /* ---------------------------------------
      Favori butonu
-     --------------------------------------- */
+  --------------------------------------- */
 
   let favoriteButton =
     card.querySelector(
@@ -1238,8 +1176,7 @@ function createSkinCard(
         'button'
       );
 
-    favoriteButton.type =
-      'button';
+    favoriteButton.type = 'button';
 
     favoriteButton.className =
       'favorite-button';
@@ -1282,10 +1219,9 @@ function createSkinCard(
 
   /* ---------------------------------------
      Kart erişilebilirliği
-     --------------------------------------- */
+  --------------------------------------- */
 
-  article.tabIndex =
-    0;
+  article.tabIndex = 0;
 
   article.setAttribute(
     'role',
@@ -1303,7 +1239,7 @@ function createSkinCard(
 
   /* ---------------------------------------
      Modal
-     --------------------------------------- */
+  --------------------------------------- */
 
   article.addEventListener(
     'click',
@@ -1316,13 +1252,10 @@ function createSkinCard(
     'keydown',
     (event) => {
       if (
-        event.key ===
-          'Enter' ||
-        event.key ===
-          ' '
+        event.key === 'Enter' ||
+        event.key === ' '
       ) {
         event.preventDefault();
-
         openModal(group);
       }
     }
@@ -1333,7 +1266,7 @@ function createSkinCard(
 
 /* =========================================
    SKINLERİ RENDER ET
-   ========================================= */
+========================================= */
 
 function render() {
   if (
@@ -1346,9 +1279,7 @@ function render() {
   }
 
   const query =
-    normalize(
-      search.value
-    );
+    normalize(search.value);
 
   let found =
     skinGroups.filter(
@@ -1361,23 +1292,20 @@ function render() {
 
   /* ---------------------------------------
      Favori filtresi
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (
     isFavoriteFilterActive()
   ) {
-    found =
-      found.filter(
-        (group) =>
-          groupHasFavorite(
-            group
-          )
-      );
+    found = found.filter(
+      (group) =>
+        groupHasFavorite(group)
+    );
   }
 
   /* ---------------------------------------
      Maksimum görünür kart
-     --------------------------------------- */
+  --------------------------------------- */
 
   const maxVisible =
     query ||
@@ -1393,11 +1321,8 @@ function render() {
 
   const cards =
     visible
-      .map(
-        (group) =>
-          createSkinCard(
-            group
-          )
+      .map((group) =>
+        createSkinCard(group)
       )
       .filter(Boolean);
 
@@ -1407,40 +1332,49 @@ function render() {
 
   /* ---------------------------------------
      Başlık
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (
     isFavoriteFilterActive()
   ) {
-    title.textContent =
-      query
-        ? t(
-            'favoriteResultsCount',
-            {
-              count: formatNumber(
+    title.textContent = query
+      ? t(
+          'favoriteResultsCount',
+          {
+            count:
+              formatNumber(
                 found.length
               )
-            }
-          )
-        : t('favoriteCount', {
-            count: formatNumber(
-              found.length
-            )
-          });
+          }
+        )
+      : t(
+          'favoriteCount',
+          {
+            count:
+              formatNumber(
+                found.length
+              )
+          }
+        );
   } else {
-    title.textContent =
-      query
-        ? t('resultsCount', {
-            count: formatNumber(
-              found.length
-            )
-          })
-        : t('exploreSkins');
+    title.textContent = query
+      ? t(
+          'resultsCount',
+          {
+            count:
+              formatNumber(
+                found.length
+              )
+          }
+        )
+      : t(
+          'exploreSkins'
+        );
   }
 
   /* ---------------------------------------
      Meta
-     --------------------------------------- */
+  --------------------------------------- */
 
   const visibleCount =
     visible.length;
@@ -1455,19 +1389,21 @@ function render() {
     ) {
       meta.textContent =
         t('showingCount', {
-          visible: formatNumber(
-            visibleCount
-          ),
-          total: formatNumber(
-            found.length
-          )
+          visible:
+            formatNumber(
+              visibleCount
+            ),
+          total:
+            formatNumber(
+              found.length
+            )
         });
     }
   }
 
   /* ---------------------------------------
      Boş durum
-     --------------------------------------- */
+  --------------------------------------- */
 
   empty.hidden =
     found.length !== 0;
@@ -1476,14 +1412,10 @@ function render() {
     found.length === 0;
 
   const emptyTitle =
-    empty.querySelector(
-      'h2'
-    );
+    empty.querySelector('h2');
 
   const emptyText =
-    empty.querySelector(
-      'p'
-    );
+    empty.querySelector('p');
 
   if (
     emptyTitle &&
@@ -1527,11 +1459,9 @@ function render() {
 
 /* =========================================
    SKIN MODALI
-   ========================================= */
+========================================= */
 
-function openModal(
-  group
-) {
+function openModal(group) {
   if (
     !modal ||
     !downloadList ||
@@ -1571,12 +1501,11 @@ function openModal(
 
   /* ---------------------------------------
      Modal görseli
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (modalImage) {
     modalImage.src =
-      skin.image ||
-      '';
+      skin.image || '';
 
     modalImage.alt =
       `${displayName} — ${displayChampion}`;
@@ -1584,7 +1513,7 @@ function openModal(
 
   /* ---------------------------------------
      Modal bilgileri
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (modalChampion) {
     modalChampion.textContent =
@@ -1603,139 +1532,139 @@ function openModal(
       });
   }
 
+  /* ---------------------------------------
+     Modal favori
+  --------------------------------------- */
+
   const modalFavoriteButton =
     document.querySelector(
-     '#modal-favorite'
+      '#modal-favorite'
     );
 
   if (modalFavoriteButton) {
     modalFavoriteButton.dataset.skinId =
-     String(skin.id);
+      String(skin.id);
 
     updateFavoriteButton(
-     modalFavoriteButton,
-     skin.id
+      modalFavoriteButton,
+      skin.id
     );
 
     modalFavoriteButton.onclick =
-     () => {
-       toggleFavorite(
-         skin.id,
-         modalFavoriteButton
-       );
-     };
+      () => {
+        toggleFavorite(
+          skin.id,
+          modalFavoriteButton
+        );
+      };
   }
 
-     /* ---------------------------------------
+  /* ---------------------------------------
      Fantome dosyaları
-     --------------------------------------- */
+  --------------------------------------- */
 
   const fragment =
     document.createDocumentFragment();
 
-  group.skins.forEach(
-    (item) => {
-      const hasFile =
-        fantomeFiles.has(
-          String(item.id)
+  group.skins.forEach((item) => {
+    const hasFile =
+      fantomeFiles.has(
+        String(item.id)
+      );
+
+    const element =
+      document.createElement(
+        hasFile ? 'a' : 'span'
+      );
+
+    element.className =
+      `download-item${
+        hasFile
+          ? ''
+          : ' unavailable'
+      }`;
+
+    const itemDisplayName =
+      localizedName(item);
+
+    const chromaName =
+      itemDisplayName.match(
+        /\(([^)]+)\)$/
+      )?.[1];
+
+    element.textContent =
+      item === skin
+        ? `${t('mainSkin')} · ${item.id}`
+        : `${
+            chromaName ||
+            itemDisplayName
+          } · ${item.id}`;
+
+    if (hasFile) {
+      element.href =
+        assetUrl(
+          `fantome/${item.id}.fantome`
         );
 
-      const element =
-        document.createElement(
-          hasFile
-            ? 'a'
-            : 'span'
-        );
+      element.download =
+        `${item.id}.fantome`;
 
-      element.className =
-        `download-item${
-          hasFile
-            ? ''
-            : ' unavailable'
-        }`;
-
-      const itemDisplayName =
-        localizedName(item);
-
-      const chromaName =
-        itemDisplayName
-          .match(
-            /\(([^)]+)\)$/
-          )?.[1];
-
-      element.textContent =
-        item === skin
-          ? `${t('mainSkin')} · ${item.id}`
-          : `${
-              chromaName ||
-              itemDisplayName
-            } · ${item.id}`;
-
-      if (hasFile) {
-        element.href =
-          assetUrl(
-            `fantome/${item.id}.fantome`
-          );
-
-        element.download =
-          `${item.id}.fantome`;
-
-        element.title =
-          t(
-            'downloadFantomeTitle',
-            {
-              id: item.id
-            }
-          );
-
-        element.setAttribute(
-          'aria-label',
-          t(
-            'downloadFantomeAriaLabel',
-            {
-              name: itemDisplayName
-            }
-          )
-        );
-
-        element.addEventListener(
-          'click',
-          () => {
-            track(
-              'fantome_download',
-              {
-                skin_id:
-                  item.id,
-
-                skin_name:
-                  item.name,
-
-                champion:
-                  item.champion,
-
-                is_chroma:
-                  item !== skin
-                    ? 1
-                    : 0
-              }
-            );
+      element.title =
+        t(
+          'downloadFantomeTitle',
+          {
+            id: item.id
           }
         );
-      } else {
-        element.title =
-          t('fileNotFound');
 
-        element.setAttribute(
-          'aria-disabled',
-          'true'
-        );
-      }
+      element.setAttribute(
+        'aria-label',
+        t(
+          'downloadFantomeAriaLabel',
+          {
+            name:
+              itemDisplayName
+          }
+        )
+      );
 
-      fragment.appendChild(
-        element
+      element.addEventListener(
+        'click',
+        () => {
+          track(
+            'fantome_download',
+            {
+              skin_id:
+                item.id,
+
+              skin_name:
+                item.name,
+
+              champion:
+                item.champion,
+
+              is_chroma:
+                item !== skin
+                  ? 1
+                  : 0
+            }
+          );
+        }
+      );
+    } else {
+      element.title =
+        t('fileNotFound');
+
+      element.setAttribute(
+        'aria-disabled',
+        'true'
       );
     }
-  );
+
+    fragment.appendChild(
+      element
+    );
+  });
 
   downloadList.replaceChildren(
     fragment
@@ -1743,7 +1672,7 @@ function openModal(
 
   /* ---------------------------------------
      Modal aç
-     --------------------------------------- */
+  --------------------------------------- */
 
   if (
     typeof modal.showModal ===
@@ -1757,24 +1686,16 @@ function openModal(
     );
   }
 
-  track(
-    'skin_open',
-    {
-      skin_id:
-        skin.id,
-
-      skin_name:
-        skin.name,
-
-      champion:
-        skin.champion
-    }
-  );
+  track('skin_open', {
+    skin_id: skin.id,
+    skin_name: skin.name,
+    champion: skin.champion
+  });
 }
 
 /* =========================================
    SKIN MODALI KAPAT
-   ========================================= */
+========================================= */
 
 function closeSkinModal() {
   if (!modal) {
@@ -1794,9 +1715,7 @@ function closeSkinModal() {
 }
 
 document
-  .querySelector(
-    '.modal-close'
-  )
+  .querySelector('.modal-close')
   ?.addEventListener(
     'click',
     closeSkinModal
@@ -1806,46 +1725,16 @@ modal?.addEventListener(
   'click',
   (event) => {
     if (
-      event.target ===
-      modal
+      event.target === modal
     ) {
       closeSkinModal();
-    }
-  }
-);
-
-/* =========================================
-   ESC — MODALLAR
-   ========================================= */
-
-document.addEventListener(
-  'keydown',
-  (event) => {
-    if (
-      event.key !==
-      'Escape'
-    ) {
-      return;
-    }
-
-    if (
-      modal?.open
-    ) {
-      closeSkinModal();
-      return;
-    }
-
-    if (
-      discordModal?.open
-    ) {
-      closeDiscordModal();
     }
   }
 );
 
 /* =========================================
    DISCORD MODALI
-   ========================================= */
+========================================= */
 
 const discordButton =
   document.querySelector(
@@ -1933,8 +1822,32 @@ if (
 }
 
 /* =========================================
+   ESC — MODALLAR
+========================================= */
+
+document.addEventListener(
+  'keydown',
+  (event) => {
+    if (
+      event.key !== 'Escape'
+    ) {
+      return;
+    }
+
+    if (modal?.open) {
+      closeSkinModal();
+      return;
+    }
+
+    if (discordModal?.open) {
+      closeDiscordModal();
+    }
+  }
+);
+
+/* =========================================
    FAVORİ FİLTRESİ
-   ========================================= */
+========================================= */
 
 favoriteFilter?.addEventListener(
   'click',
@@ -1942,19 +1855,13 @@ favoriteFilter?.addEventListener(
     const active =
       !isFavoriteFilterActive();
 
-    setFavoriteFilter(
-      active
-    );
-
+    setFavoriteFilter(active);
     render();
 
     track(
       'favorite_filter',
       {
-        active:
-          active
-            ? 1
-            : 0
+        active: active ? 1 : 0
       }
     );
   }
@@ -1962,7 +1869,7 @@ favoriteFilter?.addEventListener(
 
 /* =========================================
    ARAMA ANALYTICS
-   ========================================= */
+========================================= */
 
 function scheduleSearchAnalytics() {
   clearTimeout(
@@ -2022,13 +1929,12 @@ function scheduleSearchAnalytics() {
 
 /* =========================================
    ARAMA
-   ========================================= */
+========================================= */
 
 search?.addEventListener(
   'input',
   () => {
     render();
-
     scheduleSearchAnalytics();
   }
 );
@@ -2037,11 +1943,9 @@ search?.addEventListener(
   'keydown',
   (event) => {
     if (
-      event.key ===
-      'Escape'
+      event.key === 'Escape'
     ) {
-      search.value =
-        '';
+      search.value = '';
 
       setFavoriteFilter(
         false
@@ -2056,46 +1960,42 @@ search?.addEventListener(
 
 /* =========================================
    HIZLI ARAMALAR
-   ========================================= */
+========================================= */
 
 document
   .querySelectorAll(
     '[data-query]'
   )
-  .forEach(
-    (button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          if (!search) {
-            return;
-          }
-
-          search.value =
-            button.dataset.query ||
-            '';
-
-          setFavoriteFilter(
-            false
-          );
-
-          render();
-
-          search.focus();
-
-          scheduleSearchAnalytics();
+  .forEach((button) => {
+    button.addEventListener(
+      'click',
+      () => {
+        if (!search) {
+          return;
         }
-      );
-    }
-  );
+
+        search.value =
+          button.dataset.query ||
+          '';
+
+        setFavoriteFilter(
+          false
+        );
+
+        render();
+
+        search.focus();
+
+        scheduleSearchAnalytics();
+      }
+    );
+  });
 
 /* =========================================
    FANTOME ID VERİLERİNİ NORMALİZE ET
-   ========================================= */
+========================================= */
 
-function addFantomeFile(
-  value
-) {
+function addFantomeFile(value) {
   if (
     value === null ||
     value === undefined
@@ -2105,31 +2005,25 @@ function addFantomeFile(
 
   /*
    * JSON bazen:
-   *
    * [29004, 29005]
    *
-   * bazen de:
-   *
+   * bazen:
    * ["29004", "29005"]
    *
-   * gelebilir.
+   * bazen de:
+   * [{ id: 29004 }]
    */
 
   if (
-    typeof value ===
-    'object'
+    typeof value === 'object'
   ) {
-    if (
-      'id' in value
-    ) {
+    if ('id' in value) {
       fantomeFiles.add(
         String(value.id)
       );
     }
 
-    if (
-      'skinId' in value
-    ) {
+    if ('skinId' in value) {
       fantomeFiles.add(
         String(value.skinId)
       );
@@ -2147,80 +2041,67 @@ function addFantomeFile(
       );
 
   if (id) {
-    fantomeFiles.add(
-      id
-    );
+    fantomeFiles.add(id);
   }
 }
 
 /* =========================================
    SKIN GRUPLARINI OLUŞTUR
-   ========================================= */
+========================================= */
 
 function buildSkinGroups(
   skinList
 ) {
-  const groups =
-    new Map();
+  const groups = new Map();
 
-  skinList.forEach(
-    (skin) => {
-      const baseName =
-        skin.name
-          .trim()
-          .replace(
-            /\s*\([^)]+\)$/,
-            ''
-          );
-
-      /*
-       * Aynı şampiyondaki aynı skin
-       * isimlerini aynı grupta tut.
-       */
-
-      const key =
-        `${skin.championId ?? skin.champion}:${normalize(
-          baseName
-        )}`;
-
-      if (
-        !groups.has(key)
-      ) {
-        groups.set(
-          key,
-          {
-            primary:
-              skin,
-            skins: []
-          }
+  skinList.forEach((skin) => {
+    const baseName =
+      skin.name
+        .trim()
+        .replace(
+          /\s*\([^)]+\)$/,
+          ''
         );
-      }
 
-      const group =
-        groups.get(key);
+    /*
+     * Aynı şampiyondaki aynı skin
+     * isimlerini aynı grupta tut.
+     */
 
-      group.skins.push(
-        skin
-      );
-
-      /*
-       * Chroma olmayan ana skin
-       * primary olarak kullanılır.
-       */
-
-      if (
-        skin.name.trim() ===
+    const key =
+      `${skin.championId ?? skin.champion}:${normalize(
         baseName
-      ) {
-        group.primary =
-          skin;
-      }
-    }
-  );
+      )}`;
 
-  return [
-    ...groups.values()
-  ].map(
+    if (!groups.has(key)) {
+      groups.set(
+        key,
+        {
+          primary: skin,
+          skins: []
+        }
+      );
+    }
+
+    const group =
+      groups.get(key);
+
+    group.skins.push(skin);
+
+    /*
+     * Chroma olmayan ana skin
+     * primary olarak kullanılır.
+     */
+
+    if (
+      skin.name.trim() ===
+      baseName
+    ) {
+      group.primary = skin;
+    }
+  });
+
+  return [...groups.values()].map(
     (group) => {
       const primary =
         group.primary;
@@ -2263,10 +2144,14 @@ function buildSkinGroups(
 
 /* =========================================
    VERİLERİ YÜKLE
-   ========================================= */
+========================================= */
 
 async function loadData() {
-  if (!search || !results || !empty) {
+  if (
+    !search ||
+    !results ||
+    !empty
+  ) {
     console.error(
       'Gerekli HTML elementleri bulunamadı.'
     );
@@ -2278,36 +2163,33 @@ async function loadData() {
     const [
       dataResponse,
       filesResponse
-    ] =
-      await Promise.all([
-        fetch(
-          assetUrl(
-            'data/skins.json'
-          ),
-          {
-            cache:
-              'no-cache'
-          }
+    ] = await Promise.all([
+      fetch(
+        assetUrl(
+          'data/skins.json'
         ),
+        {
+          cache:
+            'no-cache'
+        }
+      ),
 
-        fetch(
-          assetUrl(
-            'data/fantome-files.json'
-          ),
-          {
-            cache:
-              'no-cache'
-          }
-        )
-      ]);
+      fetch(
+        assetUrl(
+          'data/fantome-files.json'
+        ),
+        {
+          cache:
+            'no-cache'
+        }
+      )
+    ]);
 
     /* ---------------------------------------
        skins.json
-       --------------------------------------- */
+    --------------------------------------- */
 
-    if (
-      !dataResponse.ok
-    ) {
+    if (!dataResponse.ok) {
       throw new Error(
         `skins.json yüklenemedi (${dataResponse.status})`
       );
@@ -2318,11 +2200,9 @@ async function loadData() {
 
     /* ---------------------------------------
        Fantome listesi
-       --------------------------------------- */
+    --------------------------------------- */
 
-    if (
-      filesResponse.ok
-    ) {
+    if (filesResponse.ok) {
       const files =
         await filesResponse.json();
 
@@ -2350,7 +2230,7 @@ async function loadData() {
 
     /* ---------------------------------------
        Skin listesi
-       --------------------------------------- */
+    --------------------------------------- */
 
     const rawSkins =
       Array.isArray(
@@ -2376,7 +2256,7 @@ async function loadData() {
 
     /* ---------------------------------------
        Gruplar
-       --------------------------------------- */
+    --------------------------------------- */
 
     skinGroups =
       buildSkinGroups(
@@ -2385,20 +2265,23 @@ async function loadData() {
 
     /* ---------------------------------------
        Meta
-       --------------------------------------- */
+    --------------------------------------- */
 
     if (meta) {
       const version =
         data?.version ||
-        (currentLang === 'en'
-          ? 'Unknown'
-          : 'Bilinmiyor');
+        (
+          currentLang === 'en'
+            ? 'Unknown'
+            : 'Bilinmiyor'
+        );
 
       meta.textContent =
         t('metaVersion', {
-          count: formatNumber(
-            skinGroups.length
-          ),
+          count:
+            formatNumber(
+              skinGroups.length
+            ),
           version
         });
     }
@@ -2428,11 +2311,8 @@ async function loadData() {
         t('dataLoadFailedMeta');
     }
 
-    empty.hidden =
-      false;
-
-    results.hidden =
-      true;
+    empty.hidden = false;
+    results.hidden = true;
 
     const emptyTitle =
       empty.querySelector(
@@ -2446,19 +2326,23 @@ async function loadData() {
 
     if (emptyTitle) {
       emptyTitle.textContent =
-        t('dataLoadFailedTitle');
+        t(
+          'dataLoadFailedTitle'
+        );
     }
 
     if (emptyText) {
       emptyText.textContent =
-        t('dataLoadFailedHint');
+        t(
+          'dataLoadFailedHint'
+        );
     }
   }
 }
 
 /* =========================================
    BAŞLAT
-   ========================================= */
+========================================= */
 
 applyStaticTranslations();
 
@@ -2466,8 +2350,6 @@ updateLangSwitchUI();
 
 updateFavoriteCount();
 
-setFavoriteFilter(
-  false
-);
+setFavoriteFilter(false);
 
 await loadData();
