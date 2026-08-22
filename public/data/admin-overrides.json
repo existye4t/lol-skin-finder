@@ -1,16 +1,5 @@
 {
-  "updatedAt": "2026-08-22T02:23:17.602Z",
-  "overrides": {
-    "11116": {
-      "id": "11116",
-      "name": "KOD ADI: Komut Zinciri Yi TEST",
-      "nameEn": "PROJECT: Command Line Yi Test",
-      "champion": "Master Yi",
-      "championEn": "Master Yi",
-      "championId": "MasterYi",
-      "modifiedAt": "2026-08-22T02:23:17.598Z",
-      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_116.jpg"
-    }
-  },
+  "updatedAt": "2026-08-22T02:27:24.910Z",
+  "overrides": {},
   "customSkins": []
 }
