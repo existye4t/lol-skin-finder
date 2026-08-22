@@ -1614,7 +1614,11 @@ function createSkinCard(group) {
 
   if (image) {
     image.src =
-      skin.image || '';
+      skin.image && (skin.image.startsWith('http://') || skin.image.startsWith('https://'))
+        ? skin.image
+        : skin.image
+          ? assetUrl(skin.image)
+          : '';
 
     image.alt =
       `${displayName} — ${displayChampion}`;
@@ -2009,7 +2013,11 @@ function openModal(group) {
 
   if (modalImage) {
     modalImage.src =
-      skin.image || '';
+      skin.image && (skin.image.startsWith('http://') || skin.image.startsWith('https://'))
+        ? skin.image
+        : skin.image
+          ? assetUrl(skin.image)
+          : '';
 
     modalImage.alt =
       `${displayName} — ${displayChampion}`;

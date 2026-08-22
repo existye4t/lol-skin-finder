@@ -1,0 +1,13 @@
+name = "lol-skin-finder-admin"
+main = "worker.js"
+compatibility_date = "2026-08-22"
+
+[vars]
+REPO_OWNER = "existye4t"
+REPO_NAME = "lol-skin-finder"
+REPO_BRANCH = "main"
+
+# Secret environment variables (Set via: wrangler secret put <NAME>)
+# - GITHUB_TOKEN: Fine-grained Personal Access Token with repository contents read/write permissions
+# - ADMIN_PASSWORD: Your strong admin password
+# - JWT_SECRET: A 32+ character random string for signing admin session tokens

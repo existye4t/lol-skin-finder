@@ -7,6 +7,7 @@
     "update-data": "node scripts/update-skins.mjs",
     "prepare-fantome": "node scripts/prepare-fantome.mjs",
     "dev": "vite --host 127.0.0.1",
+    "admin-server": "node scripts/admin-server.mjs",
     "build": "vite build --base=./",
     "preview": "vite preview"
   },

@@ -57,13 +57,14 @@ jobs:
         run: |
           set -e
 
-          mkdir -p fantome
-          mkdir -p data
+          mkdir -p public/fantome
+          mkdir -p public/data
+          mkdir -p public/images/skins
 
           echo "Directories ready."
 
       # ============================================================
-      # 5. SYNC FANTOME FILES
+      # 5. SYNC FANTOME FILES (WITH ADMIN OVERRIDE PROTECTION)
       # ============================================================
 
       - name: Sync Fantome files
@@ -75,26 +76,51 @@ jobs:
           echo "SYNCING FANTOME FILES"
           echo "=========================================="
 
-          rm -rf fantome
-          mkdir -p fantome
+          python3 - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
 
-          count=0
+          target_dir = Path("public/fantome")
+          target_dir.mkdir(parents=True, exist_ok=True)
 
-          while IFS= read -r -d '' file; do
-            filename="$(basename "$file")"
+          # 1. Admin overrides dosyasını oku ve korunan fantome dosyalarını tespit et
+          overrides_path = Path("public/data/admin-overrides.json")
+          protected_ids = set()
+          if overrides_path.exists():
+              try:
+                  ov = json.loads(overrides_path.read_text(encoding="utf-8"))
+                  ov_map = ov.get("overrides", {}) if isinstance(ov, dict) else {}
+                  if isinstance(ov, list):
+                      for item in ov:
+                          if isinstance(item, dict) and item.get("customFantome") is True:
+                              protected_ids.add(str(item.get("id", "")).strip())
+                  else:
+                      for skin_id, item in ov_map.items():
+                          if isinstance(item, dict) and item.get("customFantome") is True:
+                              protected_ids.add(str(skin_id).strip())
+                      for c_skin in ov.get("customSkins", []):
+                          if isinstance(c_skin, dict) and c_skin.get("id"):
+                              protected_ids.add(str(c_skin["id"]).strip())
+              except Exception as e:
+                  print(f"Warning reading admin-overrides.json: {e}")
 
-            cp -f "$file" "fantome/$filename"
+          print(f"Protected custom fantome files: {len(protected_ids)}")
 
-            count=$((count + 1))
-          done < <(
-            find source-skins/skins \
-              -type f \
-              -iname "*.fantome" \
-              -print0
-          )
+          # 2. Source-skins dosyalarını kopyala (korunan dosyaları ezme)
+          source_dir = Path("source-skins/skins")
+          count = 0
+          for file in source_dir.rglob("*.fantome"):
+              skin_id = file.stem.strip()
+              target_file = target_dir / f"{skin_id}.fantome"
+              if skin_id in protected_ids and target_file.exists():
+                  print(f"Preserving custom fantome: {skin_id}.fantome")
+                  continue
+              shutil.copy2(file, target_file)
+              count += 1
 
-          echo ""
-          echo "Fantome files copied: $count"
+          print(f"Fantome files copied/synced: {count}")
+          PY
 
       # ============================================================
       # 6. DOWNLOAD RIOT VERSION
@@ -629,7 +655,7 @@ jobs:
           from pathlib import Path
 
           fantome_dir = Path(
-              "fantome"
+              "public/fantome"
           )
 
           riot_index = json.loads(
@@ -1005,8 +1031,54 @@ jobs:
               # ====================================================
               # Keep source only internally
               # ====================================================
- 
+
               matched[skin_id] = skin
+
+          # ========================================================
+          # APPLY ADMIN OVERRIDES & INJECT CUSTOM SKINS
+          # ========================================================
+
+          overrides_file = Path("public/data/admin-overrides.json")
+          if overrides_file.exists():
+              try:
+                  ov_data = json.loads(overrides_file.read_text(encoding="utf-8"))
+                  ov_map = {}
+                  custom_skins = []
+
+                  if isinstance(ov_data, list):
+                      for item in ov_data:
+                          if isinstance(item, dict) and item.get("id"):
+                              ov_map[str(item["id"]).strip()] = item
+                  elif isinstance(ov_data, dict):
+                      ov_map = ov_data.get("overrides", {})
+                      custom_skins = ov_data.get("customSkins", [])
+
+                  # 1. Merge overrides on existing matched skins
+                  for ov_id, ov_entry in ov_map.items():
+                      str_id = str(ov_id).strip()
+                      if str_id in matched and isinstance(ov_entry, dict):
+                          for field in ["name", "nameEn", "champion", "championEn", "championId", "image"]:
+                              if field in ov_entry and ov_entry[field]:
+                                  matched[str_id][field] = ov_entry[field]
+
+                  # 2. Add custom skins that aren't in matched
+                  for c_skin in custom_skins:
+                      if isinstance(c_skin, dict) and c_skin.get("id"):
+                          c_id = str(c_skin["id"]).strip()
+                          if c_id not in matched:
+                              matched[c_id] = {
+                                  "id": c_id,
+                                  "skinNum": c_skin.get("skinNum", 0),
+                                  "name": c_skin.get("name", f"Custom Skin {c_id}"),
+                                  "champion": c_skin.get("champion", "Custom"),
+                                  "nameEn": c_skin.get("nameEn", c_skin.get("name", f"Custom Skin {c_id}")),
+                                  "championEn": c_skin.get("championEn", c_skin.get("champion", "Custom")),
+                                  "championId": c_skin.get("championId", "Custom"),
+                                  "image": c_skin.get("image", f"images/skins/{c_id}.jpg")
+                              }
+                  print(f"Admin overrides applied. Overrides: {len(ov_map)}, Custom skins: {len(custom_skins)}")
+              except Exception as e:
+                  print(f"Warning processing admin overrides in step 12: {e}")
 
           # ========================================================
           # SORT
@@ -1068,7 +1140,7 @@ jobs:
           }
 
           output = Path(
-              "data/skins.json"
+              "public/data/skins.json"
           )
 
           output.parent.mkdir(
@@ -1146,7 +1218,7 @@ jobs:
           from pathlib import Path
 
           folder = Path(
-              "fantome"
+              "public/fantome"
           )
 
           files = sorted(
@@ -1157,7 +1229,7 @@ jobs:
           )
 
           output = Path(
-              "data/fantome-files.json"
+              "public/data/fantome-files.json"
           )
 
           output.parent.mkdir(
@@ -1193,11 +1265,11 @@ jobs:
           from pathlib import Path
 
           skins_file = Path(
-              "data/skins.json"
+              "public/data/skins.json"
           )
 
           fantome_file = Path(
-              "data/fantome-files.json"
+              "public/data/fantome-files.json"
           )
 
           skins = json.loads(
@@ -1280,9 +1352,11 @@ jobs:
           git status --short
 
           if git diff --quiet -- \
-            fantome \
-            data/skins.json \
-            data/fantome-files.json
+            public/fantome \
+            public/data/skins.json \
+            public/data/fantome-files.json \
+            public/data/admin-overrides.json \
+            public/images/skins
           then
 
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -1316,9 +1390,11 @@ jobs:
             "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add \
-            fantome \
-            data/skins.json \
-            data/fantome-files.json
+            public/fantome \
+            public/data/skins.json \
+            public/data/fantome-files.json \
+            public/data/admin-overrides.json \
+            public/images/skins
 
           git commit \
             -m "chore: sync League skins"

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="theme-color" content="#070b18" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Exist LOL Skin Finder • Yönetim Paneli</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+
+<body>
+  <!-- =========================================
+       ÜST BAŞLIK / GEZİNTİ
+       ========================================= -->
+  <header class="admin-header">
+    <div class="admin-header-brand">
+      <span class="site-brand-main">EXIST</span>
+      <span class="site-brand-divider">/</span>
+      <span class="site-brand-sub">ADMIN PANEL</span>
+      <span id="backend-mode-badge" class="badge badge-local" title="Sunucu durumu">LOCAL MOD</span>
+    </div>
+
+    <div class="admin-header-actions">
+      <div class="header-stats">
+        <span class="stat-pill" title="Toplam Skin">
+          <span class="stat-icon">◈</span>
+          <span id="stat-total-skins">0</span> skin
+        </span>
+        <span class="stat-pill highlight" title="Aktif Geçersiz Kılmalar (Overrides)">
+          <span class="stat-icon">★</span>
+          <span id="stat-overrides-count">0</span> geçersiz kılma
+        </span>
+      </div>
+
+      <button id="btn-add-skin" class="btn btn-secondary" type="button">
+        <span>+</span> Yeni Skin Ekle
+      </button>
+
+      <button id="btn-lock" class="btn btn-icon" type="button" title="Paneli Kilitle">
+        🔒
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================
+       ANA İKİLİ ÇALIŞMA ALANI (DUAL PANE)
+       ========================================= -->
+  <main class="admin-container">
+
+    <!-- SOL PANEL: ARAMA VE SKİN LİSTESİ -->
+    <section class="admin-sidebar">
+      <div class="sidebar-search-sticky">
+        <div class="admin-search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            id="admin-search"
+            type="search"
+            autocomplete="off"
+            placeholder="Skin adı, şampiyon veya ID ara…"
+            autofocus
+          />
+          <kbd id="search-clear-btn" title="Temizle">ESC</kbd>
+        </div>
+
+        <div class="sidebar-filters">
+          <button class="filter-tab active" data-filter="all" type="button">Tümü (<span id="count-all">0</span>)</button>
+          <button class="filter-tab" data-filter="overridden" type="button">Özelleştirilmiş (<span id="count-overridden">0</span>)</button>
+          <button class="filter-tab" data-filter="custom" type="button">Özel Skinler (<span id="count-custom">0</span>)</button>
+          <button class="filter-tab" data-filter="missing-fantome" type="button">Fantome Yok (<span id="count-missing">0</span>)</button>
+        </div>
+      </div>
+
+      <div id="skin-list-meta" class="skin-list-meta">
+        <span id="skin-list-count">Skinler yükleniyor…</span>
+      </div>
+
+      <div id="admin-skin-list" class="admin-skin-list" role="listbox">
+        <!-- Dinamik skin öğeleri -->
+      </div>
+    </section>
+
+    <!-- SAĞ PANEL: DETAYLI EDİTÖR VE CANLI ÖNİZLEME -->
+    <section class="admin-editor-pane">
+      <div id="editor-empty-state" class="editor-empty-state">
+        <div class="empty-icon">📂</div>
+        <h2>Düzenlemek için bir skin seçin</h2>
+        <p>Sol taraftaki listeden arama yaparak düzenlemek istediğiniz skini seçin veya yeni bir skin ekleyin.</p>
+      </div>
+
+      <div id="editor-form-wrapper" class="editor-form-wrapper" hidden>
+        <!-- EDİTÖR BAŞLIĞI & STATÜSÜ -->
+        <div class="editor-header">
+          <div>
+            <div class="editor-kicker">
+              <span id="editor-champion-kicker">Şampiyon</span>
+              <span class="kicker-divider">•</span>
+              <span id="editor-id-kicker" class="mono-id">ID: 00000</span>
+              <span id="editor-status-badge" class="badge">Orijinal Veri</span>
+            </div>
+            <h1 id="editor-heading">Skin Adı</h1>
+          </div>
+
+          <div class="editor-top-actions">
+            <button id="btn-revert-override" class="btn btn-danger-outline" type="button" title="Tüm manuel değişiklikleri geri al ve Riot verisine dön" hidden>
+              ↺ Orijinale Dön
+            </button>
+            <button id="btn-save-skin" class="btn btn-gold" type="button">
+              <span class="btn-spinner" hidden></span>
+              <span class="btn-label">💾 Değişiklikleri Kaydet</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-grid">
+          <!-- FORM ALANLARI -->
+          <div class="editor-fields">
+            <!-- 1. METAVERİLER (TR & EN) -->
+            <div class="editor-card">
+              <h3 class="card-title">📝 Skin & Şampiyon Bilgileri</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="field-name-tr">Skin Adı (Türkçe)</label>
+                  <input id="field-name-tr" type="text" placeholder="Örn. Omega Timi Twitch" />
+                </div>
+
+                <div class="form-group">
+                  <label for="field-name-en">Skin Adı (İngilizce)</label>
+                  <input id="field-name-en" type="text" placeholder="Örn. Omega Squad Twitch" />
+                </div>
+
+                <div class="form-group">
+                  <label for="field-champ-tr">Şampiyon Adı (Türkçe)</label>
+                  <input id="field-champ-tr" type="text" placeholder="Örn. Twitch" />
+                </div>
+
+                <div class="form-group">
+                  <label for="field-champ-en">Şampiyon Adı (İngilizce)</label>
+                  <input id="field-champ-en" type="text" placeholder="Örn. Twitch" />
+                </div>
+
+                <div class="form-group">
+                  <label for="field-skin-id">Riot Skin ID <span class="label-hint">(Kalıcı Tanımlayıcı)</span></label>
+                  <input id="field-skin-id" type="text" readonly class="input-readonly" />
+                </div>
+
+                <div class="form-group">
+                  <label for="field-champ-id">Riot Dahili ID (championId)</label>
+                  <input id="field-champ-id" type="text" placeholder="Örn. Twitch" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. GÖRSEL DEĞİŞTİRME -->
+            <div class="editor-card">
+              <div class="card-header-row">
+                <h3 class="card-title">🖼️ Skin Splash Görseli</h3>
+                <span id="image-status-pill" class="pill-tag">Riot CDN</span>
+              </div>
+              <p class="card-description">
+                Bilgisayarınızdan yeni bir görsel seçerek mevcut splash görselini değiştirebilirsiniz. Görsel <code>public/images/skins/{id}.jpg</code> olarak kaydedilir.
+              </p>
+
+              <div class="file-upload-zone" id="image-dropzone">
+                <input id="input-image-file" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+                <div class="upload-zone-content">
+                  <div class="upload-icon">📷</div>
+                  <div class="upload-texts">
+                    <p class="upload-title">Yeni görsel yüklemek için tıklayın veya sürükleyin</p>
+                    <p class="upload-subtitle">Desteklenen formatlar: JPG, PNG, WEBP (Önerilen boyut: 1215x717)</p>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-image">Dosya Seç</button>
+                </div>
+              </div>
+
+              <div id="image-preview-meta" class="file-preview-bar" hidden>
+                <div class="file-info">
+                  <span class="file-name" id="preview-image-name">dosya.jpg</span>
+                  <span class="file-size" id="preview-image-size">0 KB</span>
+                </div>
+                <button type="button" class="btn-text-danger" id="btn-cancel-image">Vazgeç</button>
+              </div>
+            </div>
+
+            <!-- 3. FANTOME MOD DOSYASI -->
+            <div class="editor-card">
+              <div class="card-header-row">
+                <h3 class="card-title">📦 .fantome Mod Dosyası</h3>
+                <span id="fantome-status-pill" class="pill-tag">Dosya Mevcut</span>
+              </div>
+              <p class="card-description">
+                Bu skine ait <code>.fantome</code> mod dosyasını güncelleyin. Dosya adı otomatik olarak <code>public/fantome/{id}.fantome</code> olacaktır.
+              </p>
+
+              <div class="file-upload-zone" id="fantome-dropzone">
+                <input id="input-fantome-file" type="file" accept=".fantome" hidden />
+                <div class="upload-zone-content">
+                  <div class="upload-icon">⚡</div>
+                  <div class="upload-texts">
+                    <p class="upload-title">Yeni .fantome dosyası yüklemek için tıklayın veya sürükleyin</p>
+                    <p class="upload-subtitle">Sadece geçerli .fantome dosyaları kabul edilir</p>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-browse-fantome">Dosya Seç</button>
+                </div>
+              </div>
+
+              <div id="fantome-preview-meta" class="file-preview-bar" hidden>
+                <div class="file-info">
+                  <span class="file-name" id="preview-fantome-name">00000.fantome</span>
+                  <span class="file-size" id="preview-fantome-size">0 KB</span>
+                </div>
+                <button type="button" class="btn-text-danger" id="btn-cancel-fantome">Vazgeç</button>
+              </div>
+
+              <div class="fantome-action-row">
+                <a id="btn-download-existing-fantome" class="btn btn-secondary btn-sm" href="#" download hidden>
+                  ⬇ Mevcut .fantome Dosyasını İndir
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- SAĞ SÜTUN: CANLI ÖNİZLEME KARTI -->
+          <div class="editor-preview-column">
+            <div class="preview-sticky-card">
+              <div class="card-header-row">
+                <h3 class="card-title">👁️ Canlı Site Kart Önizlemesi</h3>
+                <div class="preview-lang-toggle" role="group" aria-label="Önizleme Dili">
+                  <button type="button" class="btn-lang-toggle active" id="btn-preview-lang-tr">TR</button>
+                  <button type="button" class="btn-lang-toggle" id="btn-preview-lang-en">EN</button>
+                </div>
+              </div>
+              <p class="preview-hint">Değişiklikleriniz ana sayfada seçilen dilde tam olarak böyle görünecektir:</p>
+
+              <!-- CANLI KART BİLEŞENİ -->
+              <article id="live-card-preview" class="skin-card live-card">
+                <button class="favorite-button" type="button" disabled title="Önizleme">
+                  <span class="favorite-icon">☆</span>
+                </button>
+                <img id="live-card-image" src="" alt="Skin Splash" loading="lazy" />
+                <div class="card-shade"></div>
+                <div class="card-content">
+                  <p id="live-card-champion" class="champion">Şampiyon</p>
+                  <h3 id="live-card-name">Skin Adı</h3>
+                  <p id="live-card-id" class="skin-id">ID: 00000</p>
+                </div>
+              </article>
+
+              <div class="preview-details-box">
+                <h4>Detay Bilgileri</h4>
+                <div class="detail-row">
+                  <span>Türkçe Ad:</span>
+                  <strong id="preview-name-tr">-</strong>
+                </div>
+                <div class="detail-row">
+                  <span>İngilizce Ad:</span>
+                  <strong id="preview-name-en">-</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Şampiyon (TR/EN):</span>
+                  <strong id="preview-champ-pair">-</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Fantome Durumu:</span>
+                  <strong id="preview-fantome-status">Mevcut</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Görsel Kaynağı:</span>
+                  <strong id="preview-image-source">Riot Data Dragon</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Override Durumu:</span>
+                  <strong id="preview-override-status">Yok</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================
+       MODAL: YENİ SKİN EKLEME
+       ========================================= -->
+  <dialog id="modal-new-skin" class="admin-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>+ Yeni Skin / Dosya Ekle</h2>
+        <button type="button" class="modal-close-btn" id="btn-close-new-skin-modal">×</button>
+      </div>
+
+      <form id="form-new-skin" class="modal-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="new-skin-id">Riot Skin ID <span class="required">*</span></label>
+            <input id="new-skin-id" type="text" pattern="[0-9]+" required placeholder="Örn. 999001" />
+            <small class="field-help">Sadece rakam içermelidir.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="new-skin-num">Skin Numarası (skinNum)</label>
+            <input id="new-skin-num" type="number" placeholder="Örn. 99" />
+          </div>
+
+          <div class="form-group">
+            <label for="new-skin-name-tr">Skin Adı (Türkçe) <span class="required">*</span></label>
+            <input id="new-skin-name-tr" type="text" required placeholder="Örn. Özel Prototip Aatrox" />
+          </div>
+
+          <div class="form-group">
+            <label for="new-skin-name-en">Skin Adı (İngilizce)</label>
+            <input id="new-skin-name-en" type="text" placeholder="Örn. Custom Prototype Aatrox" />
+          </div>
+
+          <div class="form-group">
+            <label for="new-champ-tr">Şampiyon (Türkçe) <span class="required">*</span></label>
+            <input id="new-champ-tr" type="text" required placeholder="Örn. Aatrox" />
+          </div>
+
+          <div class="form-group">
+            <label for="new-champ-en">Şampiyon (İngilizce)</label>
+            <input id="new-champ-en" type="text" placeholder="Örn. Aatrox" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Splash Görseli (Opsiyonel)</label>
+          <input id="new-skin-image-file" type="file" accept="image/jpeg,image/png,image/webp" />
+        </div>
+
+        <div class="form-group">
+          <label>.fantome Mod Dosyası (Opsiyonel)</label>
+          <input id="new-skin-fantome-file" type="file" accept=".fantome" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-new-skin">Vazgeç</button>
+          <button type="submit" class="btn btn-gold">Skini Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- =========================================
+       GİRİŞ / ŞİFRE KİLİT EKRANI (PASSWORD GATE)
+       ========================================= -->
+  <div id="auth-gate" class="auth-gate">
+    <div class="auth-box">
+      <div class="auth-icon">🛡️</div>
+      <h2>Yönetim Paneli Girişi</h2>
+      <p>Bu panel LoL skin verilerini düzenlemek için tasarlanmış özel bir yönetim aracıdır.</p>
+
+      <form id="auth-form" class="auth-form">
+        <div class="form-group">
+          <label for="auth-password">Yönetici Şifresi / Erişim Anahtarı</label>
+          <input
+            id="auth-password"
+            type="password"
+            placeholder="Yönetici şifrenizi girin…"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <p id="auth-error-msg" class="auth-error" hidden></p>
+        <button type="submit" class="btn btn-gold btn-block">
+          <span class="auth-btn-label">Giriş Yap</span>
+        </button>
+      </form>
+      <div class="auth-footer-hint">
+        <span>Geliştirme / Yerel Test için şifre: <code>admin</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BİLDİRİM / TOAST KONTEYNERİ -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- JAVASCRIPT GİRİŞİ -->
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>
