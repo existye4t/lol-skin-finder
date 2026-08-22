@@ -1,6 +1,6 @@
 {
   "version": "16.16.1",
-  "updatedAt": "2026-08-22T01:57:33.166Z",
+  "updatedAt": "2026-08-22T02:23:17.628Z",
   "skins": [
     {
       "id": "876045",
@@ -40495,12 +40495,13 @@
     {
       "id": "11116",
       "skinNum": 116,
-      "name": "KOD ADI: Komut Zinciri Yi",
+      "name": "KOD ADI: Komut Zinciri Yi TEST",
       "champion": "Master Yi",
-      "nameEn": "PROJECT: Command Line Yi",
+      "nameEn": "PROJECT: Command Line Yi Test",
       "championEn": "Master Yi",
       "championId": "MasterYi",
-      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_116.jpg"
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_116.jpg",
+      "modifiedAt": "2026-08-22T02:23:17.598Z"
     },
     {
       "id": "89008",
