@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-08-26T12:27:47.377603+00:00",
+  "updatedAt": "2026-08-26T19:30:33.694271+00:00",
   "skins": [
     {
       "id": "266001",
@@ -30971,6 +30971,104 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_64.jpg",
       "parentSkin": "3",
       "nameEn": "Zombie Slayer Jinx (Doom)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222065",
+      "skinNum": 65,
+      "name": "Ocean Song Jinx",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_65.jpg",
+      "nameEn": "Ocean Song Jinx",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222066",
+      "skinNum": 66,
+      "name": "Ocean Song Jinx (Ruby)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_66.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Ruby)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222067",
+      "skinNum": 67,
+      "name": "Ocean Song Jinx (Catseye)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_67.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Catseye)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222068",
+      "skinNum": 68,
+      "name": "Ocean Song Jinx (Emerald)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_68.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Emerald)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222069",
+      "skinNum": 69,
+      "name": "Ocean Song Jinx (Turquoise)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_69.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Turquoise)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222070",
+      "skinNum": 70,
+      "name": "Ocean Song Jinx (Sapphire)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_70.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Sapphire)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222071",
+      "skinNum": 71,
+      "name": "Ocean Song Jinx (Rose Quartz)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_71.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Rose Quartz)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222072",
+      "skinNum": 72,
+      "name": "Ocean Song Jinx (Obsidian)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_72.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Obsidian)",
+      "championEn": "Jinx"
+    },
+    {
+      "id": "222073",
+      "skinNum": 73,
+      "name": "Ocean Song Jinx (Pearl)",
+      "champion": "Jinx",
+      "championId": "222",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/222_73.jpg",
+      "parentSkin": "65",
+      "nameEn": "Ocean Song Jinx (Pearl)",
       "championEn": "Jinx"
     },
     {
@@ -66111,6 +66209,16 @@
       "championEn": "Seraphine"
     },
     {
+      "id": "147069",
+      "skinNum": 69,
+      "name": "Heartsong Seraphine",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_69.jpg",
+      "nameEn": "Heartsong Seraphine",
+      "championEn": "Seraphine"
+    },
+    {
       "id": "147070",
       "skinNum": 70,
       "name": "T1 Seraphine (Elite)",
@@ -66174,6 +66282,72 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_75.jpg",
       "parentSkin": "68",
       "nameEn": "T1 Seraphine (Sapphire)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147076",
+      "skinNum": 76,
+      "name": "Heartsong Seraphine (Ruby)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_76.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Ruby)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147077",
+      "skinNum": 77,
+      "name": "Heartsong Seraphine (Sapphire)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_77.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Sapphire)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147078",
+      "skinNum": 78,
+      "name": "Heartsong Seraphine (Pearl)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_78.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Pearl)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147079",
+      "skinNum": 79,
+      "name": "Heartsong Seraphine (Catseye)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_79.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Catseye)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147080",
+      "skinNum": 80,
+      "name": "Heartsong Seraphine (Tanzanite)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_80.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Tanzanite)",
+      "championEn": "Seraphine"
+    },
+    {
+      "id": "147081",
+      "skinNum": 81,
+      "name": "Heartsong Seraphine (Obsidian)",
+      "champion": "Seraphine",
+      "championId": "147",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/147_81.jpg",
+      "parentSkin": "69",
+      "nameEn": "Heartsong Seraphine (Obsidian)",
       "championEn": "Seraphine"
     },
     {
@@ -72354,6 +72528,104 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_62.jpg",
       "parentSkin": "4",
       "nameEn": "Reaper Soraka (Doom)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16063",
+      "skinNum": 63,
+      "name": "Ocean Song Soraka",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_63.jpg",
+      "nameEn": "Ocean Song Soraka",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16064",
+      "skinNum": 64,
+      "name": "Ocean Song Soraka (Ruby)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_64.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Ruby)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16065",
+      "skinNum": 65,
+      "name": "Ocean Song Soraka (Catseye)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_65.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Catseye)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16066",
+      "skinNum": 66,
+      "name": "Ocean Song Soraka (Emerald)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_66.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Emerald)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16067",
+      "skinNum": 67,
+      "name": "Ocean Song Soraka (Turquoise)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_67.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Turquoise)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16068",
+      "skinNum": 68,
+      "name": "Ocean Song Soraka (Sapphire)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_68.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Sapphire)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16069",
+      "skinNum": 69,
+      "name": "Ocean Song Soraka (Rose Quartz)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_69.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Rose Quartz)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16070",
+      "skinNum": 70,
+      "name": "Ocean Song Soraka (Obsidian)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_70.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Obsidian)",
+      "championEn": "Soraka"
+    },
+    {
+      "id": "16071",
+      "skinNum": 71,
+      "name": "Ocean Song Soraka (Pearl)",
+      "champion": "Soraka",
+      "championId": "16",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/16_71.jpg",
+      "parentSkin": "63",
+      "nameEn": "Ocean Song Soraka (Pearl)",
       "championEn": "Soraka"
     },
     {
