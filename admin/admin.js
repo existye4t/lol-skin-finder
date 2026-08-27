@@ -1041,6 +1041,96 @@ filterTabs.forEach((tab) => {
 });
 
 /* =========================================
+   TOPLULUK: GÜNCELLEMELER VE HATA BİLDİRİMLERİ
+   ========================================= */
+const updatesAdminModal = document.querySelector('#modal-updates');
+const reportsAdminModal = document.querySelector('#modal-bug-reports');
+const updateForm = document.querySelector('#form-update');
+const adminUpdatesList = document.querySelector('#admin-updates-list');
+const adminReportsList = document.querySelector('#admin-bug-reports-list');
+
+function openAdminModal(dialog) {
+  if (dialog?.showModal) dialog.showModal();
+  else dialog?.setAttribute('open', '');
+}
+
+function renderCommunityRows(container, entries, type) {
+  if (!container) return;
+  container.replaceChildren();
+  if (!entries.length) {
+    const empty = document.createElement('p');
+    empty.textContent = type === 'update' ? 'Henüz yayınlanmış güncelleme yok.' : 'Henüz hata bildirimi yok.';
+    container.append(empty);
+    return;
+  }
+  entries.forEach((entry) => {
+    const article = document.createElement('article');
+    article.className = 'admin-community-row';
+    const title = document.createElement('strong');
+    title.textContent = entry.title || 'Başlıksız';
+    const meta = document.createElement('small');
+    meta.textContent = new Date(entry.publishedAt || entry.createdAt).toLocaleString('tr-TR');
+    const body = document.createElement('p');
+    body.textContent = entry.description || '';
+    article.append(title, meta, body);
+    if (type === 'report' && entry.skinName) {
+      const skin = document.createElement('span');
+      skin.className = 'admin-community-tag';
+      skin.textContent = `Skin: ${entry.skinName}`;
+      article.append(skin);
+    }
+    if (type === 'report' && /^https?:\/\//i.test(entry.imageUrl || '')) {
+      const image = document.createElement('a');
+      image.href = entry.imageUrl;
+      image.target = '_blank';
+      image.rel = 'noopener noreferrer';
+      image.textContent = 'Görsel bağlantısını aç ↗';
+      article.append(image);
+    }
+    container.append(article);
+  });
+}
+
+async function loadCommunityData() {
+  const [updates, reports] = await Promise.all([
+    fetch(assetUrl('data/updates.json'), { cache: 'no-cache' }).then((r) => r.ok ? r.json() : { updates: [] }),
+    fetch(assetUrl('data/bug-reports.json'), { cache: 'no-cache' }).then((r) => r.ok ? r.json() : { reports: [] })
+  ]);
+  renderCommunityRows(adminUpdatesList, Array.isArray(updates.updates) ? updates.updates : [], 'update');
+  renderCommunityRows(adminReportsList, Array.isArray(reports.reports) ? reports.reports : [], 'report');
+}
+
+document.querySelector('#btn-manage-updates')?.addEventListener('click', async () => {
+  await loadCommunityData();
+  openAdminModal(updatesAdminModal);
+});
+
+document.querySelector('#btn-view-bug-reports')?.addEventListener('click', async () => {
+  await loadCommunityData();
+  openAdminModal(reportsAdminModal);
+});
+
+document.querySelectorAll('[data-close-admin-modal]').forEach((button) => {
+  button.addEventListener('click', () => document.querySelector(`#${button.dataset.closeAdminModal}`)?.close());
+});
+
+updateForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const title = document.querySelector('#update-title').value.trim();
+  const description = document.querySelector('#update-description').value.trim();
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/admin/updates`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Güncelleme yayınlanamadı.');
+    updateForm.reset();
+    await loadCommunityData();
+    showToast('Güncelleme ziyaretçilere yayınlandı.', 'success');
+  } catch (error) { showToast(error.message, 'error'); }
+});
+
+/* =========================================
    BAŞLANGIÇ ÇALIŞTIRMA
    ========================================= */
 checkAuth();

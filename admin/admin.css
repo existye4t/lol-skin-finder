@@ -1123,6 +1123,16 @@ body {
   border-color: rgba(255, 82, 82, 0.5);
 }
 
+.community-admin-modal .modal-content { width: min(720px, calc(100vw - 32px)); }
+.community-admin-modal textarea { min-height: 130px; resize: vertical; }
+.admin-community-list { display: grid; gap: 10px; max-height: 360px; margin-top: 22px; overflow: auto; }
+.admin-community-row { padding: 14px; border: 1px solid #2b3b5b; border-radius: 10px; background: #0b1121; }
+.admin-community-row strong { display: block; color: var(--gold); }
+.admin-community-row small { display: block; margin-top: 4px; color: #7082a4; }
+.admin-community-row p { margin: 10px 0; color: #c5d0e3; line-height: 1.5; white-space: pre-wrap; }
+.admin-community-row a { color: #9bb8ff; font-size: 12px; }
+.admin-community-tag { display: inline-block; margin-right: 10px; padding: 3px 7px; border-radius: 999px; color: #cfe0ff; background: #1a2b4b; font-size: 11px; }
+
 /* =========================================
    ANİMASYONLAR
 ========================================= */

@@ -38,6 +38,9 @@
         <span>+</span> Yeni Skin Ekle
       </button>
 
+      <button id="btn-manage-updates" class="btn btn-secondary" type="button">✦ Güncellemeler</button>
+      <button id="btn-view-bug-reports" class="btn btn-secondary" type="button">⚑ Hata Bildirimleri</button>
+
       <button id="btn-lock" class="btn btn-icon" type="button" title="Paneli Kilitle">
         🔒
       </button>
@@ -340,6 +343,25 @@
           <button type="submit" class="btn btn-gold">Skini Kaydet</button>
         </div>
       </form>
+    </div>
+  </dialog>
+
+  <dialog id="modal-updates" class="admin-modal community-admin-modal">
+    <div class="modal-content">
+      <div class="modal-header"><h2>Güncelleme yayınla</h2><button type="button" class="modal-close-btn" data-close-admin-modal="modal-updates">×</button></div>
+      <form id="form-update" class="modal-form">
+        <div class="form-group"><label for="update-title">Başlık</label><input id="update-title" maxlength="120" required placeholder="Örn. Yeni skin verileri eklendi" /></div>
+        <div class="form-group"><label for="update-description">Açıklama</label><textarea id="update-description" maxlength="3000" required placeholder="Ziyaretçilere göstermek istediğin detay…"></textarea></div>
+        <div class="modal-actions"><button type="submit" class="btn btn-gold">Yayınla</button></div>
+      </form>
+      <div id="admin-updates-list" class="admin-community-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="modal-bug-reports" class="admin-modal community-admin-modal">
+    <div class="modal-content">
+      <div class="modal-header"><h2>Hata bildirimleri</h2><button type="button" class="modal-close-btn" data-close-admin-modal="modal-bug-reports">×</button></div>
+      <div id="admin-bug-reports-list" class="admin-community-list"><p>Yükleniyor…</p></div>
     </div>
   </dialog>
 

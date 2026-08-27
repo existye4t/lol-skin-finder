@@ -62,6 +62,54 @@ function adminDevApiPlugin(adminPassword) {
           });
         }
 
+        if (req.method === 'POST' && url.pathname === '/api/bug-reports') {
+          let body = '';
+          req.on('data', (chunk) => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const title = String(payload.title || '').trim().slice(0, 120);
+              const description = String(payload.description || '').trim().slice(0, 2000);
+              const imageUrl = String(payload.imageUrl || '').trim().slice(0, 2048);
+              if (!title || !description) return sendJson(400, { error: 'Başlık ve açıklama zorunludur.' });
+              if (imageUrl && !/^https?:\/\//i.test(imageUrl)) return sendJson(400, { error: 'Görsel bağlantısı geçerli bir http(s) URL olmalıdır.' });
+              const reportsPath = resolve(DATA_DIR, 'bug-reports.json');
+              let data = { updatedAt: null, reports: [] };
+              try { data = JSON.parse(await readFile(reportsPath, 'utf8')); } catch {}
+              data.reports = Array.isArray(data.reports) ? data.reports : [];
+              data.reports.unshift({ id: crypto.randomUUID(), title, description, imageUrl, skinId: String(payload.skinId || ''), skinName: String(payload.skinName || '').slice(0, 160), createdAt: new Date().toISOString(), status: 'new' });
+              data.reports = data.reports.slice(0, 500);
+              data.updatedAt = new Date().toISOString();
+              await writeFile(reportsPath, JSON.stringify(data, null, 2), 'utf8');
+              return sendJson(201, { success: true });
+            } catch (error) { return sendJson(500, { error: error.message }); }
+          });
+          return;
+        }
+
+        if (req.method === 'POST' && url.pathname === '/api/admin/updates') {
+          let body = '';
+          req.on('data', (chunk) => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const title = String(payload.title || '').trim().slice(0, 120);
+              const description = String(payload.description || '').trim().slice(0, 3000);
+              if (!title || !description) return sendJson(400, { error: 'Başlık ve açıklama zorunludur.' });
+              const updatesPath = resolve(DATA_DIR, 'updates.json');
+              let data = { updatedAt: null, updates: [] };
+              try { data = JSON.parse(await readFile(updatesPath, 'utf8')); } catch {}
+              data.updates = Array.isArray(data.updates) ? data.updates : [];
+              data.updates.unshift({ id: crypto.randomUUID(), title, description, publishedAt: new Date().toISOString() });
+              data.updates = data.updates.slice(0, 100);
+              data.updatedAt = new Date().toISOString();
+              await writeFile(updatesPath, JSON.stringify(data, null, 2), 'utf8');
+              return sendJson(201, { success: true });
+            } catch (error) { return sendJson(500, { error: error.message }); }
+          });
+          return;
+        }
+
         // --------------------------------------------------
         // 2. Auth login
         // --------------------------------------------------

@@ -2449,6 +2449,130 @@ const discordClose =
     '#discord-modal-close'
   );
 
+const updatesButton = document.querySelector('#updates-button');
+const bugReportButton = document.querySelector('#bug-report-button');
+const updatesModal = document.querySelector('#updates-modal');
+const bugReportModal = document.querySelector('#bug-report-modal');
+const updatesList = document.querySelector('#updates-list');
+const bugReportForm = document.querySelector('#bug-report-form');
+const bugReportSkin = document.querySelector('#bug-report-skin');
+const bugReportStatus = document.querySelector('#bug-report-status');
+
+function openCommunityModal(dialog) {
+  if (!dialog) return;
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', '');
+}
+
+function closeCommunityModal(dialog) {
+  if (!dialog) return;
+  if (typeof dialog.close === 'function') dialog.close();
+  else dialog.removeAttribute('open');
+}
+
+function populateBugReportSkins() {
+  if (!bugReportSkin || bugReportSkin.options.length > 1) return;
+
+  const options = skins
+    .filter((skin) => !skin.parentSkinId)
+    .sort((a, b) => getLocalizedSkinName(a).localeCompare(getLocalizedSkinName(b), LOCALE_MAP[currentLang]))
+    .map((skin) => {
+      const option = document.createElement('option');
+      option.value = skin.id;
+      option.textContent = `${getLocalizedSkinName(skin)} — ${getLocalizedChampionName(skin)}`;
+      return option;
+    });
+
+  bugReportSkin.append(...options);
+}
+
+function formatUpdateDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf()) ? '' : new Intl.DateTimeFormat(LOCALE_MAP[currentLang], { dateStyle: 'medium' }).format(date);
+}
+
+async function renderUpdates() {
+  if (!updatesList) return;
+  updatesList.replaceChildren();
+
+  try {
+    const response = await fetch(assetUrl('data/updates.json'), { cache: 'no-cache' });
+    if (!response.ok) throw new Error('updates unavailable');
+    const data = await response.json();
+    const updates = Array.isArray(data?.updates) ? data.updates : [];
+
+    if (!updates.length) {
+      updatesList.innerHTML = '<p class="community-empty">Henüz yayınlanmış bir güncelleme yok.</p>';
+      return;
+    }
+
+    updates
+      .slice()
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+      .forEach((update) => {
+        const article = document.createElement('article');
+        article.className = 'update-item';
+        const heading = document.createElement('h3');
+        heading.textContent = update.title || 'Güncelleme';
+        const date = document.createElement('time');
+        date.textContent = formatUpdateDate(update.publishedAt);
+        const body = document.createElement('p');
+        body.textContent = update.description || '';
+        article.append(heading, date, body);
+        updatesList.append(article);
+      });
+  } catch {
+    updatesList.innerHTML = '<p class="community-empty">Güncellemeler şu anda yüklenemiyor.</p>';
+  }
+}
+
+updatesButton?.addEventListener('click', () => {
+  openCommunityModal(updatesModal);
+  renderUpdates();
+});
+
+bugReportButton?.addEventListener('click', () => {
+  populateBugReportSkins();
+  bugReportStatus.textContent = '';
+  openCommunityModal(bugReportModal);
+});
+
+document.querySelectorAll('[data-close-community-modal]').forEach((button) => {
+  button.addEventListener('click', () => closeCommunityModal(button.closest('dialog')));
+});
+
+[updatesModal, bugReportModal].forEach((dialog) => dialog?.addEventListener('click', (event) => {
+  if (event.target === dialog) closeCommunityModal(dialog);
+}));
+
+bugReportForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(bugReportForm);
+  const payload = Object.fromEntries(formData.entries());
+  const selectedSkin = skins.find((skin) => String(skin.id) === String(payload.skinId));
+
+  bugReportStatus.textContent = 'Gönderiliyor…';
+  try {
+    const response = await fetch('./api/bug-reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: String(payload.title || '').trim(),
+        description: String(payload.description || '').trim(),
+        imageUrl: String(payload.imageUrl || '').trim(),
+        skinId: selectedSkin?.id || '',
+        skinName: selectedSkin ? getLocalizedSkinName(selectedSkin, 'tr') : ''
+      })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Bildiriminiz gönderilemedi.');
+    bugReportForm.reset();
+    bugReportStatus.textContent = 'Teşekkürler! Hata bildirimin kaydedildi.';
+  } catch (error) {
+    bugReportStatus.textContent = error.message || 'Bildiriminiz gönderilemedi.';
+  }
+});
+
 function openDiscordModal() {
   if (!discordModal) {
     return;

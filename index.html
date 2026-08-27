@@ -478,6 +478,15 @@
         Sonuçlar anında filtrelenir.
       </p>
 
+      <div class="community-actions" aria-label="Topluluk işlemleri">
+        <button id="updates-button" class="community-button community-button-updates" type="button" aria-haspopup="dialog" aria-controls="updates-modal">
+          <span aria-hidden="true">✦</span><span>Güncellemeler</span>
+        </button>
+        <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
+          <span aria-hidden="true">⚑</span><span>Hata Bildir</span>
+        </button>
+      </div>
+
       <div class="search-row">
 
         <label
@@ -1093,6 +1102,28 @@
 
     </div>
 
+  </dialog>
+
+  <dialog id="updates-modal" class="community-modal" aria-labelledby="updates-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker">YENİLİKLER</p>
+    <h2 id="updates-modal-title">Güncellemeler</h2>
+    <div id="updates-list" class="updates-list" aria-live="polite"><p class="community-empty">Güncellemeler yükleniyor…</p></div>
+  </dialog>
+
+  <dialog id="bug-report-modal" class="community-modal" aria-labelledby="bug-report-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker">GERİ BİLDİRİM</p>
+    <h2 id="bug-report-modal-title">Hata bildir</h2>
+    <p class="community-description">Sorunu kısa ve net anlat; mümkünse tekrar üretme adımlarını ekle.</p>
+    <form id="bug-report-form" class="community-form">
+      <label>Başlık<input id="bug-report-title" name="title" maxlength="120" required placeholder="Örn. Skin görseli açılmıyor" /></label>
+      <label>Açıklama<textarea id="bug-report-description" name="description" maxlength="2000" required placeholder="Ne oldu, ne bekliyordun?"></textarea></label>
+      <label>Görsel bağlantısı <span>(opsiyonel)</span><input id="bug-report-image-url" name="imageUrl" type="url" maxlength="2048" placeholder="https://…" /></label>
+      <label>İlgili skin <span>(opsiyonel)</span><select id="bug-report-skin" name="skinId"><option value="">Skin seçme</option></select></label>
+      <p id="bug-report-status" class="community-form-status" aria-live="polite"></p>
+      <button class="community-submit" type="submit">Bildirimi gönder <span aria-hidden="true">→</span></button>
+    </form>
   </dialog>
 
   <!-- =========================================
