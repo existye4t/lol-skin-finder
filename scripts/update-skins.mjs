@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const baseUrl = 'https://ddragon.leagueoflegends.com';
+const communityDragonUrl = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const output = resolve(root, 'public', 'data', 'skins.json');
 
@@ -18,6 +19,33 @@ console.log(`Data Dragon ${version} verisi indiriliyor...`);
 
 const champions = await getJson(`${baseUrl}/cdn/${version}/data/tr_TR/champion.json`);
 const entries = Object.values(champions.data);
+
+// Data Dragon şampiyon/skin numaralarını verir; ancak skin adlarını tam
+// yerelleştirmez. CommunityDragon istemcinin kullandığı yerelleştirilmiş
+// skin adlarını ve kanonik splash yolunu sağlar.
+const [trSkins, enSkins] = await Promise.all([
+  getJson(`${communityDragonUrl}/global/tr_tr/v1/skins.json`),
+  // CommunityDragon İngilizce istemci verisini "default" altında sunar.
+  getJson(`${communityDragonUrl}/global/default/v1/skins.json`)
+]);
+
+const imageUrlFromSplashPath = (splashPath) => {
+  if (!splashPath) return '';
+
+  const normalizedPath = String(splashPath)
+    .replace(/^\/lol-game-data\/assets\/assets\//i, 'assets/')
+    .toLowerCase();
+
+  return `${communityDragonUrl}/global/default/${normalizedPath}`;
+};
+
+const parentSkinById = new Map();
+
+Object.values(trSkins).forEach((skin) => {
+  skin.chromas?.forEach((chroma) => {
+    parentSkinById.set(String(chroma.id), String(skin.id));
+  });
+});
 
 // Hem Türkçe hem İngilizce yerelleştirmeleri paralel indir.
 // Bu sayede sitedeki dil değiştirici (TR/EN) skin ve şampiyon
@@ -40,18 +68,30 @@ const skins = details.flatMap(({ trDetail, enDetail }) => {
 
   return champion.skins.map((skin, index) => {
     const skinEn = championEn?.skins?.[index];
+    const id = `${champion.key}${String(skin.num).padStart(3, '0')}`;
+    const trSkin = trSkins[id];
+    const enSkin = enSkins[id];
+    const parentId = parentSkinById.get(id);
 
     return {
-      id: `${champion.key}${String(skin.num).padStart(3, '0')}`,
+      id,
       skinNum: skin.num,
-      name: skin.name === 'default' ? champion.name : skin.name,
+      // "name" ve "champion" eski istemcilerle uyumluluk için Türkçe
+      // tutulur; açık locale alanları yeni arayüzün tek doğruluk kaynağıdır.
+      name: trSkin?.name || (skin.name === 'default' ? champion.name : skin.name),
       champion: champion.name,
-      nameEn: skinEn
+      nameTr: trSkin?.name || (skin.name === 'default' ? champion.name : skin.name),
+      championTr: champion.name,
+      nameEn: enSkin?.name || (skinEn
         ? (skinEn.name === 'default' ? (championEn.name || champion.name) : skinEn.name)
-        : (skin.name === 'default' ? champion.name : skin.name),
+        : (skin.name === 'default' ? champion.name : skin.name)),
       championEn: championEn?.name || champion.name,
       championId: champion.id,
-      image: `${baseUrl}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`
+      // Data Dragon ana kaynaktır. CommunityDragon istemcinin kanonik
+      // splash yolunu ikinci kaynak olarak saklar; placeholder kullanılmaz.
+      image: `${baseUrl}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`,
+      imageFallback: imageUrlFromSplashPath(trSkin?.splashPath || enSkin?.splashPath),
+      ...(parentId ? { parentSkinId: parentId } : {})
     };
   });
 }).sort((a, b) => a.name.localeCompare(b.name, 'tr'));

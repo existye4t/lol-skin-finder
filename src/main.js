@@ -344,20 +344,20 @@ function formatNumber(value) {
    SKIN / ŞAMPİYON YERELLEŞTİRME
 ========================================= */
 
-function localizedName(skin) {
-  if (currentLang === 'en' && skin?.nameEn) {
-    return skin.nameEn;
-  }
+function getLocalizedSkinName(skin, lang = currentLang) {
+  if (!skin) return '';
 
-  return skin?.name || '';
+  return lang === 'en'
+    ? skin.nameEn || skin.nameTr || skin.name || ''
+    : skin.nameTr || skin.name || skin.nameEn || '';
 }
 
-function localizedChampion(skin) {
-  if (currentLang === 'en' && skin?.championEn) {
-    return skin.championEn;
-  }
+function getLocalizedChampionName(skin, lang = currentLang) {
+  if (!skin) return '';
 
-  return skin?.champion || '';
+  return lang === 'en'
+    ? skin.championEn || skin.championTr || skin.champion || ''
+    : skin.championTr || skin.champion || skin.championEn || '';
 }
 
 /* =========================================
@@ -575,6 +575,12 @@ function setLang(lang) {
   render();
   syncAllFavoriteButtons();
 
+  // Açık modal da kartlarla aynı merkezi locale resolver'ını kullanır.
+  // İçerik seçili skin korunarak yenilenir.
+  if (modal?.open && activeModalGroup) {
+    refreshOpenModal(activeModalGroup);
+  }
+
   track('language_change', {
     language: lang
   });
@@ -756,50 +762,63 @@ const assetUrl = (path) => {
  *     Not: public/images/skins/*.jpg dosyalarının tamamı 68 byte'lık
  *     1x1 şeffaf placeholder PNG'dir (bkz. scripts/generate-placeholders.mjs),
  *     gerçek görsel değildir — bu yüzden birincil kaynak olarak KULLANILMAZ.
- *  2) CommunityDragon champion-splashes → ddragon 404 verirse (bazı chroma
- *     girdilerinde num'un splash karşılığı olmayabiliyor) ikinci deneme.
- *     (https://raw.communitydragon.org/latest/plugin/rcp-be-lol-game-data/
- *      global/default/v1/champion-splashes/{championId}/{skinId}.jpg)
+ *  2) CommunityDragon istemci splash yolu → Data Dragon başarısız olursa
+ *     kanonik, belirli skin splash'i ikinci deneme olur.
  *  3) İkisi de başarısız olursa img gizlenir, kart üzerindeki isim/şampiyon
  *     metni zaten görünür kalır (kırık görsel ikonu gösterilmez).
  */
 
-const getSkinImageUrl = (skin) => {
-  if (skin?.image && /^https?:\/\//.test(skin.image)) {
-    return skin.image;
+const imageSourceCache = new Map();
+
+function isRemoteImageUrl(value) {
+  return /^https:\/\//i.test(String(value || ''));
+}
+
+function getSkinImageSources(skin) {
+  const cacheKey = String(skin?.id || '');
+
+  if (cacheKey && imageSourceCache.has(cacheKey)) {
+    return imageSourceCache.get(cacheKey);
   }
 
-  return getSkinFallbackImageUrl(skin);
-};
+  const dataDragonUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
+    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${skin.championId}_${skin.skinNum}.jpg`
+    : '';
 
-const getSkinFallbackImageUrl = (skin) => {
-  if (!skin?.championId || !skin?.id) {
-    return '';
+  // Yerel images/skins dosyaları bilinen 1x1 placeholder'lardır. Buraya
+  // özellikle dahil edilmez; yalnızca Riot CDN URL'leri kullanılabilir.
+  const sources = [...new Set([
+    skin?.image,
+    dataDragonUrl,
+    skin?.imageFallback
+  ].filter(isRemoteImageUrl))];
+
+  if (cacheKey) {
+    imageSourceCache.set(cacheKey, sources);
   }
 
-  return `https://raw.communitydragon.org/latest/plugin/rcp-be-lol-game-data/global/default/v1/champion-splashes/${skin.championId}/${skin.id}.jpg`;
-};
+  return sources;
+}
 
-// <img> için sırayla CDN denemesi yapan ortak onerror zinciri.
+function getSkinImageUrl(skin) {
+  return getSkinImageSources(skin)[0] || '';
+}
+
+// <img> için sıralı Riot CDN denemesi yapan ortak onerror zinciri.
 function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
   if (!imageEl) {
     return;
   }
 
-  imageEl.dataset.fallbackStage = '0';
+  const sources = getSkinImageSources(skin);
+  let sourceIndex = Math.max(0, sources.indexOf(imageEl.src));
 
   imageEl.onerror = () => {
-    const stage = imageEl.dataset.fallbackStage;
+    sourceIndex += 1;
 
-    if (stage === '0') {
-      imageEl.dataset.fallbackStage = '1';
-
-      const fallbackUrl = getSkinFallbackImageUrl(skin);
-
-      if (fallbackUrl && fallbackUrl !== imageEl.src) {
-        imageEl.src = fallbackUrl;
-        return;
-      }
+    if (sources[sourceIndex]) {
+      imageEl.src = sources[sourceIndex];
+      return;
     }
 
     imageEl.onerror = null;
@@ -818,6 +837,7 @@ function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
 
 let skins = [];
 let skinGroups = [];
+let activeModalGroup = null;
 
 let searchTrackingTimer = null;
 let lastTrackedSearch = '';
@@ -1074,8 +1094,8 @@ function getChampionOptions() {
 
   skins.forEach((skin) => {
    const names = [
-     skin?.champion,
-     skin?.championEn
+     getLocalizedChampionName(skin, 'tr'),
+     getLocalizedChampionName(skin, 'en')
    ].filter(Boolean);
 
    names.forEach((name) => {
@@ -1085,10 +1105,7 @@ function getChampionOptions() {
        return;
      }
 
-     const displayName =
-       currentLang === 'en'
-         ? skin?.championEn || skin?.champion
-         : skin?.champion || skin?.championEn;
+     const displayName = getLocalizedChampionName(skin);
 
      if (!options.has(key)) {
        options.set(key, {
@@ -1281,8 +1298,8 @@ function skinMatchesChampionFilter(skin) {
   }
 
   const keys = [
-   skin?.champion,
-   skin?.championEn
+   getLocalizedChampionName(skin, 'tr'),
+   getLocalizedChampionName(skin, 'en')
   ]
    .filter(Boolean)
    .map((name) => normalize(name));
@@ -1597,6 +1614,18 @@ function normalizeSkin(skin) {
     skin.image ?? ''
   ).trim();
 
+  const imageFallback = String(
+    skin.imageFallback ?? ''
+  ).trim();
+
+  const nameTr = skin.nameTr
+    ? String(skin.nameTr).trim()
+    : name;
+
+  const championTr = skin.championTr
+    ? String(skin.championTr).trim()
+    : champion;
+
   const nameEn = skin.nameEn
     ? String(
         skin.nameEn
@@ -1624,6 +1653,9 @@ function normalizeSkin(skin) {
     name,
     champion,
     image,
+    imageFallback,
+    nameTr,
+    championTr,
     nameEn,
     championEn
   };
@@ -1686,10 +1718,10 @@ function createSkinCard(group) {
   }
 
   const displayName =
-    localizedName(skin);
+    getLocalizedSkinName(skin);
 
   const displayChampion =
-    localizedChampion(skin);
+    getLocalizedChampionName(skin);
 
   /* ---------------------------------------
      Görsel
@@ -2124,6 +2156,8 @@ function openModal(group) {
   const skin =
     group.primary;
 
+  activeModalGroup = group;
+
   const modalImage =
     document.querySelector(
       '#modal-image'
@@ -2145,10 +2179,10 @@ function openModal(group) {
     );
 
   const displayName =
-    localizedName(skin);
+    getLocalizedSkinName(skin);
 
   const displayChampion =
-    localizedChampion(skin);
+    getLocalizedChampionName(skin);
 
   /* ---------------------------------------
      Modal görseli
@@ -2238,7 +2272,7 @@ function openModal(group) {
       }`;
 
     const itemDisplayName =
-      localizedName(item);
+      getLocalizedSkinName(item);
 
     const chromaName =
       itemDisplayName.match(
@@ -2365,6 +2399,17 @@ function closeSkinModal() {
       'open'
     );
   }
+}
+
+function refreshOpenModal(group) {
+  if (!group?.primary || !modal?.open) {
+    return;
+  }
+
+  // openModal içerikleri yeniden oluşturur. showModal yalnızca kapalı bir
+  // dialogda çağrılabildiği için önce mevcut dialogu kapatıyoruz.
+  closeSkinModal();
+  openModal(group);
 }
 
 document
@@ -2793,10 +2838,16 @@ function buildSkinGroups(
   skinList
 ) {
   const groups = new Map();
+  const skinById = new Map(
+    skinList.map((skin) => [String(skin.id), skin])
+  );
 
   skinList.forEach((skin) => {
+    const explicitParent = skin.parentSkinId && skinById.get(String(skin.parentSkinId));
     const baseName =
-      skin.name
+      (explicitParent
+        ? getLocalizedSkinName(explicitParent, 'tr')
+        : getLocalizedSkinName(skin, 'tr'))
         .trim()
         .replace(
           /\s*\([^)]+\)$/,
@@ -2833,10 +2884,7 @@ function buildSkinGroups(
      * primary olarak kullanılır.
      */
 
-    if (
-      skin.name.trim() ===
-      baseName
-    ) {
+    if (!skin.parentSkinId && getLocalizedSkinName(skin, 'tr').trim() === baseName) {
       group.primary = skin;
     }
   });

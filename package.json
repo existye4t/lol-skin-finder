@@ -8,7 +8,7 @@
     "prepare-fantome": "node scripts/prepare-fantome.mjs",
     "dev": "vite --host 127.0.0.1",
     "admin-server": "node scripts/admin-server.mjs",
-    "build": "vite build --base=./",
+    "build": "vite build --base=./ --configLoader runner",
     "preview": "vite preview"
   },
   "devDependencies": {
