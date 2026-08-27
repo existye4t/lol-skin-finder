@@ -1,4 +1,11 @@
 {
-  "updatedAt": null,
-  "updates": []
+  "updatedAt": "2026-08-27T08:06:12.586Z",
+  "updates": [
+    {
+      "id": "1047f4d9-dffc-4339-ac05-a7f0b60a139b",
+      "title": "LOL Patch 16.17 fixed",
+      "description": "Türkçe:\nLOL'e yeni gelen 16.17 patch'inden dolayı skinlerde bir bozulma olmuştu, bu sorun düzeltildi.\n\nİsteyen kişiler skin indirip kullanmaya devam edebilirler, hata veya eksik olursa hata bildirebilir veya Discord sunucumuza katılıp oradan konuşabilirsiniz.\n\nExist Skin Finder\n\nEnglish:\nA glitch affecting skins occurred due to the new LoL Patch 16.17, but this issue has now been resolved.\n\nYou can download and continue using the skins if you wish; if you encounter any errors or issues, please report them or join our Discord server to discuss them.\n\nExist Skin Finder",
+      "publishedAt": "2026-08-27T08:06:12.586Z"
+    }
+  ]
 }
