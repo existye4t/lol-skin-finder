@@ -107,6 +107,16 @@ const TRANSLATIONS = {
     en: 'Clear favorites'
   },
 
+  popularEyebrow: {
+    tr: 'ÖNE ÇIKANLAR',
+    en: 'FEATURED'
+  },
+
+  popularHeading: {
+    tr: 'Popüler Skinler',
+    en: 'Popular Skins'
+  },
+
   resultsEyebrow: {
     tr: 'SONUÇLAR',
     en: 'RESULTS'
@@ -561,6 +571,7 @@ function setLang(lang) {
   updateFilterButtonState();
   renderChampionFilterOptions();
 
+  renderPopular();
   render();
   syncAllFavoriteButtons();
 
@@ -626,6 +637,8 @@ const empty = document.querySelector('#empty');
 const meta = document.querySelector('#meta');
 const title = document.querySelector('#result-title');
 const template = document.querySelector('#skin-template');
+const popularSection = document.querySelector('#popular-section');
+const popularGrid = document.querySelector('#popular-grid');
 
 const modal = document.querySelector('#skin-modal');
 const downloadList =
@@ -735,6 +748,69 @@ const assetUrl = (path) => {
 
   return `${normalizedBase}${normalizedPath}`;
 };
+
+/*
+ * Skin görseli CDN sırası:
+ *  1) skin.image → Riot Data Dragon splash art
+ *     (https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{championId}_{num}.jpg)
+ *     Not: public/images/skins/*.jpg dosyalarının tamamı 68 byte'lık
+ *     1x1 şeffaf placeholder PNG'dir (bkz. scripts/generate-placeholders.mjs),
+ *     gerçek görsel değildir — bu yüzden birincil kaynak olarak KULLANILMAZ.
+ *  2) CommunityDragon champion-splashes → ddragon 404 verirse (bazı chroma
+ *     girdilerinde num'un splash karşılığı olmayabiliyor) ikinci deneme.
+ *     (https://raw.communitydragon.org/latest/plugin/rcp-be-lol-game-data/
+ *      global/default/v1/champion-splashes/{championId}/{skinId}.jpg)
+ *  3) İkisi de başarısız olursa img gizlenir, kart üzerindeki isim/şampiyon
+ *     metni zaten görünür kalır (kırık görsel ikonu gösterilmez).
+ */
+
+const getSkinImageUrl = (skin) => {
+  if (skin?.image && /^https?:\/\//.test(skin.image)) {
+    return skin.image;
+  }
+
+  return getSkinFallbackImageUrl(skin);
+};
+
+const getSkinFallbackImageUrl = (skin) => {
+  if (!skin?.championId || !skin?.id) {
+    return '';
+  }
+
+  return `https://raw.communitydragon.org/latest/plugin/rcp-be-lol-game-data/global/default/v1/champion-splashes/${skin.championId}/${skin.id}.jpg`;
+};
+
+// <img> için sırayla CDN denemesi yapan ortak onerror zinciri.
+function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
+  if (!imageEl) {
+    return;
+  }
+
+  imageEl.dataset.fallbackStage = '0';
+
+  imageEl.onerror = () => {
+    const stage = imageEl.dataset.fallbackStage;
+
+    if (stage === '0') {
+      imageEl.dataset.fallbackStage = '1';
+
+      const fallbackUrl = getSkinFallbackImageUrl(skin);
+
+      if (fallbackUrl && fallbackUrl !== imageEl.src) {
+        imageEl.src = fallbackUrl;
+        return;
+      }
+    }
+
+    imageEl.onerror = null;
+
+    if (onFinalFailure) {
+      onFinalFailure();
+    } else {
+      imageEl.style.display = 'none';
+    }
+  };
+}
 
 /* =========================================
    VERİLER
@@ -1620,12 +1696,7 @@ function createSkinCard(group) {
   --------------------------------------- */
 
   if (image) {
-    image.src =
-      skin.image && (skin.image.startsWith('http://') || skin.image.startsWith('https://'))
-        ? skin.image
-        : skin.image
-          ? assetUrl(skin.image)
-          : '';
+    image.src = getSkinImageUrl(skin);
 
     image.alt =
       `${displayName} — ${displayChampion}`;
@@ -1633,16 +1704,7 @@ function createSkinCard(group) {
     image.loading = 'lazy';
     image.decoding = 'async';
 
-    image.addEventListener(
-      'error',
-      () => {
-        image.style.display =
-          'none';
-      },
-      {
-        once: true
-      }
-    );
+    attachImageFallbackChain(image, skin);
   }
 
   /* ---------------------------------------
@@ -1768,6 +1830,74 @@ function createSkinCard(group) {
 }
 
 /* =========================================
+   POPÜLER SKİNLER
+========================================= */
+
+// Öne çıkan / bilinen skinler için sabit ID listesi.
+// skins.json her güncellendiğinde ID'ler değişmez,
+// bu yüzden burada elle seçilmiş bir liste kullanılır.
+const POPULAR_SKIN_IDS = [
+  '103015', // K/DA Ahri
+  '99007',  // Elementalist Lux
+  '37006',  // DJ Sona
+  '22008',  // PROJECT: Ashe
+  '103027', // Spirit Blossom Ahri
+  '81005',  // Pulsefire Ezreal
+  '266007', // Blood Moon Aatrox
+  '246002', // True Damage Qiyana
+  '99015',  // Battle Academia Lux
+  '141002', // Odyssey Kayn
+  '21007',  // Arcade Miss Fortune
+  '412005'  // Dark Star Thresh
+];
+
+let popularRendered = false;
+
+function renderPopular() {
+  if (!popularGrid || !popularSection) {
+    return;
+  }
+
+  if (!skinGroups.length) {
+    return;
+  }
+
+  const groupsById = new Map();
+
+  skinGroups.forEach((group) => {
+    group.skins.forEach((skin) => {
+      groupsById.set(String(skin.id), group);
+    });
+  });
+
+  const seen = new Set();
+
+  const popularGroups = POPULAR_SKIN_IDS
+    .map((id) => groupsById.get(String(id)))
+    .filter((group) => {
+      if (!group || seen.has(group.primary.id)) {
+        return false;
+      }
+
+      seen.add(group.primary.id);
+      return true;
+    });
+
+  if (!popularGroups.length) {
+    popularSection.hidden = true;
+    return;
+  }
+
+  const cards = popularGroups
+    .map((group) => createSkinCard(group))
+    .filter(Boolean);
+
+  popularGrid.replaceChildren(...cards);
+  popularSection.hidden = false;
+  popularRendered = true;
+}
+
+/* =========================================
    SKINLERİ RENDER ET
 ========================================= */
 
@@ -1783,6 +1913,12 @@ function render() {
 
   const query =
     normalize(search.value);
+
+  if (popularSection) {
+    popularSection.hidden =
+      Boolean(query) ||
+      isFavoriteFilterActive();
+  }
 
   let found =
     skinGroups
@@ -2019,15 +2155,13 @@ function openModal(group) {
   --------------------------------------- */
 
   if (modalImage) {
-    modalImage.src =
-      skin.image && (skin.image.startsWith('http://') || skin.image.startsWith('https://'))
-        ? skin.image
-        : skin.image
-          ? assetUrl(skin.image)
-          : '';
+    modalImage.style.display = '';
+    modalImage.src = getSkinImageUrl(skin);
 
     modalImage.alt =
       `${displayName} — ${displayChampion}`;
+
+    attachImageFallbackChain(modalImage, skin);
   }
 
   /* ---------------------------------------
@@ -2894,6 +3028,7 @@ async function loadData() {
 
     updateFavoriteCount();
 
+    renderPopular();
     render();
 
     track(
