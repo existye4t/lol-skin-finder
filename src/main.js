@@ -720,13 +720,20 @@ const track = (
 ========================================= */
 
 const assetUrl = (path) => {
-  const base =
-    import.meta.env?.BASE_URL || '/';
+  const base = import.meta.env?.BASE_URL || './';
+  
+  // Normalize the input path: remove leading slashes and leading './'
+  const normalizedPath = String(path).replace(/^\/+/, '').replace(/^\.\//, '');
+  
+  // Normalize base: ensure it ends with a slash if not empty/relative
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  
+  // If base is './' or '/', keep as relative
+  if (base === './' || base === '/') {
+      return `./${normalizedPath}`;
+  }
 
-  return `${base}${String(path).replace(
-    /^\/+/,
-    ''
-  )}`;
+  return `${normalizedBase}${normalizedPath}`;
 };
 
 /* =========================================
