@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-08-27T07:22:59.009Z",
+  "updatedAt": "2026-08-28T09:31:43.323Z",
   "skins": [
     {
       "id": "876045",
@@ -80833,7 +80833,9 @@
       "championEn": "Aphelios",
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_40.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin40/images/aphelios_splash_centered_40.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin40/images/aphelios_splash_centered_40.jpg",
+      "modifiedAt": "2026-08-28T09:31:40.649Z",
+      "customFantome": true
     },
     {
       "id": "99070",

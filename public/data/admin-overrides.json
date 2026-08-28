@@ -1,5 +1,17 @@
 {
-  "updatedAt": "2026-08-22T02:27:24.910Z",
-  "overrides": {},
+  "updatedAt": "2026-08-28T09:31:43.182Z",
+  "overrides": {
+    "523040": {
+      "id": "523040",
+      "name": "Prestij Ruh Çiçeği Kaplıcası Aphelios",
+      "nameEn": "Prestige Spirit Blossom Springs Aphelios",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-08-28T09:31:40.649Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_40.jpg",
+      "customFantome": true
+    }
+  },
   "customSkins": []
 }
