@@ -843,6 +843,45 @@ let searchTrackingTimer = null;
 let lastTrackedSearch = '';
 
 /* =========================================
+   SEARCH CACHE (LRU)
+========================================= */
+
+const SEARCH_CACHE_MAX_SIZE = 20;
+const searchCache = new Map();
+
+// Cache key includes query, favorite filter state, and champion filter state
+function getSearchCacheKey(query, favoriteFilterActive, championFilters) {
+  const filterKey = championFilters.size > 0
+    ? [...championFilters].sort().join(',')
+    : '';
+  return `${query}|${favoriteFilterActive ? '1' : '0'}|${filterKey}`;
+}
+
+function getCachedSearchResult(cacheKey) {
+  const entry = searchCache.get(cacheKey);
+  if (entry) {
+    // Move to end (most recently used)
+    searchCache.delete(cacheKey);
+    searchCache.set(cacheKey, entry);
+    return entry;
+  }
+  return null;
+}
+
+function setCachedSearchResult(cacheKey, result) {
+  // Remove oldest if at capacity
+  if (searchCache.size >= SEARCH_CACHE_MAX_SIZE) {
+    const firstKey = searchCache.keys().next().value;
+    searchCache.delete(firstKey);
+  }
+  searchCache.set(cacheKey, result);
+}
+
+function clearSearchCache() {
+  searchCache.clear();
+}
+
+/* =========================================
    FAVORİLERİ KAYDET
 ========================================= */
 
@@ -1093,27 +1132,38 @@ function getChampionOptions() {
   const options = new Map();
 
   skins.forEach((skin) => {
-   const names = [
-     getLocalizedChampionName(skin, 'tr'),
-     getLocalizedChampionName(skin, 'en')
-   ].filter(Boolean);
+   // Use pre-computed normalized champion keys
+   const keys = skin._championKeys;
+   if (keys) {
+     keys.forEach((key) => {
+       if (!key) return;
+       const displayName = getLocalizedChampionName(skin);
+       if (!options.has(key)) {
+         options.set(key, {
+           key,
+           label: displayName
+         });
+       }
+     });
+   } else {
+     // Fallback for any skin without pre-computed keys
+     const names = [
+       getLocalizedChampionName(skin, 'tr'),
+       getLocalizedChampionName(skin, 'en')
+     ].filter(Boolean);
 
-   names.forEach((name) => {
-     const key = normalize(name);
-
-     if (!key) {
-       return;
-     }
-
-     const displayName = getLocalizedChampionName(skin);
-
-     if (!options.has(key)) {
-       options.set(key, {
-         key,
-         label: displayName || name
-       });
-     }
-   });
+     names.forEach((name) => {
+       const key = normalize(name);
+       if (!key) return;
+       const displayName = getLocalizedChampionName(skin);
+       if (!options.has(key)) {
+         options.set(key, {
+           key,
+           label: displayName || name
+         });
+       }
+     });
+   }
   });
 
   return [...options.values()].sort(
@@ -1273,6 +1323,7 @@ function applyChampionFilters() {
 
   saveChampionFilters();
   updateFilterButtonState();
+  clearSearchCache();
   render();
   closeChampionFilterPanel();
 }
@@ -1297,14 +1348,21 @@ function skinMatchesChampionFilter(skin) {
    return true;
   }
 
-  const keys = [
+  // Use pre-computed normalized champion keys
+  const keys = skin._championKeys;
+  if (keys) {
+    return keys.some((key) => appliedChampionFilters.has(key));
+  }
+
+  // Fallback for any skin without pre-computed keys
+  const fallbackKeys = [
    getLocalizedChampionName(skin, 'tr'),
    getLocalizedChampionName(skin, 'en')
   ]
    .filter(Boolean)
    .map((name) => normalize(name));
 
-  return keys.some((key) =>
+  return fallbackKeys.some((key) =>
    appliedChampionFilters.has(key)
   );
 }
@@ -1377,6 +1435,7 @@ function toggleFavorite(
 
   if (isFavoriteFilterActive()) {
     window.setTimeout(() => {
+      clearSearchCache();
       render();
     }, 220);
   }
@@ -1410,14 +1469,8 @@ const normalize = (value) =>
    ARAMA RELEVANS SKORU
 ========================================= */
 
-function scoreTextMatch(text, query) {
-  const normalizedText = normalize(
-   String(text ?? '')
-  );
-  const normalizedQuery = normalize(
-   String(query ?? '')
-  );
-
+// Score match against an already-normalized text string
+function scoreNormalizedMatch(normalizedText, normalizedQuery) {
   if (!normalizedText || !normalizedQuery) {
    return 0;
   }
@@ -1530,12 +1583,8 @@ function scoreTextMatch(text, query) {
 
 function getGroupSearchScore(
   group,
-  query
+  normalizedQuery
 ) {
-  const normalizedQuery = normalize(
-   String(query ?? '')
-  );
-
   if (!normalizedQuery) {
    return 0;
   }
@@ -1543,23 +1592,18 @@ function getGroupSearchScore(
   let bestScore = 0;
 
   group.skins.forEach((skin) => {
-   [
-     skin.name,
-     skin.nameEn,
-     skin.champion,
-     skin.championEn,
-     String(skin.id)
-   ]
-     .filter(Boolean)
-     .forEach((text) => {
-       bestScore = Math.max(
-         bestScore,
-         scoreTextMatch(
-           text,
-           normalizedQuery
-         )
-       );
-     });
+   // Use pre-computed normalized search fields
+   const fields = skin._searchFields;
+   if (fields) {
+     for (const normalizedText of fields) {
+       const score = scoreNormalizedMatch(normalizedText, normalizedQuery);
+       if (score > bestScore) {
+         bestScore = score;
+         // Early exit for perfect match
+         if (bestScore >= 1_000_000) return;
+       }
+     }
+   }
   });
 
   return bestScore;
@@ -1567,11 +1611,11 @@ function getGroupSearchScore(
 
 function groupMatchesSearch(
   group,
-  query
+  normalizedQuery
 ) {
   return getGroupSearchScore(
    group,
-   query
+   normalizedQuery
   ) > 0;
 }
 
@@ -1647,6 +1691,23 @@ function normalizeSkin(skin) {
     return null;
   }
 
+  // Pre-compute normalized search fields to avoid repeated normalization during search
+  const searchFields = [
+    name,
+    nameEn,
+    champion,
+    championEn,
+    String(id)
+  ].filter(Boolean);
+
+  const normalizedSearchFields = searchFields.map(normalize);
+
+  // Pre-compute normalized champion keys for filter matching
+  const championKeys = [
+    championTr,
+    championEn
+  ].filter(Boolean).map(normalize);
+
   return {
     ...skin,
     id,
@@ -1657,7 +1718,9 @@ function normalizeSkin(skin) {
     nameTr,
     championTr,
     nameEn,
-    championEn
+    championEn,
+    _searchFields: normalizedSearchFields,
+    _championKeys: championKeys
   };
 }
 
@@ -1933,6 +1996,15 @@ function renderPopular() {
    SKINLERİ RENDER ET
 ========================================= */
 
+// Incremental rendering state
+let renderState = {
+  allGroups: [],
+  renderedCount: 0,
+  batchSize: 30,
+  isRendering: false,
+  observer: null
+};
+
 function render() {
   if (
     !search ||
@@ -1945,80 +2017,61 @@ function render() {
 
   const query =
     normalize(search.value);
+  const favoriteActive = isFavoriteFilterActive();
+  const championFilters = appliedChampionFilters;
 
   if (popularSection) {
     popularSection.hidden =
       Boolean(query) ||
-      isFavoriteFilterActive();
+      favoriteActive;
   }
 
-  let found =
-    skinGroups
-     .map((group) => ({
-       group,
-       score: getGroupSearchScore(
+  // Check cache first
+  const cacheKey = getSearchCacheKey(query, favoriteActive, championFilters);
+  const cached = getCachedSearchResult(cacheKey);
+
+  let found;
+  if (cached) {
+    found = cached;
+  } else {
+    // Compute search results
+    found =
+      skinGroups
+       .map((group) => ({
          group,
-         query
+         score: getGroupSearchScore(
+           group,
+           query
+         )
+       }))
+       .filter(
+         ({ group, score }) =>
+           (!query || score > 0) &&
+           groupMatchesChampionFilter(group)
        )
-     }))
-     .filter(
-       ({ group, score }) =>
-         (!query || score > 0) &&
-         groupMatchesChampionFilter(group)
-     )
-     .sort(
-       (a, b) =>
-         b.score - a.score
-     )
-     .map(({ group }) => group);
+       .sort(
+         (a, b) =>
+           b.score - a.score
+       )
+       .map(({ group }) => group);
 
-  /* ---------------------------------------
-     Favori filtresi
-  --------------------------------------- */
+    /* ---------------------------------------
+       Favori filtresi
+    --------------------------------------- */
 
-  if (
-    isFavoriteFilterActive()
-  ) {
-    found = found.filter(
-     (group) =>
-       groupHasFavorite(group)
-    );
+    if (favoriteActive) {
+      found = found.filter(
+       (group) =>
+         groupHasFavorite(group)
+      );
+    }
+
+    // Cache the full sorted/filtered results
+    setCachedSearchResult(cacheKey, found);
   }
 
-  /* ---------------------------------------
-     Maksimum görünür kart
-  --------------------------------------- */
-
-  const maxVisible =
-    query ||
-    isFavoriteFilterActive()
-      ? 80
-      : 24;
-
-  const visible =
-    found.slice(
-      0,
-      maxVisible
-    );
-
-  const cards =
-    visible
-      .map((group) =>
-        createSkinCard(group)
-      )
-      .filter(Boolean);
-
-  results.replaceChildren(
-    ...cards
-  );
-
-  /* ---------------------------------------
-     Başlık
-  --------------------------------------- */
-
-  if (
-    isFavoriteFilterActive()
-  ) {
+  // Update title and meta immediately (cheap operations)
+  if (favoriteActive) {
     title.textContent = query
       ? t(
           'favoriteResultsCount',
@@ -2054,12 +2107,31 @@ function render() {
         );
   }
 
+  const maxVisible =
+    query ||
+    favoriteActive
+      ? 80
+      : 24;
+
+  // Reset incremental rendering state
+  renderState.allGroups = found;
+  renderState.renderedCount = 0;
+  renderState.batchSize = maxVisible <= 30 ? maxVisible : 30;
+
+  // Clear previous results and start incremental rendering
+  results.replaceChildren();
+  empty.hidden = found.length !== 0;
+  results.hidden = found.length === 0;
+
+  // Render first batch
+  renderNextBatch();
+
+  // Set up intersection observer for progressive loading
+  setupRenderObserver();
+
   /* ---------------------------------------
      Meta
   --------------------------------------- */
-
-  const visibleCount =
-    visible.length;
 
   if (
     meta &&
@@ -2067,13 +2139,13 @@ function render() {
   ) {
     if (
       query ||
-      isFavoriteFilterActive()
+      favoriteActive
     ) {
       meta.textContent =
         t('showingCount', {
           visible:
             formatNumber(
-              visibleCount
+              Math.min(renderState.batchSize, found.length)
             ),
           total:
             formatNumber(
@@ -2087,12 +2159,6 @@ function render() {
      Boş durum
   --------------------------------------- */
 
-  empty.hidden =
-    found.length !== 0;
-
-  results.hidden =
-    found.length === 0;
-
   const emptyTitle =
     empty.querySelector('h2');
 
@@ -2104,7 +2170,7 @@ function render() {
     emptyText
   ) {
     if (
-      isFavoriteFilterActive() &&
+      favoriteActive &&
       favorites.size === 0
     ) {
       emptyTitle.textContent =
@@ -2113,7 +2179,7 @@ function render() {
       emptyText.textContent =
         t('noFavoritesYetHint');
     } else if (
-      isFavoriteFilterActive() &&
+      favoriteActive &&
       found.length === 0
     ) {
       emptyTitle.textContent =
@@ -2138,6 +2204,75 @@ function render() {
 
   updateFavoriteCount();
   updateFilterButtonState();
+}
+
+function renderNextBatch() {
+  const { allGroups, renderedCount, batchSize } = renderState;
+  const nextCount = Math.min(renderedCount + batchSize, allGroups.length);
+  const batch = allGroups.slice(renderedCount, nextCount);
+
+  if (batch.length === 0) {
+    // No more to render, disconnect observer
+    if (renderState.observer) {
+      renderState.observer.disconnect();
+      renderState.observer = null;
+    }
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  batch.forEach((group) => {
+    const card = createSkinCard(group);
+    if (card) fragment.appendChild(card);
+  });
+
+  results.appendChild(fragment);
+  renderState.renderedCount = nextCount;
+
+  // Update meta with current visible count
+  if (meta && skinGroups.length) {
+    const query = normalize(search?.value || '');
+    const favoriteActive = isFavoriteFilterActive();
+    if (query || favoriteActive) {
+      meta.textContent =
+        t('showingCount', {
+          visible:
+            formatNumber(renderState.renderedCount),
+          total:
+            formatNumber(allGroups.length)
+        });
+    }
+  }
+}
+
+function setupRenderObserver() {
+  // Clean up previous observer
+  if (renderState.observer) {
+    renderState.observer.disconnect();
+  }
+
+  // Create sentinel element for intersection observer
+  let sentinel = results.querySelector('.render-sentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.className = 'render-sentinel';
+    sentinel.style.height = '1px';
+    results.appendChild(sentinel);
+  }
+
+  renderState.observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && renderState.renderedCount < renderState.allGroups.length) {
+        renderNextBatch();
+      }
+    },
+    {
+      rootMargin: '200px',
+      threshold: 0
+    }
+  );
+
+  renderState.observer.observe(sentinel);
 }
 
 /* =========================================
@@ -2678,6 +2813,7 @@ favoriteFilter?.addEventListener(
       !isFavoriteFilterActive();
 
     setFavoriteFilter(active);
+    clearSearchCache();
     render();
 
     track(
@@ -2840,10 +2976,23 @@ function scheduleSearchAnalytics() {
    ARAMA
 ========================================= */
 
+let searchDebounceTimer = null;
+const SEARCH_DEBOUNCE_MS = 50;
+
+function debouncedRender() {
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer);
+  }
+  searchDebounceTimer = setTimeout(() => {
+    render();
+    searchDebounceTimer = null;
+  }, SEARCH_DEBOUNCE_MS);
+}
+
 search?.addEventListener(
   'input',
   () => {
-    render();
+    debouncedRender();
     scheduleSearchAnalytics();
   }
 );
@@ -2891,6 +3040,7 @@ document
           false
         );
 
+        clearSearchCache();
         render();
 
         search.focus();
