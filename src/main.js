@@ -1,4 +1,5 @@
 import './style.css';
+import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders';
 
 /* =========================================
    DİL / i18n
@@ -370,7 +371,12 @@ function applyStaticTranslations() {
   document
     .querySelectorAll('[data-i18n]')
     .forEach((element) => {
-      element.textContent = t(element.dataset.i18n);
+      const contentSpan = element.querySelector('.btn-metal-content');
+      if (contentSpan) {
+        contentSpan.textContent = t(element.dataset.i18n);
+      } else {
+        element.textContent = t(element.dataset.i18n);
+      }
     });
 
   document
@@ -3404,8 +3410,218 @@ async function loadData() {
 }
 
 /* =========================================
+   BACKGROUND PATHS (AMBIENT LAYER)
+   ========================================= */
+
+function initBackgroundPaths() {
+  const container = document.getElementById('background-paths');
+  if (!container) return;
+
+  function createPathGroup(position, groupClass) {
+    const paths = [];
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+      const p = position;
+      const x1 = -(380 - i * 5 * p);
+      const y1 = -(189 + i * 6);
+      const cx1 = -(312 - i * 5 * p);
+      const cy1 = 216 - i * 6;
+      const cx2 = 152 - i * 5 * p;
+      const cy2 = 343 - i * 6;
+      const x2 = 616 - i * 5 * p;
+      const y2 = 470 - i * 6;
+      const cx3 = 684 - i * 5 * p;
+      const cy3 = 875 - i * 6;
+
+      const d = `M ${x1} ${y1} C ${cx1} ${cy1} ${cx2} ${cy2} ${x2} ${y2} C ${cx3} ${cy3} ${cx3} ${cy3} ${cx3} ${cy3}`;
+      const strokeWidth = (0.5 + i * 0.03).toFixed(2);
+      const opacity = (0.02 + (i / count) * 0.04).toFixed(3);
+      const delay = (i * 0.3).toFixed(2);
+      const duration = (24 + (i % 5) * 3).toFixed(1);
+
+      paths.push(`
+        <path
+          d="${d}"
+          class="bg-path bg-path-${i % 3}"
+          stroke-width="${strokeWidth}"
+          stroke-opacity="${opacity}"
+          style="--anim-delay: ${delay}s; --anim-dur: ${duration}s;"
+        />
+      `);
+    }
+    return `<g class="${groupClass}">${paths.join('')}</g>`;
+  }
+
+  container.innerHTML = `
+    <svg class="bg-paths-svg" viewBox="-250 -200 1200 1200" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad-iris" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4F7CFF" stop-opacity="0.3"/>
+          <stop offset="60%" stop-color="#3b5ec2" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#05070B" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#d2b175" stop-opacity="0.25"/>
+          <stop offset="60%" stop-color="#8c6e32" stop-opacity="0.1"/>
+          <stop offset="100%" stop-color="#05070B" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="grad-ember" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#C56A52" stop-opacity="0.25"/>
+          <stop offset="70%" stop-color="#4F7CFF" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#05070B" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${createPathGroup(1, 'bg-paths-group-1')}
+      ${createPathGroup(-1, 'bg-paths-group-2')}
+    </svg>
+  `;
+}
+
+/* =========================================
+   LIQUID METAL BUTTON DESIGN SYSTEM
+   ========================================= */
+
+const mountedLiquidMetalShaders = new Map();
+
+function mountLiquidMetalButton(btn, customUniforms = {}) {
+  if (!btn || mountedLiquidMetalShaders.has(btn)) return;
+
+  btn.classList.add('btn-liquid-metal');
+
+  const canvasWrap = document.createElement('span');
+  canvasWrap.className = 'btn-metal-canvas';
+  canvasWrap.setAttribute('aria-hidden', 'true');
+
+  const glowWrap = document.createElement('span');
+  glowWrap.className = 'btn-metal-glow';
+  glowWrap.setAttribute('aria-hidden', 'true');
+
+  const ripplesWrap = document.createElement('span');
+  ripplesWrap.className = 'btn-metal-ripples';
+  ripplesWrap.setAttribute('aria-hidden', 'true');
+
+  const contentWrap = document.createElement('span');
+  contentWrap.className = 'btn-metal-content';
+
+  while (btn.firstChild) {
+    contentWrap.appendChild(btn.firstChild);
+  }
+
+  btn.appendChild(glowWrap);
+  btn.appendChild(canvasWrap);
+  btn.appendChild(ripplesWrap);
+  btn.appendChild(contentWrap);
+
+  try {
+    const uniforms = {
+      u_colorBack: customUniforms.u_colorBack || [0.02, 0.03, 0.05, 1.0],
+      u_colorTint: customUniforms.u_colorTint || [0.31, 0.49, 0.95, 1.0],
+      u_repetition: customUniforms.u_repetition || 2.2,
+      u_softness: customUniforms.u_softness || 0.5,
+      u_shiftRed: customUniforms.u_shiftRed || 0.15,
+      u_shiftBlue: customUniforms.u_shiftBlue || 0.2,
+      u_distortion: customUniforms.u_distortion || 0.08,
+      u_contour: customUniforms.u_contour || 0.38,
+      u_angle: customUniforms.u_angle || 60.0,
+      u_shape: 0,
+      u_isImage: false
+    };
+
+    const shader = new ShaderMount(
+      canvasWrap,
+      liquidMetalFragmentShader,
+      uniforms,
+      { alpha: true, antialias: true, depth: false },
+      0.35,
+      0,
+      1,
+      1000000
+    );
+
+    mountedLiquidMetalShaders.set(btn, shader);
+
+    btn.addEventListener('mouseenter', () => {
+      shader.setSpeed(1.6);
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      shader.setSpeed(0.35);
+    });
+  } catch (err) {
+    console.warn('Liquid metal shader initialization skipped/fallback:', err);
+    btn.classList.add('btn-metal-fallback');
+  }
+
+  btn.addEventListener('pointerdown', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const ripple = document.createElement('span');
+    ripple.className = 'btn-metal-ripple';
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripplesWrap.appendChild(ripple);
+    setTimeout(() => {
+      ripple.remove();
+    }, 700);
+  });
+}
+
+function initLiquidMetalButtons() {
+  const primarySelectors = [
+    '.discord-invite-cta',
+    '#discord-invite',
+    '#discord-modal-join',
+    '#updates-button',
+    '#bug-report-button',
+    '#apply-filters',
+    '.community-submit'
+  ];
+
+  primarySelectors.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((btn) => {
+      mountLiquidMetalButton(btn);
+    });
+  });
+}
+
+function initInteractiveRipples() {
+  document.addEventListener('pointerdown', (e) => {
+    const btn = e.target.closest(
+      '.favorite-filter, .filter-button, .quick-searches button, .favorite-button, .filter-panel-action, .clear-favorites, .lang-switch, .discord-contact, .modal-favorite, .modal-close, .community-modal-close, .btn-secondary-metal, .btn-icon-metal'
+    );
+    if (!btn || btn.classList.contains('btn-liquid-metal')) return;
+
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    let rippleWrap = btn.querySelector('.css-ripple-wrap');
+    if (!rippleWrap) {
+      rippleWrap = document.createElement('span');
+      rippleWrap.className = 'css-ripple-wrap';
+      rippleWrap.setAttribute('aria-hidden', 'true');
+      btn.appendChild(rippleWrap);
+    }
+
+    const ripple = document.createElement('span');
+    ripple.className = 'css-ripple';
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    rippleWrap.appendChild(ripple);
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  });
+}
+
+/* =========================================
    BAŞLAT
 ========================================= */
+
+initBackgroundPaths();
+initLiquidMetalButtons();
+initInteractiveRipples();
 
 applyStaticTranslations();
 
@@ -3416,3 +3632,4 @@ updateFavoriteCount();
 setFavoriteFilter(false);
 
 await loadData();
+
