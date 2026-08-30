@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-08-28T09:31:43.323Z",
+  "updatedAt": "2026-08-30T09:02:09.401Z",
   "skins": [
     {
       "id": "876045",
@@ -60248,7 +60248,9 @@
       "championEn": "Yasuo",
       "championId": "Yasuo",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_87.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yasuo/skins/skin87/images/yasuo_splash_centered_87.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yasuo/skins/skin87/images/yasuo_splash_centered_87.jpg",
+      "modifiedAt": "2026-08-30T09:02:06.748Z",
+      "customFantome": true
     },
     {
       "id": "19003",
@@ -120964,7 +120966,9 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_44.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin44/images/garen_splash_centered_44.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin44/images/garen_splash_centered_44.jpg",
+      "modifiedAt": "2026-08-30T09:01:04.813Z",
+      "customFantome": true
     },
     {
       "id": "21005",
@@ -121328,7 +121332,9 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_13.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin13/images/garen_splash_centered_13.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin13/images/garen_splash_centered_13.jpg",
+      "modifiedAt": "2026-08-30T09:01:41.057Z",
+      "customFantome": true
     },
     {
       "id": "64052",

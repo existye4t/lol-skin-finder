@@ -1,6 +1,39 @@
 {
-  "updatedAt": "2026-08-28T09:31:43.182Z",
+  "updatedAt": "2026-08-30T09:02:09.359Z",
   "overrides": {
+    "86013": {
+      "id": "86013",
+      "name": "Yüce Kral Garen",
+      "nameEn": "God-King Garen",
+      "champion": "Garen",
+      "championEn": "Garen",
+      "championId": "Garen",
+      "modifiedAt": "2026-08-30T09:01:41.057Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_13.jpg",
+      "customFantome": true
+    },
+    "86044": {
+      "id": "86044",
+      "name": "Yitmiş Yüce Kral Garen",
+      "nameEn": "Fallen God-King Garen",
+      "champion": "Garen",
+      "championEn": "Garen",
+      "championId": "Garen",
+      "modifiedAt": "2026-08-30T09:01:04.813Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_44.jpg",
+      "customFantome": true
+    },
+    "157087": {
+      "id": "157087",
+      "name": "Köken: Gecenin Kılıcı Yasuo",
+      "nameEn": "Genesis Nightbringer Yasuo",
+      "champion": "Yasuo",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "modifiedAt": "2026-08-30T09:02:06.748Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_87.jpg",
+      "customFantome": true
+    },
     "523040": {
       "id": "523040",
       "name": "Prestij Ruh Çiçeği Kaplıcası Aphelios",
