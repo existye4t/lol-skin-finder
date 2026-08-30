@@ -1077,16 +1077,38 @@ kbd {
   width: 320px;
   padding: 20px;
   border-radius: 16px;
-  border: 1px solid var(--border);
+  border: 1px solid #5865f2;
   background: var(--surface);
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 16px 50px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(88, 101, 242, 0.25),
+    0 0 32px rgba(88, 101, 242, 0.35);
   transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease;
+  animation: discord-card-glow 2.6s ease-in-out infinite;
 }
 
 .discord-invite-card:hover {
-  transform: translateY(-3px);
-  border-color: #31425e;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75);
+  transform: translateY(-4px) scale(1.015);
+  border-color: #707bf5;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(88, 101, 242, 0.4),
+    0 0 44px rgba(88, 101, 242, 0.55);
+}
+
+@keyframes discord-card-glow {
+  0%, 100% {
+    box-shadow:
+      0 16px 50px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(88, 101, 242, 0.25),
+      0 0 22px rgba(88, 101, 242, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 16px 50px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(88, 101, 242, 0.45),
+      0 0 40px rgba(88, 101, 242, 0.55);
+  }
 }
 
 .discord-invite-inner {
@@ -1103,14 +1125,14 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #141c2e;
-  border: 1px solid #283750;
+  background: rgba(88, 101, 242, 0.18);
+  border: 1px solid #5865f2;
 }
 
 .discord-invite-icon svg {
   width: 24px;
   height: 24px;
-  color: var(--accent-primary);
+  color: #8891ff;
 }
 
 .discord-invite-body h3 {
@@ -1128,8 +1150,45 @@ kbd {
 
 .discord-invite-cta {
   width: 100%;
-  min-height: 40px;
-  font-size: 0.86rem;
+  min-height: 48px;
+  font-size: 0.98rem;
+  background: linear-gradient(145deg, #5865f2, #4046c9);
+  border: 1px solid #7983f5;
+  box-shadow:
+    0 8px 24px rgba(88, 101, 242, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  animation: discord-cta-pulse 2.2s ease-in-out infinite;
+}
+
+.discord-invite-cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: #99a2f7;
+  box-shadow:
+    0 12px 32px rgba(88, 101, 242, 0.6),
+    0 0 24px rgba(88, 101, 242, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.discord-invite-cta:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 4px 10px rgba(88, 101, 242, 0.5);
+}
+
+@keyframes discord-cta-pulse {
+  0%, 100% {
+    box-shadow:
+      0 8px 24px rgba(88, 101, 242, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 8px 30px rgba(88, 101, 242, 0.7),
+      0 0 20px rgba(88, 101, 242, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  }
 }
 
 /* =========================================
