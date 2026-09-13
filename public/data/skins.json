@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-08-30T09:02:09.401Z",
+  "updatedAt": "2026-09-11T19:15:26.559Z",
   "skins": [
     {
       "id": "876045",
@@ -1670,6 +1670,20 @@
       "championId": "Leblanc",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_5.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leblanc/skins/skin05/images/leblanc_splash_centered_5.jpg"
+    },
+    {
+      "id": "7061",
+      "skinNum": 61,
+      "name": "Ağaç Ata LeBlanc (Emsalsiz)",
+      "champion": "LeBlanc",
+      "nameTr": "Ağaç Ata LeBlanc (Emsalsiz)",
+      "championTr": "LeBlanc",
+      "nameEn": "Elderwood LeBlanc (Paragon)",
+      "championEn": "LeBlanc",
+      "championId": "Leblanc",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_61.jpg",
+      "imageFallback": "",
+      "parentSkinId": "7005"
     },
     {
       "id": "516002",
@@ -4296,6 +4310,20 @@
       "championEn": "Akali",
       "championId": "Akali",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_85.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84082"
+    },
+    {
+      "id": "84104",
+      "skinNum": 104,
+      "name": "Arş Hükümdarı Akali (Emsalsiz)",
+      "champion": "Akali",
+      "nameTr": "Arş Hükümdarı Akali (Emsalsiz)",
+      "championTr": "Akali",
+      "nameEn": "Empyrean Akali (Paragon)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_104.jpg",
       "imageFallback": "",
       "parentSkinId": "84082"
     },
@@ -30276,6 +30304,20 @@
       "championId": "Taliyah",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_1.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/taliyah/skins/skin01/images/taliyah_splash_centered_1.jpg"
+    },
+    {
+      "id": "163033",
+      "skinNum": 33,
+      "name": "Freljord'lu Taliyah (Emsalsiz)",
+      "champion": "Taliyah",
+      "nameTr": "Freljord'lu Taliyah (Emsalsiz)",
+      "championTr": "Taliyah",
+      "nameEn": "Freljord Taliyah (Paragon)",
+      "championEn": "Taliyah",
+      "championId": "Taliyah",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_33.jpg",
+      "imageFallback": "",
+      "parentSkinId": "163001"
     },
     {
       "id": "3006",
@@ -73203,6 +73245,19 @@
       "championEn": "Kai'Sa",
       "championId": "Kaisa",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kaisa_71.jpg",
+      "imageFallback": ""
+    },
+    {
+      "id": "18080",
+      "skinNum": 80,
+      "name": "Ölümsüz Efsane Tristana",
+      "champion": "Tristana",
+      "nameTr": "Ölümsüz Efsane Tristana",
+      "championTr": "Tristana",
+      "nameEn": "Immortalized Legend Tristana",
+      "championEn": "Tristana",
+      "championId": "Tristana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_80.jpg",
       "imageFallback": ""
     },
     {
@@ -122288,6 +122343,60 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_57.jpg",
       "imageFallback": "",
       "parentSkinId": "7055"
+    },
+    {
+      "id": "61040",
+      "skinNum": 40,
+      "name": "Yükselen Efsane Orianna",
+      "champion": "Orianna",
+      "nameTr": "Yükselen Efsane Orianna",
+      "championTr": "Orianna",
+      "nameEn": "Risen Legend Orianna",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_40.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/orianna/skins/skin40/images/orianna_splash_centered_40.skins_orianna_skin40.jpg"
+    },
+    {
+      "id": "61042",
+      "skinNum": 42,
+      "name": "Yükselen Efsane Orianna (Efsanenin Doruğu)",
+      "champion": "Orianna",
+      "nameTr": "Yükselen Efsane Orianna (Efsanenin Doruğu)",
+      "championTr": "Orianna",
+      "nameEn": "Risen Legend Orianna (Mythclimber)",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_42.jpg",
+      "imageFallback": "",
+      "parentSkinId": "61040"
+    },
+    {
+      "id": "61041",
+      "skinNum": 41,
+      "name": "Yükselen Efsane Orianna (Emsalsiz)",
+      "champion": "Orianna",
+      "nameTr": "Yükselen Efsane Orianna (Emsalsiz)",
+      "championTr": "Orianna",
+      "nameEn": "Risen Legend Orianna (Paragon)",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_41.jpg",
+      "imageFallback": "",
+      "parentSkinId": "61040"
+    },
+    {
+      "id": "18079",
+      "skinNum": 79,
+      "name": "Yükselen Efsane Tristana",
+      "champion": "Tristana",
+      "nameTr": "Yükselen Efsane Tristana",
+      "championTr": "Tristana",
+      "nameEn": "Risen Legend Tristana",
+      "championEn": "Tristana",
+      "championId": "Tristana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_79.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/tristana/skins/skin79/images/tristana_splash_centered_79.hol_tristana.jpg"
     },
     {
       "id": "67064",
