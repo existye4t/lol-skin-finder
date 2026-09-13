@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-09-11T19:15:26.559Z",
+  "updatedAt": "2026-09-13T13:47:04.515Z",
   "skins": [
     {
       "id": "876045",
@@ -1683,7 +1683,9 @@
       "championId": "Leblanc",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_61.jpg",
       "imageFallback": "",
-      "parentSkinId": "7005"
+      "parentSkinId": "7005",
+      "modifiedAt": "2026-09-13T13:46:44.014Z",
+      "customFantome": true
     },
     {
       "id": "516002",
@@ -4325,7 +4327,9 @@
       "championId": "Akali",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_104.jpg",
       "imageFallback": "",
-      "parentSkinId": "84082"
+      "parentSkinId": "84082",
+      "modifiedAt": "2026-09-13T13:47:02.731Z",
+      "customFantome": true
     },
     {
       "id": "84090",
@@ -30317,7 +30321,9 @@
       "championId": "Taliyah",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_33.jpg",
       "imageFallback": "",
-      "parentSkinId": "163001"
+      "parentSkinId": "163001",
+      "modifiedAt": "2026-09-13T13:46:22.716Z",
+      "customFantome": true
     },
     {
       "id": "3006",
@@ -73258,7 +73264,9 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_80.jpg",
-      "imageFallback": ""
+      "imageFallback": "",
+      "modifiedAt": "2026-09-13T13:44:55.486Z",
+      "customFantome": true
     },
     {
       "id": "92044",
@@ -122355,7 +122363,9 @@
       "championEn": "Orianna",
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_40.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/orianna/skins/skin40/images/orianna_splash_centered_40.skins_orianna_skin40.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/orianna/skins/skin40/images/orianna_splash_centered_40.skins_orianna_skin40.jpg",
+      "modifiedAt": "2026-09-13T13:45:29.288Z",
+      "customFantome": true
     },
     {
       "id": "61042",
@@ -122369,7 +122379,9 @@
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_42.jpg",
       "imageFallback": "",
-      "parentSkinId": "61040"
+      "parentSkinId": "61040",
+      "modifiedAt": "2026-09-13T13:46:06.493Z",
+      "customFantome": true
     },
     {
       "id": "61041",
@@ -122383,7 +122395,9 @@
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_41.jpg",
       "imageFallback": "",
-      "parentSkinId": "61040"
+      "parentSkinId": "61040",
+      "modifiedAt": "2026-09-13T13:45:54.741Z",
+      "customFantome": true
     },
     {
       "id": "18079",
@@ -122396,7 +122410,9 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_79.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/tristana/skins/skin79/images/tristana_splash_centered_79.hol_tristana.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/tristana/skins/skin79/images/tristana_splash_centered_79.hol_tristana.jpg",
+      "modifiedAt": "2026-09-13T13:44:31.348Z",
+      "customFantome": true
     },
     {
       "id": "67064",

@@ -1,6 +1,83 @@
 {
-  "updatedAt": "2026-08-30T09:02:09.359Z",
+  "updatedAt": "2026-09-13T13:47:04.212Z",
   "overrides": {
+    "7061": {
+      "id": "7061",
+      "name": "Ağaç Ata LeBlanc (Emsalsiz)",
+      "nameEn": "Elderwood LeBlanc (Paragon)",
+      "champion": "LeBlanc",
+      "championEn": "LeBlanc",
+      "championId": "Leblanc",
+      "modifiedAt": "2026-09-13T13:46:44.014Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_61.jpg",
+      "customFantome": true
+    },
+    "18079": {
+      "id": "18079",
+      "name": "Yükselen Efsane Tristana",
+      "nameEn": "Risen Legend Tristana",
+      "champion": "Tristana",
+      "championEn": "Tristana",
+      "championId": "Tristana",
+      "modifiedAt": "2026-09-13T13:44:31.348Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_79.jpg",
+      "customFantome": true
+    },
+    "18080": {
+      "id": "18080",
+      "name": "Ölümsüz Efsane Tristana",
+      "nameEn": "Immortalized Legend Tristana",
+      "champion": "Tristana",
+      "championEn": "Tristana",
+      "championId": "Tristana",
+      "modifiedAt": "2026-09-13T13:44:55.486Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_80.jpg",
+      "customFantome": true
+    },
+    "61040": {
+      "id": "61040",
+      "name": "Yükselen Efsane Orianna",
+      "nameEn": "Risen Legend Orianna",
+      "champion": "Orianna",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "modifiedAt": "2026-09-13T13:45:29.288Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_40.jpg",
+      "customFantome": true
+    },
+    "61041": {
+      "id": "61041",
+      "name": "Yükselen Efsane Orianna (Emsalsiz)",
+      "nameEn": "Risen Legend Orianna (Paragon)",
+      "champion": "Orianna",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "modifiedAt": "2026-09-13T13:45:54.741Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_41.jpg",
+      "customFantome": true
+    },
+    "61042": {
+      "id": "61042",
+      "name": "Yükselen Efsane Orianna (Efsanenin Doruğu)",
+      "nameEn": "Risen Legend Orianna (Mythclimber)",
+      "champion": "Orianna",
+      "championEn": "Orianna",
+      "championId": "Orianna",
+      "modifiedAt": "2026-09-13T13:46:06.493Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_42.jpg",
+      "customFantome": true
+    },
+    "84104": {
+      "id": "84104",
+      "name": "Arş Hükümdarı Akali (Emsalsiz)",
+      "nameEn": "Empyrean Akali (Paragon)",
+      "champion": "Akali",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "modifiedAt": "2026-09-13T13:47:02.731Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_104.jpg",
+      "customFantome": true
+    },
     "86013": {
       "id": "86013",
       "name": "Yüce Kral Garen",
@@ -32,6 +109,17 @@
       "championId": "Yasuo",
       "modifiedAt": "2026-08-30T09:02:06.748Z",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_87.jpg",
+      "customFantome": true
+    },
+    "163033": {
+      "id": "163033",
+      "name": "Freljord'lu Taliyah (Emsalsiz)",
+      "nameEn": "Freljord Taliyah (Paragon)",
+      "champion": "Taliyah",
+      "championEn": "Taliyah",
+      "championId": "Taliyah",
+      "modifiedAt": "2026-09-13T13:46:22.716Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_33.jpg",
       "customFantome": true
     },
     "523040": {
