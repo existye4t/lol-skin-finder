@@ -1,12 +1,24 @@
 {
   "tr": {
     "title": "Nasıl kullanılır?",
-    "content": "Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.",
-    "videos": []
+    "content": "Sitedeki skinleri kullanmak için aşağıdaki adımları takip edebilirsiniz.\n\nSkinleri hatasız kullanabilmek için LTK Manager ayarlarından sol kısımdaki patching sekmesine girip Enforce anti-skinhack scan ayarını kapatın.\n\nLTK Manager uygulamasının her zaman en son sürümünü kullandığınızdan emin olun.\n\nLTK Manager: https://github.com/LeagueToolkit/ltk-manager",
+    "videos": [
+      {
+        "title": "Exist Skin Finder nasıl kullanılır?",
+        "description": "Bu videoda LTK Manager ile skinleri nasıl kullanacağınızı gösteriyorum.",
+        "url": "https://youtu.be/Es561iuCd1k?si=j-yqP_PZXGN-0XCI"
+      }
+    ]
   },
   "en": {
     "title": "How to Use?",
-    "content": "Follow the steps below to learn how to use the website.",
-    "videos": []
+    "content": "Follow the steps below to learn how to use the skins in website.\n\nTo use skins without any issues, go to the “Patching” tab on the left side of the LTK Manager settings and disable the “Enforce anti-skinhack scan” setting.\n\nMake sure you are always using the latest version of the LTK Manager app.\n\nLTK Manager: https://github.com/LeagueToolkit/ltk-manager",
+    "videos": [
+      {
+        "title": "How do you use Exist Skin Finder?",
+        "description": "In this video, I'll show you how to use skins with LTK Manager.",
+        "url": "https://youtu.be/Es561iuCd1k?si=j-yqP_PZXGN-0XCI"
+      }
+    ]
   }
 }
