@@ -290,6 +290,41 @@ const TRANSLATIONS = {
   closeDiscord: {
     tr: 'Discord penceresini kapat',
     en: 'Close the Discord window'
+  },
+
+  howToUseButton: {
+    tr: 'Nasıl kullanılır?',
+    en: 'How to Use?'
+  },
+
+  howToUseKicker: {
+    tr: 'REHBER',
+    en: 'GUIDE'
+  },
+
+  howToUseModalTitle: {
+    tr: 'Nasıl Kullanılır?',
+    en: 'How to Use?'
+  },
+
+  howToUseNoContent: {
+    tr: 'Henüz içerik eklenmedi.',
+    en: 'No content added yet.'
+  },
+
+  howToUseVideoTitle: {
+    tr: 'Video',
+    en: 'Video'
+  },
+
+  howToUseVideoDescription: {
+    tr: 'Açıklama',
+    en: 'Description'
+  },
+
+  howToUseVideoUrl: {
+    tr: 'Video URL',
+    en: 'Video URL'
   }
 };
 
@@ -585,6 +620,11 @@ function setLang(lang) {
   // İçerik seçili skin korunarak yenilenir.
   if (modal?.open && activeModalGroup) {
     refreshOpenModal(activeModalGroup);
+  }
+
+  // How-to-use modal açıkken dil değişirse içeriği yenile
+  if (howToUseModal?.open) {
+    renderHowToUse();
   }
 
   track('language_change', {
@@ -2592,12 +2632,16 @@ const discordClose =
 
 const updatesButton = document.querySelector('#updates-button');
 const bugReportButton = document.querySelector('#bug-report-button');
+const howToUseButton = document.querySelector('#how-to-use-button');
 const updatesModal = document.querySelector('#updates-modal');
 const bugReportModal = document.querySelector('#bug-report-modal');
+const howToUseModal = document.querySelector('#how-to-use-modal');
 const updatesList = document.querySelector('#updates-list');
 const bugReportForm = document.querySelector('#bug-report-form');
 const bugReportSkin = document.querySelector('#bug-report-skin');
 const bugReportStatus = document.querySelector('#bug-report-status');
+const howToUseContent = document.querySelector('#how-to-use-content');
+const howToUseVideos = document.querySelector('#how-to-use-videos');
 
 function openCommunityModal(dialog) {
   if (!dialog) return;
@@ -2667,6 +2711,91 @@ async function renderUpdates() {
   }
 }
 
+async function renderHowToUse() {
+  if (!howToUseContent || !howToUseVideos) return;
+  howToUseContent.replaceChildren();
+  howToUseVideos.replaceChildren();
+
+  try {
+    const response = await fetch(assetUrl('data/how-to-use.json'), { cache: 'no-cache' });
+    if (!response.ok) throw new Error('how-to-use unavailable');
+    const data = await response.json();
+    const langData = data[currentLang] || data.tr || {};
+
+    // Content
+    if (langData.content) {
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'how-to-use-text';
+      contentDiv.textContent = langData.content;
+      howToUseContent.appendChild(contentDiv);
+    } else {
+      const emptyP = document.createElement('p');
+      emptyP.className = 'community-empty';
+      emptyP.textContent = t('howToUseNoContent');
+      howToUseContent.appendChild(emptyP);
+    }
+
+    // Videos
+    const videos = Array.isArray(langData.videos) ? langData.videos : [];
+    if (videos.length > 0) {
+      const videosHeading = document.createElement('h3');
+      videosHeading.className = 'how-to-use-videos-heading';
+      videosHeading.textContent = t('howToUseKicker') + ' ' + t('howToUseVideoTitle') + 'lar';
+      howToUseVideos.appendChild(videosHeading);
+
+      const videosGrid = document.createElement('div');
+      videosGrid.className = 'how-to-use-videos-grid';
+
+      videos.forEach((video, index) => {
+        const videoCard = document.createElement('article');
+        videoCard.className = 'how-to-use-video-card';
+
+        if (video.title) {
+          const title = document.createElement('h4');
+          title.className = 'how-to-use-video-title';
+          title.textContent = video.title;
+          videoCard.appendChild(title);
+        }
+
+        if (video.description) {
+          const desc = document.createElement('p');
+          desc.className = 'how-to-use-video-description';
+          desc.textContent = video.description;
+          videoCard.appendChild(desc);
+        }
+
+        if (video.url) {
+          const link = document.createElement('a');
+          link.className = 'how-to-use-video-link';
+          link.href = video.url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = t('howToUseVideoUrl') + ' →';
+          videoCard.appendChild(link);
+        }
+
+        videosGrid.appendChild(videoCard);
+      });
+
+      howToUseVideos.appendChild(videosGrid);
+    }
+  } catch {
+    const errorP = document.createElement('p');
+    errorP.className = 'community-empty';
+    errorP.textContent = currentLang === 'en' ? 'Unable to load guide content.' : 'Rehber içeriği yüklenemiyor.';
+    howToUseContent.appendChild(errorP);
+  }
+}
+
+function openHowToUseModal() {
+  openCommunityModal(howToUseModal);
+  renderHowToUse();
+}
+
+function closeHowToUseModal() {
+  closeCommunityModal(howToUseModal);
+}
+
 updatesButton?.addEventListener('click', () => {
   openCommunityModal(updatesModal);
   renderUpdates();
@@ -2678,11 +2807,15 @@ bugReportButton?.addEventListener('click', () => {
   openCommunityModal(bugReportModal);
 });
 
+howToUseButton?.addEventListener('click', () => {
+  openHowToUseModal();
+});
+
 document.querySelectorAll('[data-close-community-modal]').forEach((button) => {
   button.addEventListener('click', () => closeCommunityModal(button.closest('dialog')));
 });
 
-[updatesModal, bugReportModal].forEach((dialog) => dialog?.addEventListener('click', (event) => {
+[updatesModal, bugReportModal, howToUseModal].forEach((dialog) => dialog?.addEventListener('click', (event) => {
   if (event.target === dialog) closeCommunityModal(dialog);
 }));
 
@@ -2804,6 +2937,11 @@ document.addEventListener(
 
     if (discordModal?.open) {
       closeDiscordModal();
+      return;
+    }
+
+    if (howToUseModal?.open) {
+      closeHowToUseModal();
     }
   }
 );

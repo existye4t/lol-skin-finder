@@ -1174,3 +1174,114 @@ body {
     position: static;
   }
 }
+
+/* =========================================
+   HOW-TO-USE VIDEO INPUT STYLES
+   ========================================= */
+.video-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.video-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: rgba(12, 18, 34, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.video-input-row:hover {
+  border-color: var(--border-focus);
+}
+
+.video-input-fields {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.video-input-fields input {
+  background: #0c1222;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #f1f5ff;
+  font-size: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.video-input-fields input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(210, 177, 117, 0.12);
+}
+
+.video-input-fields .video-title {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.video-input-fields .video-description {
+  flex: 1 1 200px;
+  min-width: 180px;
+}
+
+.video-input-fields .video-url {
+  flex: 1 1 250px;
+  min-width: 200px;
+}
+
+.video-input-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.video-input-actions .btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.video-input-actions .btn-icon:hover {
+  background: var(--card);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.video-input-actions .btn-delete-video:hover {
+  background: rgba(255, 82, 82, 0.12);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+@media (max-width: 640px) {
+  .video-input-fields {
+    flex-direction: column;
+  }
+
+  .video-input-fields input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .video-input-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

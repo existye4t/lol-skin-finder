@@ -482,25 +482,13 @@
       </p>
 
       <div class="community-actions" aria-label="Topluluk işlemleri">
-              <button id="updates-button" class="community-button community-button-updates" type="button" aria-haspopup="dialog" aria-controls="updates-modal">
-                <span aria-hidden="true">✦</span><span>Güncellemeler</span>
-              </button>
-              <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
-                <span aria-hidden="true">⚑</span><span>Hata Bildir</span>
-              </button>
-              <!-- =========================================
-               HOW TO USE BUTTON
-               ========================================= -->
-          <button
-            id="how-to-use-button"
-            class="community-button community-button-how-to-use"
-            type="button"
-            aria-haspopup="dialog"
-            aria-controls="how-to-use-modal"
-          >
-            <span aria-hidden="true">❓</span><span data-i18n="howToUseButton">Nasıl kullanılır?</span>
-          </button>
-            </div>
+        <button id="updates-button" class="community-button community-button-updates" type="button" aria-haspopup="dialog" aria-controls="updates-modal">
+          <span aria-hidden="true">✦</span><span>Güncellemeler</span>
+        </button>
+        <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
+          <span aria-hidden="true">⚑</span><span>Hata Bildir</span>
+        </button>
+      </div>
 
       <div class="search-row">
 
@@ -1142,19 +1130,8 @@
   </dialog>
 
   <!-- =========================================
-       HOW TO USE MODAL
+       DISCORD MODALI
        ========================================= -->
-  <dialog id="how-to-use-modal" class="community-modal" aria-labelledby="how-to-use-modal-title">
-    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
-    <p class="community-kicker" data-i18n="howToUseKicker"></p>
-    <h2 id="how-to-use-modal-title" data-i18n="howToUseModalTitle"></h2>
-    <div id="how-to-use-content" class="how-to-use-content" aria-live="polite"></div>
-    <div id="how-to-use-videos" class="how-to-use-videos"></div>
-</dialog>
-
-    <!-- =========================================
-         DISCORD MODALI
-         ========================================= -->
 
   <dialog
     id="discord-modal"

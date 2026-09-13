@@ -195,6 +195,21 @@ const modalNewSkin = document.querySelector('#modal-new-skin');
 const formNewSkin = document.querySelector('#form-new-skin');
 const btnCloseNewSkinModal = document.querySelector('#btn-close-new-skin-modal');
 const btnCancelNewSkin = document.querySelector('#btn-cancel-new-skin');
+
+// How-to-use modal
+const modalHowToUse = document.querySelector('#modal-how-to-use');
+const formHowToUse = document.querySelector('#form-how-to-use');
+const btnCancelHowToUse = document.querySelector('#btn-cancel-how-to-use');
+const howToUseTitleTr = document.querySelector('#how-to-use-title-tr');
+const howToUseContentTr = document.querySelector('#how-to-use-content-tr');
+const howToUseTitleEn = document.querySelector('#how-to-use-title-en');
+const howToUseContentEn = document.querySelector('#how-to-use-content-en');
+const videoListTr = document.querySelector('#video-list-tr');
+const videoListEn = document.querySelector('#video-list-en');
+const btnAddVideoTr = document.querySelector('#btn-add-video-tr');
+const btnAddVideoEn = document.querySelector('#btn-add-video-en');
+const videoInputTemplate = document.querySelector('#video-input-template');
+
 const toastContainer = document.querySelector('#toast-container');
 
 /* =========================================
@@ -1099,6 +1114,157 @@ async function loadCommunityData() {
   renderCommunityRows(adminUpdatesList, Array.isArray(updates.updates) ? updates.updates : [], 'update');
   renderCommunityRows(adminReportsList, Array.isArray(reports.reports) ? reports.reports : [], 'report');
 }
+
+/* =========================================
+   HOW-TO-USE YÖNETİMİ
+   ========================================= */
+
+function createVideoInputRow(video = {}) {
+  if (!videoInputTemplate) return null;
+  const clone = videoInputTemplate.content.cloneNode(true);
+  const row = clone.querySelector('.video-input-row');
+  const titleInput = row.querySelector('.video-title');
+  const descInput = row.querySelector('.video-description');
+  const urlInput = row.querySelector('.video-url');
+
+  titleInput.value = video.title || '';
+  descInput.value = video.description || '';
+  urlInput.value = video.url || '';
+
+  // Move up
+  row.querySelector('.btn-move-up')?.addEventListener('click', () => {
+    const prev = row.previousElementSibling;
+    if (prev && prev.classList.contains('video-input-row')) {
+      row.parentNode.insertBefore(row, prev);
+    }
+  });
+
+  // Move down
+  row.querySelector('.btn-move-down')?.addEventListener('click', () => {
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('video-input-row')) {
+      row.parentNode.insertBefore(next, row);
+    }
+  });
+
+  // Delete
+  row.querySelector('.btn-delete-video')?.addEventListener('click', () => {
+    row.remove();
+  });
+
+  return row;
+}
+
+function getVideoDataFromList(container) {
+  if (!container) return [];
+  const videos = [];
+  container.querySelectorAll('.video-input-row').forEach((row) => {
+    const title = row.querySelector('.video-title')?.value.trim();
+    const description = row.querySelector('.video-description')?.value.trim();
+    const url = row.querySelector('.video-url')?.value.trim();
+    if (title || description || url) {
+      videos.push({ title, description, url });
+    }
+  });
+  return videos;
+}
+
+function renderVideoList(container, videos) {
+  if (!container) return;
+  container.replaceChildren();
+  const videoArray = Array.isArray(videos) ? videos : [];
+  videoArray.forEach((video) => {
+    const row = createVideoInputRow(video);
+    if (row) container.appendChild(row);
+  });
+}
+
+async function loadHowToUseData() {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/admin/how-to-use`, { cache: 'no-cache' });
+    if (!response.ok) throw new Error('Failed to load');
+    const data = await response.json();
+    return data;
+  } catch {
+    return {
+      tr: { title: 'Nasıl kullanılır?', content: 'Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.', videos: [] },
+      en: { title: 'How to Use?', content: 'Follow the steps below to learn how to use the website.', videos: [] }
+    };
+  }
+}
+
+function populateHowToUseForm(data) {
+  if (!data) return;
+  if (howToUseTitleTr) howToUseTitleTr.value = data.tr?.title || '';
+  if (howToUseContentTr) howToUseContentTr.value = data.tr?.content || '';
+  if (howToUseTitleEn) howToUseTitleEn.value = data.en?.title || '';
+  if (howToUseContentEn) howToUseContentEn.value = data.en?.content || '';
+  renderVideoList(videoListTr, data.tr?.videos || []);
+  renderVideoList(videoListEn, data.en?.videos || []);
+}
+
+async function saveHowToUseData(payload) {
+  const response = await fetch(`${getApiBaseUrl()}/api/admin/how-to-use`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${sessionStorage.getItem(AUTH_STORAGE_KEY) || ''}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+document.querySelector('#btn-manage-how-to-use')?.addEventListener('click', async () => {
+  const data = await loadHowToUseData();
+  populateHowToUseForm(data);
+  openAdminModal(modalHowToUse);
+});
+
+btnAddVideoTr?.addEventListener('click', () => {
+  const row = createVideoInputRow();
+  if (row) videoListTr?.appendChild(row);
+});
+
+btnAddVideoEn?.addEventListener('click', () => {
+  const row = createVideoInputRow();
+  if (row) videoListEn?.appendChild(row);
+});
+
+btnCancelHowToUse?.addEventListener('click', () => modalHowToUse?.close());
+
+formHowToUse?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const payload = {
+    tr: {
+      title: howToUseTitleTr?.value.trim() || '',
+      content: howToUseContentTr?.value.trim() || '',
+      videos: getVideoDataFromList(videoListTr)
+    },
+    en: {
+      title: howToUseTitleEn?.value.trim() || '',
+      content: howToUseContentEn?.value.trim() || '',
+      videos: getVideoDataFromList(videoListEn)
+    }
+  };
+
+  if (!payload.tr.title || !payload.tr.content || !payload.en.title || !payload.en.content) {
+    showToast('Tüm zorunlu alanları doldurunuz.', 'error');
+    return;
+  }
+
+  try {
+    await saveHowToUseData(payload);
+    showToast('Nasıl Kullanılır içeriği kaydedildi.', 'success');
+    modalHowToUse?.close();
+  } catch (error) {
+    showToast(`Kaydedilemedi: ${error.message}`, 'error');
+  }
+});
 
 document.querySelector('#btn-manage-updates')?.addEventListener('click', async () => {
   await loadCommunityData();

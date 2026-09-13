@@ -1682,6 +1682,58 @@ dialog::backdrop {
   min-height: 44px;
 }
 
+/* How-to-use Modal */
+.how-to-use-text {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.how-to-use-videos-heading {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.how-to-use-videos-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.how-to-use-video-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #080c14;
+}
+
+.how-to-use-video-title {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.how-to-use-video-description {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.how-to-use-video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.how-to-use-video-link:hover {
+  text-decoration: underline;
+}
+
 /* Discord Modal */
 .discord-modal {
   position: relative;

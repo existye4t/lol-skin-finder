@@ -40,7 +40,6 @@
 
       <button id="btn-manage-updates" class="btn btn-secondary" type="button">✦ Güncellemeler</button>
       <button id="btn-view-bug-reports" class="btn btn-secondary" type="button">⚑ Hata Bildirimleri</button>
-      <button id="btn-manage-how-to-use" class="btn btn-secondary" type="button">📖 Nasıl Kullanılır</button>
 
       <button id="btn-lock" class="btn btn-icon" type="button" title="Paneli Kilitle">
         🔒
@@ -346,70 +345,6 @@
       </form>
     </div>
   </dialog>
-
-  <dialog id="modal-how-to-use" class="admin-modal community-admin-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Nasıl Kullanılır Yönetimi</h2>
-        <button type="button" class="modal-close-btn" data-close-admin-modal="modal-how-to-use">×</button>
-      </div>
-      <form id="form-how-to-use" class="modal-form">
-        <div class="form-group">
-          <label for="how-to-use-title-tr">Başlık (Türkçe)</label>
-          <input id="how-to-use-title-tr" maxlength="120" required placeholder="Örn. Nasıl kullanılır?" />
-        </div>
-        <div class="form-group">
-          <label for="how-to-use-content-tr">İçerik (Türkçe)</label>
-          <textarea id="how-to-use-content-tr" maxlength="3000" required placeholder="Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Videolar (Türkçe)</label>
-          <div id="video-list-tr" class="video-list"></div>
-          <button type="button" class="btn btn-secondary" id="btn-add-video-tr">Video Ekle</button>
-        </div>
-        <div class="form-group">
-          <label for="how-to-use-title-en">Title (English)</label>
-          <input id="how-to-use-title-en" maxlength="120" required placeholder="Örn. How to Use?" />
-        </div>
-        <div class="form-group">
-          <label for="how-to-use-content-en">Content (English)</label>
-          <textarea id="how-to-use-content-en" maxlength="3000" required placeholder="Follow the steps below to learn how to use the website."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Videos (English)</label>
-          <div id="video-list-en" class="video-list"></div>
-          <button type="button" class="btn btn-secondary" id="btn-add-video-en">Add Video</button>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" id="btn-cancel-how-to-use">Vazgeç</button>
-          <button type="submit" class="btn btn-gold">Kaydet</button>
-        </div>
-      </form>
-
-      <!-- Video input template -->
-      <template id="video-input-template">
-        <div class="video-input-row">
-          <div class="video-input-fields">
-            <input type="text" class="video-title" placeholder="Video başlığı" maxlength="200" />
-            <input type="text" class="video-description" placeholder="Açıklama" maxlength="500" />
-            <input type="url" class="video-url" placeholder="Video URL (YouTube, Vimeo, etc.)" maxlength="500" />
-          </div>
-          <div class="video-input-actions">
-            <button type="button" class="btn-icon btn-move-up" title="Yukarı taşı" aria-label="Yukarı taşı">↑</button>
-            <button type="button" class="btn-icon btn-move-down" title="Aşağı taşı" aria-label="Aşağı taşı">↓</button>
-            <button type="button" class="btn-icon btn-delete-video" title="Sil" aria-label="Sil">×</button>
-          </div>
-        </div>
-      </template>
-    </div>
-  </dialog>
-
-
-  <!-- =========================================
-       GİRİŞ / ŞİFRE KİLİT EKRANI (PASSWORD GATE)
-       ========================================= -->
-
-</dialog>
 
   <dialog id="modal-updates" class="admin-modal community-admin-modal">
     <div class="modal-content">
