@@ -1687,6 +1687,8 @@ dialog::backdrop {
   color: var(--text-secondary);
   line-height: 1.7;
   margin-bottom: 24px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .how-to-use-videos-heading {
@@ -1732,6 +1734,231 @@ dialog::backdrop {
 
 .how-to-use-video-link:hover {
   text-decoration: underline;
+}
+
+/* How-to-use Video Cards - Discord-like embed style */
+.how-to-use-video-card {
+  background: #0a0f1a;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.how-to-use-video-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border-color: var(--border-focus);
+}
+
+.how-to-use-video-thumbnail-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #070b14;
+  overflow: hidden;
+}
+
+.how-to-use-video-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.how-to-use-video-card:hover .how-to-use-video-thumbnail {
+  transform: scale(1.02);
+}
+
+.how-to-use-video-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  color: #070b14;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 2;
+}
+
+.how-to-use-video-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: #fff;
+}
+
+.how-to-use-video-play-btn:active {
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+.how-to-use-video-play-btn:focus-visible {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 4px;
+}
+
+.how-to-use-video-external-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  text-align: center;
+  gap: 12px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.how-to-use-video-external-link:hover {
+  color: var(--accent-primary);
+  background: rgba(79, 124, 255, 0.08);
+}
+
+.how-to-use-video-external-icon {
+  color: var(--text-muted);
+}
+
+.how-to-use-video-external-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.how-to-use-video-info {
+  padding: 16px;
+}
+
+.how-to-use-video-title {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.how-to-use-video-description {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+.how-to-use-video-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.how-to-use-video-external-link:hover {
+  background: rgba(79, 124, 255, 0.12);
+  border-color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.how-to-use-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .how-to-use-videos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Video Modal */
+.video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.9);
+  border: none;
+  padding: 0;
+  margin: auto;
+  width: min(900px, calc(100vw - 24px));
+  height: min(560px, calc(100vh - 24px));
+  max-width: 900px;
+  max-height: 560px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.video-modal::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.video-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+.video-modal-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(7, 11, 24, 0.85);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.video-modal-close:hover {
+  background: rgba(255, 82, 82, 0.2);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.video-modal-iframe-wrap {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0 0 16px 16px;
+  background: #000;
 }
 
 /* Discord Modal */

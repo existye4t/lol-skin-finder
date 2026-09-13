@@ -325,6 +325,26 @@ const TRANSLATIONS = {
   howToUseVideoUrl: {
     tr: 'Video URL',
     en: 'Video URL'
+  },
+
+  howToUseVideoPlay: {
+    tr: 'Videoyu oynat',
+    en: 'Play video'
+  },
+
+  howToUseVideoOpenYouTube: {
+    tr: 'YouTube\'da aç',
+    en: 'Open in YouTube'
+  },
+
+  videoModalClose: {
+    tr: 'Kapat',
+    en: 'Close'
+  },
+
+  videoModalTitle: {
+    tr: 'Video oynatıcı',
+    en: 'Video player'
   }
 };
 
@@ -626,6 +646,9 @@ function setLang(lang) {
   if (howToUseModal?.open) {
     renderHowToUse();
   }
+
+  // Video modal açıkken çevirileri güncelle
+  updateVideoModalTranslations();
 
   track('language_change', {
     language: lang
@@ -1512,8 +1535,39 @@ const normalize = (value) =>
     );
 
 /* =========================================
+   YOUTUBE URL HELPERS
+======================================= */
+
+const YOUTUBE_URL_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&].*)?$/;
+
+function extractYouTubeVideoId(url) {
+  if (!url || typeof url !== 'string') return null;
+  const match = url.trim().match(YOUTUBE_URL_REGEX);
+  return match ? match[1] : null;
+}
+
+function isYouTubeUrl(url) {
+  return extractYouTubeVideoId(url) !== null;
+}
+
+function getYouTubeThumbnailUrl(videoId, quality = 'hqdefault') {
+  if (!videoId) return '';
+  return `https://img.youtube.com/vi/${videoId}/${quality}.jpg`;
+}
+
+function getYouTubeEmbedUrl(videoId) {
+  if (!videoId) return '';
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+}
+
+function getYouTubeWatchUrl(videoId) {
+  if (!videoId) return '';
+  return `https://www.youtube.com/watch?v=${videoId}`;
+}
+
+/* =========================================
    ARAMA RELEVANS SKORU
-========================================= */
+======================================= */
 
 // Score match against an already-normalized text string
 function scoreNormalizedMatch(normalizedText, normalizedQuery) {
@@ -2747,33 +2801,7 @@ async function renderHowToUse() {
       videosGrid.className = 'how-to-use-videos-grid';
 
       videos.forEach((video, index) => {
-        const videoCard = document.createElement('article');
-        videoCard.className = 'how-to-use-video-card';
-
-        if (video.title) {
-          const title = document.createElement('h4');
-          title.className = 'how-to-use-video-title';
-          title.textContent = video.title;
-          videoCard.appendChild(title);
-        }
-
-        if (video.description) {
-          const desc = document.createElement('p');
-          desc.className = 'how-to-use-video-description';
-          desc.textContent = video.description;
-          videoCard.appendChild(desc);
-        }
-
-        if (video.url) {
-          const link = document.createElement('a');
-          link.className = 'how-to-use-video-link';
-          link.href = video.url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = t('howToUseVideoUrl') + ' →';
-          videoCard.appendChild(link);
-        }
-
+        const videoCard = createVideoCard(video, index);
         videosGrid.appendChild(videoCard);
       });
 
@@ -2785,6 +2813,179 @@ async function renderHowToUse() {
     errorP.textContent = currentLang === 'en' ? 'Unable to load guide content.' : 'Rehber içeriği yüklenemiyor.';
     howToUseContent.appendChild(errorP);
   }
+}
+
+function createVideoCard(video, index) {
+  const videoCard = document.createElement('article');
+  videoCard.className = 'how-to-use-video-card';
+
+  const videoId = video.url ? extractYouTubeVideoId(video.url) : null;
+  const isYouTube = videoId !== null;
+
+  // Thumbnail area with play button
+  const thumbnailWrap = document.createElement('div');
+  thumbnailWrap.className = 'how-to-use-video-thumbnail-wrap';
+
+  if (isYouTube && videoId) {
+    const thumbnail = document.createElement('img');
+    thumbnail.className = 'how-to-use-video-thumbnail';
+    thumbnail.src = getYouTubeThumbnailUrl(videoId, 'maxresdefault');
+    thumbnail.alt = video.title || 'Video thumbnail';
+    thumbnail.loading = 'lazy';
+    // Fallback to hqdefault if maxresdefault fails
+    thumbnail.onerror = () => {
+      thumbnail.src = getYouTubeThumbnailUrl(videoId, 'hqdefault');
+    };
+    thumbnailWrap.appendChild(thumbnail);
+
+    // Play button overlay
+    const playButton = document.createElement('button');
+    playButton.className = 'how-to-use-video-play-btn';
+    playButton.type = 'button';
+    playButton.setAttribute('aria-label', t('howToUseVideoPlay'));
+    playButton.innerHTML = `
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    `;
+    playButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openVideoModal(videoId, video.title, video.description);
+    });
+    thumbnailWrap.appendChild(playButton);
+
+    // Click on thumbnail also opens modal
+    thumbnailWrap.style.cursor = 'pointer';
+    thumbnailWrap.addEventListener('click', (e) => {
+      if (e.target !== playButton && !playButton.contains(e.target)) {
+        openVideoModal(videoId, video.title, video.description);
+      }
+    });
+  } else if (video.url) {
+    // Non-YouTube URL - show link card
+    const linkCard = document.createElement('a');
+    linkCard.className = 'how-to-use-video-external-link';
+    linkCard.href = video.url;
+    linkCard.target = '_blank';
+    linkCard.rel = 'noopener noreferrer';
+    linkCard.innerHTML = `
+      <div class="how-to-use-video-external-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </div>
+      <span class="how-to-use-video-external-text">${t('howToUseVideoUrl')} →</span>
+    `;
+    thumbnailWrap.appendChild(linkCard);
+  }
+
+  videoCard.appendChild(thumbnailWrap);
+
+  // Video info section
+  const infoWrap = document.createElement('div');
+  infoWrap.className = 'how-to-use-video-info';
+
+  if (video.title) {
+    const title = document.createElement('h4');
+    title.className = 'how-to-use-video-title';
+    title.textContent = video.title;
+    infoWrap.appendChild(title);
+  }
+
+  if (video.description) {
+    const desc = document.createElement('p');
+    desc.className = 'how-to-use-video-description';
+    desc.textContent = video.description;
+    infoWrap.appendChild(desc);
+  }
+
+  // External link for YouTube videos
+  if (isYouTube && videoId) {
+    const externalLink = document.createElement('a');
+    externalLink.className = 'how-to-use-video-external-link';
+    externalLink.href = getYouTubeWatchUrl(videoId);
+    externalLink.target = '_blank';
+    externalLink.rel = 'noopener noreferrer';
+    externalLink.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      <span>${t('howToUseVideoOpenYouTube')}</span>
+    `;
+    infoWrap.appendChild(externalLink);
+  }
+
+  videoCard.appendChild(infoWrap);
+
+  return videoCard;
+}
+
+let videoModal = null;
+let videoModalIframe = null;
+
+function createVideoModal() {
+  if (videoModal) return videoModal;
+
+  videoModal = document.createElement('dialog');
+  videoModal.className = 'video-modal';
+  videoModal.innerHTML = `
+    <div class="video-modal-backdrop" aria-hidden="true"></div>
+    <div class="video-modal-content">
+      <button class="video-modal-close" type="button" aria-label="${t('videoModalClose')}">×</button>
+      <div class="video-modal-iframe-wrap">
+        <iframe class="video-modal-iframe" src="" title="${t('videoModalTitle')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
+  `;
+
+  videoModalIframe = videoModal.querySelector('.video-modal-iframe');
+
+  const closeBtn = videoModal.querySelector('.video-modal-close');
+  const backdrop = videoModal.querySelector('.video-modal-backdrop');
+
+  const closeModal = () => {
+    if (videoModal) {
+      videoModalIframe.src = '';
+      videoModal.close();
+    }
+  };
+
+  closeBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && videoModal?.open) {
+      closeModal();
+    }
+  });
+
+  document.body.appendChild(videoModal);
+  return videoModal;
+}
+
+function updateVideoModalTranslations() {
+  if (!videoModal) return;
+  const closeBtn = videoModal.querySelector('.video-modal-close');
+  const iframe = videoModal.querySelector('.video-modal-iframe');
+  if (closeBtn) closeBtn.setAttribute('aria-label', t('videoModalClose'));
+  if (iframe) iframe.title = t('videoModalTitle');
+}
+
+function openVideoModal(videoId, title, description) {
+  const modal = createVideoModal();
+  const embedUrl = getYouTubeEmbedUrl(videoId);
+  videoModalIframe.src = embedUrl;
+  modal.showModal();
+
+  track('how_to_use_video_play', {
+    video_id: videoId,
+    video_title: title || ''
+  });
 }
 
 function openHowToUseModal() {
