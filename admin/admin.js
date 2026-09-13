@@ -19,7 +19,20 @@ function getApiBaseUrl() {
   if (customWorkerUrl && customWorkerUrl.trim().startsWith('http')) {
     return customWorkerUrl.trim().replace(/\/+$/, '');
   }
-  // Varsayılan olarak mevcut sunucu (Vite dev middleware / Local admin server)
+
+  // Production'da (GitHub Pages) meta tag'den Worker URL'ini oku
+  const metaWorkerUrl = document.querySelector('meta[name="worker-api-url"]')?.content;
+  if (metaWorkerUrl && metaWorkerUrl.trim().startsWith('http')) {
+    return metaWorkerUrl.trim().replace(/\/+$/, '');
+  }
+
+  // Localhost'ta Vite dev middleware kullan
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return '';
+  }
+
+  // Production'da (GitHub Pages) Worker URL bilinmiyorsa hata ver
+  console.error('[Admin] Worker API URL bilinmiyor. localStorage\'a "exist_admin_worker_url" key\'i ile kaydedin veya admin/index.html\'e <meta name="worker-api-url" content="..."> ekleyin.');
   return '';
 }
 
@@ -1180,8 +1193,16 @@ function renderVideoList(container, videos) {
 }
 
 async function loadHowToUseData() {
+  const apiBase = getApiBaseUrl();
+  if (!apiBase && !(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    showToast('Worker API URL yapılandırılmamış. Production için meta tag veya localStorage ayarlayın.', 'error');
+    return {
+      tr: { title: 'Nasıl kullanılır?', content: 'Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.', videos: [] },
+      en: { title: 'How to Use?', content: 'Follow the steps below to learn how to use the website.', videos: [] }
+    };
+  }
   try {
-    const response = await fetch(`${getApiBaseUrl()}/api/admin/how-to-use`, { cache: 'no-cache' });
+    const response = await fetch(`${apiBase}/api/admin/how-to-use`, { cache: 'no-cache' });
     if (!response.ok) throw new Error('Failed to load');
     const data = await response.json();
     return data;
@@ -1204,7 +1225,11 @@ function populateHowToUseForm(data) {
 }
 
 async function saveHowToUseData(payload) {
-  const response = await fetch(`${getApiBaseUrl()}/api/admin/how-to-use`, {
+  const apiBase = getApiBaseUrl();
+  if (!apiBase && !(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    throw new Error('Worker API URL yapılandırılmamış. Production için meta tag veya localStorage ayarlayın.');
+  }
+  const response = await fetch(`${apiBase}/api/admin/how-to-use`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

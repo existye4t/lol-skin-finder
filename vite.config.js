@@ -111,6 +111,46 @@ function adminDevApiPlugin(adminPassword) {
         }
 
         // --------------------------------------------------
+        // 1b. How-to-use (GET & POST)
+        // --------------------------------------------------
+
+        if (
+          req.method === 'GET' &&
+          url.pathname === '/api/admin/how-to-use'
+        ) {
+          try {
+            const howToUsePath = resolve(DATA_DIR, 'how-to-use.json');
+            let data = {
+              tr: { title: 'Nasıl kullanılır?', content: 'Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.', videos: [] },
+              en: { title: 'How to Use?', content: 'Follow the steps below to learn how to use the website.', videos: [] }
+            };
+            try {
+              const raw = await readFile(howToUsePath, 'utf8');
+              data = JSON.parse(raw);
+            } catch {}
+            return sendJson(200, data);
+          } catch (error) {
+            return sendJson(500, { error: error.message });
+          }
+        }
+
+        if (req.method === 'POST' && url.pathname === '/api/admin/how-to-use') {
+          let body = '';
+          req.on('data', (chunk) => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const howToUsePath = resolve(DATA_DIR, 'how-to-use.json');
+              await writeFile(howToUsePath, JSON.stringify(payload, null, 2) + '\n', 'utf8');
+              return sendJson(200, { success: true });
+            } catch (error) {
+              return sendJson(500, { error: error.message });
+            }
+          });
+          return;
+        }
+
+        // --------------------------------------------------
         // 2. Auth login
         // --------------------------------------------------
 
