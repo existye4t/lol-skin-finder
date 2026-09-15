@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-09-13T13:47:04.515Z",
+  "updatedAt": "2026-09-15T17:35:26.142Z",
   "skins": [
     {
       "id": "876045",
@@ -118612,7 +118612,9 @@
       "championEn": "Viego",
       "championId": "Viego",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Viego_43.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/viego/skins/skin43/images/viego_splash_centered_43.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/viego/skins/skin43/images/viego_splash_centered_43.jpg",
+      "modifiedAt": "2026-09-15T17:35:26.006Z",
+      "customFantome": true
     },
     {
       "id": "69004",

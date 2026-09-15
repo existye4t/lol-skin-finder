@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-13T13:47:04.212Z",
+  "updatedAt": "2026-09-15T17:35:26.011Z",
   "overrides": {
     "7061": {
       "id": "7061",
@@ -121,6 +121,16 @@
       "modifiedAt": "2026-09-13T13:46:22.716Z",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_33.jpg",
       "customFantome": true
+    },
+    "234043": {
+      "id": "234043",
+      "name": "Yeraltı Kralı Viego",
+      "nameEn": "Revenant Reign Viego",
+      "champion": "Viego",
+      "championEn": "Viego",
+      "championId": "Viego",
+      "modifiedAt": "2026-09-15T17:35:26.006Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Viego_43.jpg"
     },
     "523040": {
       "id": "523040",
