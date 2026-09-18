@@ -151,6 +151,70 @@ function adminDevApiPlugin(adminPassword) {
         }
 
         // --------------------------------------------------
+        // 1c. Discord Profile (GET & POST)
+        // --------------------------------------------------
+
+        if (
+          req.method === 'GET' &&
+          url.pathname === '/api/admin/discord-profile'
+        ) {
+          try {
+            const profilePath = resolve(DATA_DIR, 'discord-profile.json');
+            let data = {
+              nick: 'existofficial',
+              avatarUrl: 'assets/pfp.png',
+              discordUrl: 'https://discord.com/invite/VFYj8yefn',
+              status: 'online',
+              showTopRight: true,
+              showFooter: true
+            };
+            try {
+              const raw = await readFile(profilePath, 'utf8');
+              data = JSON.parse(raw);
+            } catch {}
+            return sendJson(200, data);
+          } catch (error) {
+            return sendJson(500, { error: error.message });
+          }
+        }
+
+        if (req.method === 'POST' && url.pathname === '/api/admin/discord-profile') {
+          let body = '';
+          req.on('data', (chunk) => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const profilePath = resolve(DATA_DIR, 'discord-profile.json');
+              const allowedKeys = ['nick', 'avatarUrl', 'discordUrl', 'status', 'showTopRight', 'showFooter'];
+              const filteredPayload = {};
+              for (const key of allowedKeys) {
+                if (payload[key] !== undefined) {
+                  filteredPayload[key] = payload[key];
+                }
+              }
+              // Validate status
+              const validStatuses = ['online', 'idle', 'dnd', 'offline'];
+              if (filteredPayload.status && !validStatuses.includes(filteredPayload.status)) {
+                return sendJson(400, { error: 'Geçersiz status değeri.' });
+              }
+              // Validate discordUrl if provided
+              if (filteredPayload.discordUrl && !/^https?:\/\//i.test(filteredPayload.discordUrl)) {
+                return sendJson(400, { error: 'Discord URL geçerli bir http(s) linki olmalıdır.' });
+              }
+              // Validate avatarUrl if provided (allow relative or absolute)
+              if (filteredPayload.avatarUrl && filteredPayload.avatarUrl.trim() === '') {
+                return sendJson(400, { error: 'Avatar URL boş olamaz.' });
+              }
+              await writeFile(profilePath, JSON.stringify(filteredPayload, null, 2) + '\n', 'utf8');
+              return sendJson(200, { success: true });
+            } catch (error) {
+              return sendJson(500, { error: error.message });
+            }
+          });
+          return;
+        }
+
+        // --------------------------------------------------
         // 2. Auth login
         // --------------------------------------------------
 

@@ -43,6 +43,7 @@
       <button id="btn-manage-updates" class="btn btn-secondary" type="button">✦ Güncellemeler</button>
       <button id="btn-view-bug-reports" class="btn btn-secondary" type="button">⚑ Hata Bildirimleri</button>
       <button id="btn-manage-how-to-use" class="btn btn-secondary" type="button">📖 Nasıl Kullanılır</button>
+      <button id="btn-manage-discord-profile" class="btn btn-secondary" type="button">👤 Discord Profil</button>
 
       <button id="btn-lock" class="btn btn-icon" type="button" title="Paneli Kilitle">
         🔒
@@ -406,6 +407,39 @@
     </div>
   </dialog>
 
+  <dialog id="modal-discord-profile" class="admin-modal community-admin-modal">
+    <div class="modal-content">
+      <div class="modal-header"><h2>Discord Profil Ayarları</h2><button type="button" class="modal-close-btn" data-close-admin-modal="modal-discord-profile">×</button></div>
+      <form id="form-discord-profile" class="modal-form">
+        <div class="form-group">
+          <label for="discord-profile-nick">Nick / Display Name</label>
+          <input id="discord-profile-nick" type="text" maxlength="50" required placeholder="Örn. existofficial" />
+        </div>
+        <div class="form-group">
+          <label for="discord-profile-avatar">Avatar URL</label>
+          <input id="discord-profile-avatar" type="url" maxlength="500" placeholder="https://... veya assets/pfp.png" />
+          <small class="field-help">Tam URL veya public/ klasörüne göreli yol. Boş bırakırsanız mevcut avatar korunur.</small>
+        </div>
+        <div class="form-group">
+          <label for="discord-profile-url">Discord Profil / Sunucu URL</label>
+          <input id="discord-profile-url" type="url" maxlength="500" required placeholder="https://discord.com/invite/... veya https://discord.com/users/..." />
+        </div>
+        <div class="form-group">
+          <label for="discord-profile-status">Aktiflik Durumu</label>
+          <select id="discord-profile-status" required>
+            <option value="online">🟢 Çevrimiçi</option>
+            <option value="idle">🟡 Boşta</option>
+            <option value="dnd">🔴 Rahatsız Etmeyin</option>
+            <option value="offline">⚫ Çevrimdışı</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-discord-profile">Vazgeç</button>
+          <button type="submit" class="btn btn-gold">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <!-- =========================================
        GİRİŞ / ŞİFRE KİLİT EKRANI (PASSWORD GATE)

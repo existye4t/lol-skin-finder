@@ -20,15 +20,15 @@ function getApiBaseUrl() {
     return customWorkerUrl.trim().replace(/\/+$/, '');
   }
 
+  // Localhost'ta Vite dev middleware kullan
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return '';
+  }
+
   // Production'da (GitHub Pages) meta tag'den Worker URL'ini oku
   const metaWorkerUrl = document.querySelector('meta[name="worker-api-url"]')?.content;
   if (metaWorkerUrl && metaWorkerUrl.trim().startsWith('http')) {
     return metaWorkerUrl.trim().replace(/\/+$/, '');
-  }
-
-  // Localhost'ta Vite dev middleware kullan
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    return '';
   }
 
   // Production'da (GitHub Pages) Worker URL bilinmiyorsa hata ver
@@ -223,6 +223,15 @@ const btnAddVideoTr = document.querySelector('#btn-add-video-tr');
 const btnAddVideoEn = document.querySelector('#btn-add-video-en');
 const videoInputTemplate = document.querySelector('#video-input-template');
 
+// Discord Profile modal
+const modalDiscordProfile = document.querySelector('#modal-discord-profile');
+const formDiscordProfile = document.querySelector('#form-discord-profile');
+const btnCancelDiscordProfile = document.querySelector('#btn-cancel-discord-profile');
+const discordProfileNick = document.querySelector('#discord-profile-nick');
+const discordProfileAvatar = document.querySelector('#discord-profile-avatar');
+const discordProfileUrl = document.querySelector('#discord-profile-url');
+const discordProfileStatus = document.querySelector('#discord-profile-status');
+
 const toastContainer = document.querySelector('#toast-container');
 
 /* =========================================
@@ -305,6 +314,9 @@ authForm?.addEventListener('submit', async (e) => {
   }
 
   const apiBase = getApiBaseUrl();
+  console.log('[Admin Login] API Base:', apiBase);
+  console.log('[Admin Login] Sending request to:', `${apiBase}/api/auth/login`);
+
   try {
     const res = await fetch(`${apiBase}/api/auth/login`, {
       method: 'POST',
@@ -312,8 +324,11 @@ authForm?.addEventListener('submit', async (e) => {
       body: JSON.stringify({ password })
     });
 
+    console.log('[Admin Login] Response status:', res.status, res.statusText);
+
     if (res.ok) {
       const data = await res.json();
+      console.log('[Admin Login] Success:', data);
       sessionStorage.setItem(AUTH_STORAGE_KEY, data.token || 'auth-ok');
       authGate.classList.add('unlocked');
       authErrorMsg.hidden = true;
@@ -321,19 +336,21 @@ authForm?.addEventListener('submit', async (e) => {
       return;
     } else {
       const err = await res.json().catch(() => ({}));
-      authErrorMsg.textContent = err.error || 'Geçersiz yönetici şifresi.';
+      console.error('[Admin Login] Error response:', err);
+      authErrorMsg.textContent = err.error || `HTTP ${res.status}: Geçersiz yönetici şifresi.`;
       authErrorMsg.hidden = false;
       authPassword.value = '';
       authPassword.focus();
       return;
     }
   } catch (err) {
+    console.error('[Admin Login] Network/Fetch error:', err);
     // Yerel çevrimdışı modda temel şifre doğrulaması
     if (password === 'admin' || password.length >= 4) {
       sessionStorage.setItem(AUTH_STORAGE_KEY, btoa(password));
       authGate.classList.add('unlocked');
       authErrorMsg.hidden = true;
-      showToast('Yönetim paneline giriş yapıldı (Yerel Mod).', 'success');
+      showToast('Yönetim paneline giriş yapıldı (Yerel Mod - API erişilemedi).', 'warning');
     } else {
       authErrorMsg.textContent = 'Geçersiz yönetici şifresi.';
       authErrorMsg.hidden = false;
@@ -1286,6 +1303,97 @@ formHowToUse?.addEventListener('submit', async (event) => {
     await saveHowToUseData(payload);
     showToast('Nasıl Kullanılır içeriği kaydedildi.', 'success');
     modalHowToUse?.close();
+  } catch (error) {
+    showToast(`Kaydedilemedi: ${error.message}`, 'error');
+  }
+});
+
+/* =========================================
+   DISCORD PROFİL YÖNETİMİ
+   ========================================= */
+
+function populateDiscordProfileForm(data) {
+  if (!data) return;
+
+  if (discordProfileNick) discordProfileNick.value = data.nick || '';
+  if (discordProfileAvatar) discordProfileAvatar.value = data.avatarUrl || '';
+  if (discordProfileUrl) discordProfileUrl.value = data.discordUrl || '';
+  if (discordProfileStatus) discordProfileStatus.value = data.status || 'online';
+}
+
+async function loadDiscordProfileData() {
+  const apiBase = getApiBaseUrl();
+  if (!apiBase && !(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    showToast('Worker API URL yapılandırılmamış. Production için meta tag veya localStorage ayarlayın.', 'error');
+    return {
+      nick: 'existofficial',
+      avatarUrl: 'assets/pfp.png',
+      discordUrl: 'https://discord.com/invite/VFYj8yefn',
+      status: 'online'
+    };
+  }
+  try {
+    const response = await fetch(`${apiBase}/api/admin/discord-profile`, { cache: 'no-cache' });
+    if (!response.ok) throw new Error('Failed to load');
+    const data = await response.json();
+    return data;
+  } catch {
+    return {
+      nick: 'existofficial',
+      avatarUrl: 'assets/pfp.png',
+      discordUrl: 'https://discord.com/invite/VFYj8yefn',
+      status: 'online'
+    };
+  }
+}
+
+async function saveDiscordProfileData(payload) {
+  const apiBase = getApiBaseUrl();
+  if (!apiBase && !(location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    throw new Error('Worker API URL yapılandırılmamış. Production için meta tag veya localStorage ayarlayın.');
+  }
+  const response = await fetch(`${apiBase}/api/admin/discord-profile`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${sessionStorage.getItem(AUTH_STORAGE_KEY) || ''}`
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+btnCancelDiscordProfile?.addEventListener('click', () => modalDiscordProfile?.close());
+
+document.querySelector('#btn-manage-discord-profile')?.addEventListener('click', async () => {
+  const data = await loadDiscordProfileData();
+  populateDiscordProfileForm(data);
+  openAdminModal(modalDiscordProfile);
+});
+
+formDiscordProfile?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const payload = {
+    nick: discordProfileNick?.value.trim() || 'existofficial',
+    avatarUrl: discordProfileAvatar?.value.trim() || 'assets/pfp.png',
+    discordUrl: discordProfileUrl?.value.trim() || 'https://discord.com/invite/VFYj8yefn',
+    status: discordProfileStatus?.value || 'online'
+  };
+
+  if (!payload.nick || !payload.discordUrl) {
+    showToast('Nick ve Discord URL zorunludur.', 'error');
+    return;
+  }
+
+  try {
+    await saveDiscordProfileData(payload);
+    showToast('Discord Profil ayarları kaydedildi.', 'success');
+    modalDiscordProfile?.close();
   } catch (error) {
     showToast(`Kaydedilemedi: ${error.message}`, 'error');
   }

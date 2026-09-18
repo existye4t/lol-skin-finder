@@ -345,6 +345,52 @@ const TRANSLATIONS = {
   videoModalTitle: {
     tr: 'Video oynatıcı',
     en: 'Video player'
+  },
+
+  // Discord Profile
+  discordProfile: {
+    tr: 'Discord Profil',
+    en: 'Discord Profile'
+  },
+
+  discordProfileNick: {
+    tr: 'Nick / Display Name',
+    en: 'Nick / Display Name'
+  },
+
+  discordProfileAvatar: {
+    tr: 'Avatar URL',
+    en: 'Avatar URL'
+  },
+
+  discordProfileUrl: {
+    tr: 'Discord Profil / Sunucu URL',
+    en: 'Discord Profile / Server URL'
+  },
+
+  discordProfileStatus: {
+    tr: 'Aktiflik Durumu',
+    en: 'Status'
+  },
+
+  discordProfileStatusOnline: {
+    tr: 'Çevrimiçi',
+    en: 'Online'
+  },
+
+  discordProfileStatusIdle: {
+    tr: 'Boşta',
+    en: 'Idle'
+  },
+
+  discordProfileStatusDnd: {
+    tr: 'Rahatsız Etmeyin',
+    en: 'Do Not Disturb'
+  },
+
+  discordProfileStatusOffline: {
+    tr: 'Çevrimdışı',
+    en: 'Offline'
   }
 };
 
@@ -2123,7 +2169,8 @@ function render() {
   if (popularSection) {
     popularSection.hidden =
       Boolean(query) ||
-      favoriteActive;
+      favoriteActive ||
+      championFilters.size > 0;
   }
 
   // Check cache first
@@ -3748,6 +3795,121 @@ async function loadData() {
   }
 }
 
+async function loadDiscordProfile() {
+  try {
+    const response = await fetch(assetUrl('data/discord-profile.json'), { cache: 'no-cache' });
+    if (!response.ok) throw new Error('discord-profile unavailable');
+    const profile = await response.json();
+    applyDiscordProfile(profile);
+  } catch (error) {
+    console.warn('Discord profile yüklenemedi:', error);
+    applyDiscordProfile(getDefaultDiscordProfile());
+  }
+}
+
+function getDefaultDiscordProfile() {
+  return {
+    nick: 'existofficial',
+    avatarUrl: 'assets/pfp.png',
+    discordUrl: 'https://discord.com/invite/VFYj8yefn',
+    status: 'online'
+  };
+}
+
+function applyDiscordProfile(profile) {
+  if (!profile) return;
+
+  const nick = profile.nick || 'existofficial';
+  const avatarUrl = profile.avatarUrl || 'assets/pfp.png';
+  const discordUrl = profile.discordUrl || 'https://discord.com/invite/VFYj8yefn';
+  const status = profile.status || 'online';
+
+  // Update top-right Discord button
+  const discordContact = document.querySelector('#discord-contact');
+  const discordContactName = document.querySelector('.discord-contact-name');
+  if (discordContactName) discordContactName.textContent = nick;
+  if (discordContact) {
+    // Remove any custom onclick, let the existing modal handler work
+    discordContact.onclick = null;
+    // Ensure modal trigger attributes are present
+    discordContact.setAttribute('aria-haspopup', 'dialog');
+    discordContact.setAttribute('aria-controls', 'discord-modal');
+    discordContact.setAttribute('type', 'button');
+  }
+
+  // Update footer Discord profile (main section)
+  const footerProfile = document.querySelector('.discord-profile');
+  const footerProfileImg = footerProfile?.querySelector('.discord-profile-avatar img');
+  const footerProfileName = footerProfile?.querySelector('.discord-profile-info strong');
+  if (footerProfileName) footerProfileName.textContent = nick;
+  if (footerProfileImg) {
+    footerProfileImg.src = avatarUrl;
+    footerProfileImg.alt = `${nick} Discord profil fotoğrafı`;
+  }
+
+  // Update Discord modal profile (in dialog)
+  const modalProfile = document.querySelector('#discord-modal .discord-profile');
+  const modalProfileImg = modalProfile?.querySelector('.discord-profile-avatar img');
+  const modalProfileName = modalProfile?.querySelector('.discord-profile-info strong');
+  if (modalProfileName) modalProfileName.textContent = nick;
+  if (modalProfileImg) {
+    modalProfileImg.src = avatarUrl;
+    modalProfileImg.alt = `${nick} Discord profil fotoğrafı`;
+  }
+
+  // Update Discord modal join links
+  document.querySelectorAll('#discord-modal-join, #discord-invite-small, #discord-invite').forEach(link => {
+    link.href = discordUrl;
+  });
+
+  // Update status indicators (if they exist)
+  updateStatusIndicators(status);
+}
+
+function getStatusColor(status) {
+  const colors = {
+    online: '#4ade80',
+    idle: '#fbbf24',
+    dnd: '#f87171',
+    offline: '#78716e'
+  };
+  return colors[status] || colors.online;
+}
+
+function updateStatusIndicators(status) {
+  const color = getStatusColor(status);
+  // Top-right status dot
+  const topStatusDot = document.querySelector('.discord-contact-status .status-dot');
+  if (topStatusDot) {
+    topStatusDot.style.background = color;
+    topStatusDot.setAttribute('data-status', status);
+  }
+  // Footer profile status dot
+  const footerAvatar = document.querySelector('.discord-profile .discord-profile-avatar');
+  if (footerAvatar) {
+    let statusDot = footerAvatar.querySelector('.status-dot');
+    if (!statusDot) {
+      statusDot = document.createElement('span');
+      statusDot.className = 'status-dot';
+      footerAvatar.appendChild(statusDot);
+    }
+    statusDot.style.background = color;
+    statusDot.setAttribute('data-status', status);
+  }
+  // Modal profile status dot
+  const modalAvatar = document.querySelector('#discord-modal .discord-profile-avatar');
+  if (modalAvatar) {
+    let statusDot = modalAvatar.querySelector('.status-dot');
+    if (!statusDot) {
+      statusDot = document.createElement('span');
+      statusDot.className = 'status-dot';
+      modalAvatar.appendChild(statusDot);
+    }
+    statusDot.style.background = color;
+    statusDot.setAttribute('data-status', status);
+  }
+}
+
 /* =========================================
    BACKGROUND PATHS (AMBIENT LAYER)
    ========================================= */
@@ -3971,4 +4133,5 @@ updateFavoriteCount();
 setFavoriteFilter(false);
 
 await loadData();
+await loadDiscordProfile();
 
