@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap");
 
 /* =========================================
    1. PALETTE & DESIGN TOKENS (DARK / NEAR-BLACK)
@@ -1701,58 +1701,12 @@ dialog::backdrop {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.85);
 }
 
-.modal-image-wrapper {
-  position: relative;
+.skin-modal > img {
+  display: block;
   width: 100%;
   max-height: 290px;
   aspect-ratio: 16 / 7;
-  overflow: hidden;
-}
-
-.modal-image-blur {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  filter: blur(30px);
-  transform: scale(1.2);
-  z-index: 1;
-}
-
-.modal-image-sharp {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  z-index: 2;
-}
-
-.modal-brand-left,
-.modal-brand-right {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: "Cormorant Garamond", serif;
-  font-weight: 300;
-  font-size: 0.85rem;
-  letter-spacing: 0.35em;
-  color: #e8e0d0;
-  text-shadow:
-    0 0 24px rgba(0, 0, 0, 0.95),
-    0 2px 10px rgba(0, 0, 0, 0.8);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.modal-brand-left {
-  left: 16px;
-}
-
-.modal-brand-right {
-  right: 16px;
 }
 
 .modal-body {

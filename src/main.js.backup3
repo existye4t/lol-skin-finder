@@ -1027,12 +1027,6 @@ function getSkinImageSources(skin) {
     return imageSourceCache.get(cacheKey);
   }
 
-  // Data Dragon loading screen (portrait, character-focused, no crop issues)
-  const loadingScreenUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
-    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
-    : '';
-
-  // Data Dragon splash art (fallback)
   const dataDragonUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
     ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${skin.championId}_${skin.skinNum}.jpg`
     : '';
@@ -1040,10 +1034,9 @@ function getSkinImageSources(skin) {
   // Yerel images/skins dosyaları bilinen 1x1 placeholder'lardır. Buraya
   // özellikle dahil edilmez; yalnızca Riot CDN URL'leri kullanılabilir.
   const sources = [...new Set([
-    loadingScreenUrl,      // 1st priority: loading screen (portrait, character-focused)
-    dataDragonUrl,         // 2nd priority: splash art (fallback)
-    skin?.image,           // 3rd priority: original image from JSON
-    skin?.imageFallback    // 4th priority: community dragon fallback
+    skin?.image,
+    dataDragonUrl,
+    skin?.imageFallback
   ].filter(isRemoteImageUrl))];
 
   if (cacheKey) {
@@ -1055,41 +1048,6 @@ function getSkinImageSources(skin) {
 
 function getSkinImageUrl(skin) {
   return getSkinImageSources(skin)[0] || '';
-}
-
-function getModalImageSources(skin) {
-  const cacheKey = String(skin?.id || '') + '_modal';
-
-  if (cacheKey && imageSourceCache.has(cacheKey)) {
-    return imageSourceCache.get(cacheKey);
-  }
-
-  // Data Dragon splash art (primary for modal - full art, no crop)
-  const dataDragonUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
-    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${skin.championId}_${skin.skinNum}.jpg`
-    : '';
-
-  // Data Dragon loading screen (fallback)
-  const loadingScreenUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
-    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
-    : '';
-
-  const sources = [...new Set([
-    dataDragonUrl,         // 1st priority: splash art (full art, character may be off-center but we use contain)
-    loadingScreenUrl,      // 2nd priority: loading screen (portrait, character-focused)
-    skin?.image,           // 3rd priority: original image from JSON
-    skin?.imageFallback    // 4th priority: community dragon fallback
-  ].filter(isRemoteImageUrl))];
-
-  if (cacheKey) {
-    imageSourceCache.set(cacheKey, sources);
-  }
-
-  return sources;
-}
-
-function getModalImageUrl(skin) {
-  return getModalImageSources(skin)[0] || '';
 }
 
 // <img> için sıralı Riot CDN denemesi yapan ortak onerror zinciri.
@@ -2118,6 +2076,13 @@ function createSkinCard(group) {
     image.loading = 'lazy';
     image.decoding = 'async';
 
+    // Apply custom object-position for card if defined, otherwise reset to default
+    if (skin.cardImagePosition) {
+      image.style.objectPosition = skin.cardImagePosition;
+    } else {
+      image.style.objectPosition = '';
+    }
+
     attachImageFallbackChain(image, skin);
   }
 
@@ -2613,15 +2578,11 @@ function openModal(group) {
   const skin =
     group.primary;
 
-activeModalGroup = group;
+  activeModalGroup = group;
 
-  const modalImageBlur =
+  const modalImage =
     document.querySelector(
-      '#modal-image-blur'
-    );
-  const modalImageSharp =
-    document.querySelector(
-      '#modal-image-sharp'
+      '#modal-image'
     );
 
   const modalChampion =
@@ -2645,28 +2606,25 @@ activeModalGroup = group;
   const displayChampion =
     getLocalizedChampionName(skin);
 
-  const modalImageUrl = getModalImageUrl(skin);
-
-  /* ---------------------------------------
-     Modal görseli (blur background + sharp foreground)
+/* ---------------------------------------
+     Modal görseli
    --------------------------------------- */
 
-  if (modalImageBlur) {
-    modalImageBlur.style.display = '';
-    modalImageBlur.src = modalImageUrl;
-    modalImageBlur.alt = '';
-  }
-  if (modalImageSharp) {
-    modalImageSharp.style.display = '';
-    modalImageSharp.src = modalImageUrl;
-    modalImageSharp.alt =
-      `${displayName} — ${displayChampion}`;
-  }
+  if (modalImage) {
+    modalImage.style.display = '';
+    modalImage.src = getSkinImageUrl(skin);
 
-  // Attach fallback chain to both images
-  if (modalImageBlur || modalImageSharp) {
-    attachImageFallbackChain(modalImageBlur, skin);
-    attachImageFallbackChain(modalImageSharp, skin);
+    modalImage.alt =
+      `${displayName} — ${displayChampion}`;
+
+    // Apply custom object-position for modal if defined, otherwise reset to default
+    if (skin.modalImagePosition) {
+      modalImage.style.objectPosition = skin.modalImagePosition;
+    } else {
+      modalImage.style.objectPosition = '';
+    }
+
+    attachImageFallbackChain(modalImage, skin);
   }
 
   /* ---------------------------------------
