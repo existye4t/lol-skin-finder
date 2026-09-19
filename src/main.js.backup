@@ -33,16 +33,6 @@ const TRANSLATIONS = {
     en: 'Type the skin name, champion, or Riot skin ID. Results filter instantly.'
   },
 
-  updates: {
-    tr: 'Güncellemeler',
-    en: 'Updates'
-  },
-
-  bugReport: {
-    tr: 'Hata Bildir',
-    en: 'Report Bug'
-  },
-
   searchPlaceholder: {
     tr: 'Örn. Omega Timi Twitch veya 29004',
     en: 'E.g. Omega Squad Twitch or 29004'
@@ -476,41 +466,18 @@ function getLocalizedChampionName(skin, lang = currentLang) {
    STATİK ÇEVİRİLER
 ========================================= */
 
-function setElementTranslation(element, value) {
-  const contentSpan = element.querySelector('.btn-metal-content');
-
-  if (contentSpan) {
-    contentSpan.textContent = value;
-    contentSpan.classList.add('lang-switch-text');
-    return;
-  }
-
-  // A nested translation target owns its own text. Updating the outer element
-  // would remove its icons, avatars, or other child nodes.
-  if (element.querySelector('[data-i18n]')) {
-    return;
-  }
-
-  const textNode = [...element.childNodes].find(
-    (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
-  );
-
-  if (textNode) {
-    textNode.textContent = value;
-    element.classList.add('lang-switch-text');
-  } else if (!element.children.length) {
-    element.textContent = value;
-    element.classList.add('lang-switch-text');
-  }
-}
-
 function applyStaticTranslations() {
   document.documentElement.lang = currentLang;
 
   document
     .querySelectorAll('[data-i18n]')
     .forEach((element) => {
-      setElementTranslation(element, t(element.dataset.i18n));
+      const contentSpan = element.querySelector('.btn-metal-content');
+      if (contentSpan) {
+        contentSpan.textContent = t(element.dataset.i18n);
+      } else {
+        element.textContent = t(element.dataset.i18n);
+      }
     });
 
   document
@@ -566,85 +533,6 @@ const langSwitch = document.querySelector('#lang-switch');
 const langMenu = document.querySelector('#lang-menu');
 const langSwitchFlag = document.querySelector('#lang-switch-flag');
 const langSwitchCode = document.querySelector('#lang-switch-code');
-
-let languageSwitchTimer = null;
-let languageWidthCleanupTimer = null;
-
-function getLanguageTransitionTargets(elements) {
-  const targets = new Set();
-
-  elements.forEach((element) => {
-    if (!element.isConnected) return;
-    targets.add(element);
-
-    if (element.parentElement) {
-      targets.add(element.parentElement);
-    }
-  });
-
-  return [...targets];
-}
-
-function animateWidthTransition(elements) {
-  const records = getLanguageTransitionTargets(elements).map((element) => {
-    const rect = element.getBoundingClientRect();
-
-    return {
-      element,
-      width: rect.width,
-      height: rect.height,
-      originalWidth: element.style.width,
-      originalHeight: element.style.height
-    };
-  });
-
-  records.forEach((record) => {
-    record.element.style.width = `${record.width}px`;
-    record.element.style.height = `${record.height}px`;
-  });
-
-  return function transitionToNewDimensions() {
-    const activeRecords = records.filter((record) => record.element.isConnected);
-
-    // Measure every new natural size while text is invisible, then restore the
-    // old dimensions so CSS can interpolate between the two states.
-    activeRecords.forEach((record) => {
-      record.element.style.width = 'auto';
-      record.element.style.height = 'auto';
-    });
-
-    const nextDimensions = activeRecords.map((record) => {
-      const rect = record.element.getBoundingClientRect();
-      return { record, width: rect.width, height: rect.height };
-    });
-
-    activeRecords.forEach((record) => {
-      record.element.style.width = `${record.width}px`;
-      record.element.style.height = `${record.height}px`;
-    });
-
-    requestAnimationFrame(() => {
-      nextDimensions.forEach(({ record, width, height }) => {
-        record.element.style.width = `${width}px`;
-        record.element.style.height = `${height}px`;
-      });
-    });
-
-    if (languageWidthCleanupTimer) {
-      clearTimeout(languageWidthCleanupTimer);
-    }
-
-    function cleanup() {
-      records.forEach((record) => {
-        if (!record.element.isConnected) return;
-        record.element.style.width = record.originalWidth;
-        record.element.style.height = record.originalHeight;
-      });
-    }
-
-    languageWidthCleanupTimer = window.setTimeout(cleanup, 220);
-  };
-}
 
 const LANG_FLAGS = {
   tr: `
@@ -763,73 +651,54 @@ function openLangMenu() {
 }
 
 function setLang(lang) {
-  if (
-    (lang !== 'tr' && lang !== 'en') ||
-    lang === currentLang ||
-    languageSwitchTimer
-  ) {
+  if (lang !== 'tr' && lang !== 'en') {
     return;
   }
 
-  const transitionDimensions = animateWidthTransition(
-    [...document.querySelectorAll('.lang-switch-text')]
-  );
+  currentLang = lang;
 
-  document.body.classList.add('lang-switching');
-
-  languageSwitchTimer = window.setTimeout(() => {
-    currentLang = lang;
-
-    try {
-      localStorage.setItem(
-        LANG_STORAGE_KEY,
-        lang
-      );
-    } catch (error) {
-      console.warn(
-        'Dil tercihi kaydedilemedi:',
-        error
-      );
-    }
-
-    applyStaticTranslations();
-    updateLangSwitchUI();
-    updateDiscordUI(latestDiscordPresence);
-
-    setFavoriteFilter(
-      isFavoriteFilterActive()
+  try {
+    localStorage.setItem(
+      LANG_STORAGE_KEY,
+      lang
     );
-    updateFilterButtonState();
-    renderChampionFilterOptions();
+  } catch (error) {
+    console.warn(
+      'Dil tercihi kaydedilemedi:',
+      error
+    );
+  }
 
-    renderPopular();
-    render();
-    syncAllFavoriteButtons();
+  applyStaticTranslations();
+  updateLangSwitchUI();
 
-    // Açık modal da kartlarla aynı merkezi locale resolver'ını kullanır.
-    // İçerik seçili skin korunarak yenilenir.
-    if (modal?.open && activeModalGroup) {
-      refreshOpenModal(activeModalGroup);
-    }
+  setFavoriteFilter(
+    isFavoriteFilterActive()
+  );
+  updateFilterButtonState();
+  renderChampionFilterOptions();
 
-    // How-to-use modal açıkken dil değişirse içeriği yenile
-    if (howToUseModal?.open) {
-      renderHowToUse();
-    }
+  renderPopular();
+  render();
+  syncAllFavoriteButtons();
 
-    // Video modal açıkken çevirileri güncelle
-    updateVideoModalTranslations();
+  // Açık modal da kartlarla aynı merkezi locale resolver'ını kullanır.
+  // İçerik seçili skin korunarak yenilenir.
+  if (modal?.open && activeModalGroup) {
+    refreshOpenModal(activeModalGroup);
+  }
 
-    track('language_change', {
-      language: lang
-    });
+  // How-to-use modal açıkken dil değişirse içeriği yenile
+  if (howToUseModal?.open) {
+    renderHowToUse();
+  }
 
-    requestAnimationFrame(() => {
-      transitionDimensions();
-      document.body.classList.remove('lang-switching');
-      languageSwitchTimer = null;
-    });
-  }, 60);
+  // Video modal açıkken çevirileri güncelle
+  updateVideoModalTranslations();
+
+  track('language_change', {
+    language: lang
+  });
 }
 
 langSwitch?.addEventListener(
@@ -2084,13 +1953,11 @@ function createSkinCard(group) {
   --------------------------------------- */
 
   if (championElement) {
-    championElement.classList.add('lang-switch-text');
     championElement.textContent =
       displayChampion;
   }
 
   if (nameElement) {
-    nameElement.classList.add('lang-switch-text');
     nameElement.textContent =
       displayName;
   }
@@ -2618,19 +2485,16 @@ function openModal(group) {
   --------------------------------------- */
 
   if (modalChampion) {
-    modalChampion.classList.add('lang-switch-text');
     modalChampion.textContent =
       displayChampion;
   }
 
   if (modalSkinName) {
-    modalSkinName.classList.add('lang-switch-text');
     modalSkinName.textContent =
       displayName;
   }
 
   if (modalSkinId) {
-    modalSkinId.classList.add('lang-switch-text');
     modalSkinId.textContent =
       t('riotSkinId', {
         id: skin.id
@@ -4271,13 +4135,15 @@ setFavoriteFilter(false);
 await loadData();
 await loadDiscordProfile();
 
+// Initialize Discord presence from Lanyard API
+initDiscordPresence();
+
 /* =========================================
    DISCORD PRESENCE (LANYARD API)
    ========================================= */
 
 const LANYARD_API = 'https://api.lanyard.rest/v1';
 const DISCORD_USER_ID = '772232490445176842';
-let latestDiscordPresence = null;
 
 const discordContactElements = {
   name: document.querySelector('.discord-contact-name'),
@@ -4314,7 +4180,7 @@ function getStatusDotClass(status) {
 
 async function fetchDiscordPresence(userId) {
   try {
-    const response = await fetch(`${LANYARD_API}/users/${userId}`);
+    const response = await fetch(`${LANYARD_API}/v1/users/${userId}`);
     if (!response.ok) {
       throw new Error(`Lanyard API error: ${response.status}`);
     }
@@ -4332,8 +4198,6 @@ function updateDiscordUI(presence) {
     return;
   }
 
-  latestDiscordPresence = presence;
-
   const { discord_user, discord_status } = presence;
   const lang = currentLang || 'tr';
 
@@ -4349,7 +4213,7 @@ function updateDiscordUI(presence) {
 
   // Update button username
   if (discordContactElements.name && discord_user) {
-    const displayName = discord_user.username;
+    const displayName = discord_user.global_name || discord_user.username;
     discordContactElements.name.textContent = displayName;
   }
 
@@ -4365,7 +4229,7 @@ function updateDiscordUI(presence) {
 
   // Update modal username
   if (discordContactElements.modalName && discord_user) {
-    const displayName = discord_user.username;
+    const displayName = discord_user.global_name || discord_user.username;
     discordContactElements.modalName.textContent = displayName;
   }
 
