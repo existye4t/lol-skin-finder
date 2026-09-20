@@ -33,6 +33,16 @@ const TRANSLATIONS = {
     en: 'Type the skin name, champion, or Riot skin ID. Results filter instantly.'
   },
 
+  updates: {
+    tr: 'Güncellemeler',
+    en: 'Updates'
+  },
+
+  bugReport: {
+    tr: 'Hata Bildir',
+    en: 'Report Bug'
+  },
+
   searchPlaceholder: {
     tr: 'Örn. Omega Timi Twitch veya 29004',
     en: 'E.g. Omega Squad Twitch or 29004'
@@ -466,18 +476,41 @@ function getLocalizedChampionName(skin, lang = currentLang) {
    STATİK ÇEVİRİLER
 ========================================= */
 
+function setElementTranslation(element, value) {
+  const contentSpan = element.querySelector('.btn-metal-content');
+
+  if (contentSpan) {
+    contentSpan.textContent = value;
+    contentSpan.classList.add('lang-switch-text');
+    return;
+  }
+
+  // A nested translation target owns its own text. Updating the outer element
+  // would remove its icons, avatars, or other child nodes.
+  if (element.querySelector('[data-i18n]')) {
+    return;
+  }
+
+  const textNode = [...element.childNodes].find(
+    (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+  );
+
+  if (textNode) {
+    textNode.textContent = value;
+    element.classList.add('lang-switch-text');
+  } else if (!element.children.length) {
+    element.textContent = value;
+    element.classList.add('lang-switch-text');
+  }
+}
+
 function applyStaticTranslations() {
   document.documentElement.lang = currentLang;
 
   document
     .querySelectorAll('[data-i18n]')
     .forEach((element) => {
-      const contentSpan = element.querySelector('.btn-metal-content');
-      if (contentSpan) {
-        contentSpan.textContent = t(element.dataset.i18n);
-      } else {
-        element.textContent = t(element.dataset.i18n);
-      }
+      setElementTranslation(element, t(element.dataset.i18n));
     });
 
   document
@@ -533,6 +566,85 @@ const langSwitch = document.querySelector('#lang-switch');
 const langMenu = document.querySelector('#lang-menu');
 const langSwitchFlag = document.querySelector('#lang-switch-flag');
 const langSwitchCode = document.querySelector('#lang-switch-code');
+
+let languageSwitchTimer = null;
+let languageWidthCleanupTimer = null;
+
+function getLanguageTransitionTargets(elements) {
+  const targets = new Set();
+
+  elements.forEach((element) => {
+    if (!element.isConnected) return;
+    targets.add(element);
+
+    if (element.parentElement) {
+      targets.add(element.parentElement);
+    }
+  });
+
+  return [...targets];
+}
+
+function animateWidthTransition(elements) {
+  const records = getLanguageTransitionTargets(elements).map((element) => {
+    const rect = element.getBoundingClientRect();
+
+    return {
+      element,
+      width: rect.width,
+      height: rect.height,
+      originalWidth: element.style.width,
+      originalHeight: element.style.height
+    };
+  });
+
+  records.forEach((record) => {
+    record.element.style.width = `${record.width}px`;
+    record.element.style.height = `${record.height}px`;
+  });
+
+  return function transitionToNewDimensions() {
+    const activeRecords = records.filter((record) => record.element.isConnected);
+
+    // Measure every new natural size while text is invisible, then restore the
+    // old dimensions so CSS can interpolate between the two states.
+    activeRecords.forEach((record) => {
+      record.element.style.width = 'auto';
+      record.element.style.height = 'auto';
+    });
+
+    const nextDimensions = activeRecords.map((record) => {
+      const rect = record.element.getBoundingClientRect();
+      return { record, width: rect.width, height: rect.height };
+    });
+
+    activeRecords.forEach((record) => {
+      record.element.style.width = `${record.width}px`;
+      record.element.style.height = `${record.height}px`;
+    });
+
+    requestAnimationFrame(() => {
+      nextDimensions.forEach(({ record, width, height }) => {
+        record.element.style.width = `${width}px`;
+        record.element.style.height = `${height}px`;
+      });
+    });
+
+    if (languageWidthCleanupTimer) {
+      clearTimeout(languageWidthCleanupTimer);
+    }
+
+    function cleanup() {
+      records.forEach((record) => {
+        if (!record.element.isConnected) return;
+        record.element.style.width = record.originalWidth;
+        record.element.style.height = record.originalHeight;
+      });
+    }
+
+    languageWidthCleanupTimer = window.setTimeout(cleanup, 220);
+  };
+}
 
 const LANG_FLAGS = {
   tr: `
@@ -651,54 +763,73 @@ function openLangMenu() {
 }
 
 function setLang(lang) {
-  if (lang !== 'tr' && lang !== 'en') {
+  if (
+    (lang !== 'tr' && lang !== 'en') ||
+    lang === currentLang ||
+    languageSwitchTimer
+  ) {
     return;
   }
 
-  currentLang = lang;
-
-  try {
-    localStorage.setItem(
-      LANG_STORAGE_KEY,
-      lang
-    );
-  } catch (error) {
-    console.warn(
-      'Dil tercihi kaydedilemedi:',
-      error
-    );
-  }
-
-  applyStaticTranslations();
-  updateLangSwitchUI();
-
-  setFavoriteFilter(
-    isFavoriteFilterActive()
+  const transitionDimensions = animateWidthTransition(
+    [...document.querySelectorAll('.lang-switch-text')]
   );
-  updateFilterButtonState();
-  renderChampionFilterOptions();
 
-  renderPopular();
-  render();
-  syncAllFavoriteButtons();
+  document.body.classList.add('lang-switching');
 
-  // Açık modal da kartlarla aynı merkezi locale resolver'ını kullanır.
-  // İçerik seçili skin korunarak yenilenir.
-  if (modal?.open && activeModalGroup) {
-    refreshOpenModal(activeModalGroup);
-  }
+  languageSwitchTimer = window.setTimeout(() => {
+    currentLang = lang;
 
-  // How-to-use modal açıkken dil değişirse içeriği yenile
-  if (howToUseModal?.open) {
-    renderHowToUse();
-  }
+    try {
+      localStorage.setItem(
+        LANG_STORAGE_KEY,
+        lang
+      );
+    } catch (error) {
+      console.warn(
+        'Dil tercihi kaydedilemedi:',
+        error
+      );
+    }
 
-  // Video modal açıkken çevirileri güncelle
-  updateVideoModalTranslations();
+    applyStaticTranslations();
+    updateLangSwitchUI();
+    updateDiscordUI(latestDiscordPresence);
 
-  track('language_change', {
-    language: lang
-  });
+    setFavoriteFilter(
+      isFavoriteFilterActive()
+    );
+    updateFilterButtonState();
+    renderChampionFilterOptions();
+
+    renderPopular();
+    render();
+    syncAllFavoriteButtons();
+
+    // Açık modal da kartlarla aynı merkezi locale resolver'ını kullanır.
+    // İçerik seçili skin korunarak yenilenir.
+    if (modal?.open && activeModalGroup) {
+      refreshOpenModal(activeModalGroup);
+    }
+
+    // How-to-use modal açıkken dil değişirse içeriği yenile
+    if (howToUseModal?.open) {
+      renderHowToUse();
+    }
+
+    // Video modal açıkken çevirileri güncelle
+    updateVideoModalTranslations();
+
+    track('language_change', {
+      language: lang
+    });
+
+    requestAnimationFrame(() => {
+      transitionDimensions();
+      document.body.classList.remove('lang-switching');
+      languageSwitchTimer = null;
+    });
+  }, 60);
 }
 
 langSwitch?.addEventListener(
@@ -896,6 +1027,12 @@ function getSkinImageSources(skin) {
     return imageSourceCache.get(cacheKey);
   }
 
+  // Data Dragon loading screen (portrait, character-focused, no crop issues)
+  const loadingScreenUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
+    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
+    : '';
+
+  // Data Dragon splash art (fallback)
   const dataDragonUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
     ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${skin.championId}_${skin.skinNum}.jpg`
     : '';
@@ -903,9 +1040,10 @@ function getSkinImageSources(skin) {
   // Yerel images/skins dosyaları bilinen 1x1 placeholder'lardır. Buraya
   // özellikle dahil edilmez; yalnızca Riot CDN URL'leri kullanılabilir.
   const sources = [...new Set([
-    skin?.image,
-    dataDragonUrl,
-    skin?.imageFallback
+    loadingScreenUrl,      // 1st priority: loading screen (portrait, character-focused)
+    dataDragonUrl,         // 2nd priority: splash art (fallback)
+    skin?.image,           // 3rd priority: original image from JSON
+    skin?.imageFallback    // 4th priority: community dragon fallback
   ].filter(isRemoteImageUrl))];
 
   if (cacheKey) {
@@ -917,6 +1055,41 @@ function getSkinImageSources(skin) {
 
 function getSkinImageUrl(skin) {
   return getSkinImageSources(skin)[0] || '';
+}
+
+function getModalImageSources(skin) {
+  const cacheKey = String(skin?.id || '') + '_modal';
+
+  if (cacheKey && imageSourceCache.has(cacheKey)) {
+    return imageSourceCache.get(cacheKey);
+  }
+
+  // Data Dragon splash art (primary for modal - full art, no crop)
+  const dataDragonUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
+    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${skin.championId}_${skin.skinNum}.jpg`
+    : '';
+
+  // Data Dragon loading screen (fallback)
+  const loadingScreenUrl = skin?.championId !== undefined && skin?.skinNum !== undefined
+    ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
+    : '';
+
+  const sources = [...new Set([
+    dataDragonUrl,         // 1st priority: splash art (full art, character may be off-center but we use contain)
+    loadingScreenUrl,      // 2nd priority: loading screen (portrait, character-focused)
+    skin?.image,           // 3rd priority: original image from JSON
+    skin?.imageFallback    // 4th priority: community dragon fallback
+  ].filter(isRemoteImageUrl))];
+
+  if (cacheKey) {
+    imageSourceCache.set(cacheKey, sources);
+  }
+
+  return sources;
+}
+
+function getModalImageUrl(skin) {
+  return getModalImageSources(skin)[0] || '';
 }
 
 // <img> için sıralı Riot CDN denemesi yapan ortak onerror zinciri.
@@ -1932,9 +2105,9 @@ function createSkinCard(group) {
   const displayChampion =
     getLocalizedChampionName(skin);
 
-  /* ---------------------------------------
+/* ---------------------------------------
      Görsel
-  --------------------------------------- */
+   --------------------------------------- */
 
   if (image) {
     image.src = getSkinImageUrl(skin);
@@ -1953,11 +2126,13 @@ function createSkinCard(group) {
   --------------------------------------- */
 
   if (championElement) {
+    championElement.classList.add('lang-switch-text');
     championElement.textContent =
       displayChampion;
   }
 
   if (nameElement) {
+    nameElement.classList.add('lang-switch-text');
     nameElement.textContent =
       displayName;
   }
@@ -2438,11 +2613,15 @@ function openModal(group) {
   const skin =
     group.primary;
 
-  activeModalGroup = group;
+activeModalGroup = group;
 
-  const modalImage =
+  const modalImageBlur =
     document.querySelector(
-      '#modal-image'
+      '#modal-image-blur'
+    );
+  const modalImageSharp =
+    document.querySelector(
+      '#modal-image-sharp'
     );
 
   const modalChampion =
@@ -2466,18 +2645,28 @@ function openModal(group) {
   const displayChampion =
     getLocalizedChampionName(skin);
 
+  const modalImageUrl = getModalImageUrl(skin);
+
   /* ---------------------------------------
-     Modal görseli
-  --------------------------------------- */
+     Modal görseli (blur background + sharp foreground)
+   --------------------------------------- */
 
-  if (modalImage) {
-    modalImage.style.display = '';
-    modalImage.src = getSkinImageUrl(skin);
-
-    modalImage.alt =
+  if (modalImageBlur) {
+    modalImageBlur.style.display = '';
+    modalImageBlur.src = modalImageUrl;
+    modalImageBlur.alt = '';
+  }
+  if (modalImageSharp) {
+    modalImageSharp.style.display = '';
+    modalImageSharp.src = modalImageUrl;
+    modalImageSharp.alt =
       `${displayName} — ${displayChampion}`;
+  }
 
-    attachImageFallbackChain(modalImage, skin);
+  // Attach fallback chain to both images
+  if (modalImageBlur || modalImageSharp) {
+    attachImageFallbackChain(modalImageBlur, skin);
+    attachImageFallbackChain(modalImageSharp, skin);
   }
 
   /* ---------------------------------------
@@ -2485,16 +2674,19 @@ function openModal(group) {
   --------------------------------------- */
 
   if (modalChampion) {
+    modalChampion.classList.add('lang-switch-text');
     modalChampion.textContent =
       displayChampion;
   }
 
   if (modalSkinName) {
+    modalSkinName.classList.add('lang-switch-text');
     modalSkinName.textContent =
       displayName;
   }
 
   if (modalSkinId) {
+    modalSkinId.classList.add('lang-switch-text');
     modalSkinId.textContent =
       t('riotSkinId', {
         id: skin.id
@@ -4135,15 +4327,13 @@ setFavoriteFilter(false);
 await loadData();
 await loadDiscordProfile();
 
-// Initialize Discord presence from Lanyard API
-initDiscordPresence();
-
 /* =========================================
    DISCORD PRESENCE (LANYARD API)
    ========================================= */
 
 const LANYARD_API = 'https://api.lanyard.rest/v1';
 const DISCORD_USER_ID = '772232490445176842';
+let latestDiscordPresence = null;
 
 const discordContactElements = {
   name: document.querySelector('.discord-contact-name'),
@@ -4180,7 +4370,7 @@ function getStatusDotClass(status) {
 
 async function fetchDiscordPresence(userId) {
   try {
-    const response = await fetch(`${LANYARD_API}/v1/users/${userId}`);
+    const response = await fetch(`${LANYARD_API}/users/${userId}`);
     if (!response.ok) {
       throw new Error(`Lanyard API error: ${response.status}`);
     }
@@ -4198,6 +4388,8 @@ function updateDiscordUI(presence) {
     return;
   }
 
+  latestDiscordPresence = presence;
+
   const { discord_user, discord_status } = presence;
   const lang = currentLang || 'tr';
 
@@ -4213,7 +4405,7 @@ function updateDiscordUI(presence) {
 
   // Update button username
   if (discordContactElements.name && discord_user) {
-    const displayName = discord_user.global_name || discord_user.username;
+    const displayName = discord_user.username;
     discordContactElements.name.textContent = displayName;
   }
 
@@ -4229,7 +4421,7 @@ function updateDiscordUI(presence) {
 
   // Update modal username
   if (discordContactElements.modalName && discord_user) {
-    const displayName = discord_user.global_name || discord_user.username;
+    const displayName = discord_user.username;
     discordContactElements.modalName.textContent = displayName;
   }
 

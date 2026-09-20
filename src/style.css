@@ -2640,3 +2640,40 @@ dialog::backdrop {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* =========================================
+   SCROLL REVEAL (scroll-triggered fade/slide-in)
+   ========================================= */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-reveal.scroll-reveal-animating {
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* =========================================
+   CARD TILT EFFECT (hover 3D tilt)
+   ========================================= */
+
+.card-tilt-effect {
+  transform-style: preserve-3d;
+  will-change: transform;
+
+  transition:
+    transform 0.28s ease-out,
+    box-shadow 0.22s ease-out;
+}
+
+.card-tilt-effect:hover {
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.65);
+}

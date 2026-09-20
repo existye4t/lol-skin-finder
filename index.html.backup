@@ -442,7 +442,7 @@
           <span class="discord-contact-name">existofficial</span>
           <span class="discord-contact-status">
             <span class="discord-contact-status-dot" data-status="online"></span>
-            <span class="discord-contact-status-text">Çevrimiçi</span>
+            <span class="discord-contact-status-text lang-switch-text">Çevrimiçi</span>
           </span>
         </span>
       </span>
@@ -472,13 +472,13 @@
       </p>
 
       <h1>
-        <span data-i18n="heroTitleLine">
+        <span class="lang-switch-text-inline" data-i18n="heroTitleLine">
           Aradığın skin
         </span>
 
         <br />
 
-        <em data-i18n="heroTitleEm">
+        <em class="lang-switch-text-inline" data-i18n="heroTitleEm">
           burada.
         </em>
       </h1>
@@ -493,10 +493,10 @@
 
       <div class="community-actions" aria-label="Topluluk işlemleri">
               <button id="updates-button" class="community-button community-button-updates" type="button" aria-haspopup="dialog" aria-controls="updates-modal">
-                <span aria-hidden="true">✦</span><span>Güncellemeler</span>
+                <span aria-hidden="true">✦</span><span class="lang-switch-text" data-i18n="updates">Güncellemeler</span>
               </button>
               <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
-                <span aria-hidden="true">⚑</span><span>Hata Bildir</span>
+                <span aria-hidden="true">⚑</span><span class="lang-switch-text" data-i18n="bugReport">Hata Bildir</span>
               </button>
               <!-- =========================================
                HOW TO USE BUTTON
@@ -673,7 +673,7 @@
 
         <div
           id="filter-summary"
-          class="filter-summary"
+          class="filter-summary lang-switch-text"
         >
           0 şampiyon seçildi
         </div>
@@ -1064,6 +1064,22 @@
       alt=""
     />
 
+    <div class="modal-image-wrapper">
+      <img
+        id="modal-image-blur"
+        class="modal-image-blur"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        id="modal-image-sharp"
+        class="modal-image-sharp"
+        alt=""
+      />
+      <span class="modal-brand-left" aria-hidden="true">EXIST</span>
+      <span class="modal-brand-right" aria-hidden="true">SKINS</span>
+    </div>
+
     <div class="modal-body">
 
       <div class="modal-copy">
@@ -1154,13 +1170,13 @@
   <!-- =========================================
        HOW TO USE MODAL
        ========================================= -->
-  <dialog id="how-to-use-modal" class="community-modal" aria-labelledby="how-to-use-modal-title">
+<dialog id="how-to-use-modal" class="community-modal" aria-labelledby="how-to-use-modal-title">
     <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
-    <p class="community-kicker" data-i18n="howToUseKicker"></p>
-    <h2 id="how-to-use-modal-title" data-i18n="howToUseModalTitle"></h2>
-    <div id="how-to-use-content" class="how-to-use-content" aria-live="polite"></div>
+    <p class="community-kicker lang-switch-text" data-i18n="howToUseKicker"></p>
+    <h2 id="how-to-use-modal-title" class="lang-switch-text" data-i18n="howToUseModalTitle"></h2>
+    <div id="how-to-use-content" class="how-to-use-content lang-switch-text" aria-live="polite"></div>
     <div id="how-to-use-videos" class="how-to-use-videos"></div>
-</dialog>
+  </dialog>
 
     <!-- =========================================
          DISCORD MODALI
@@ -1256,17 +1272,16 @@
 
         </div>
 
-        <div class="discord-profile-info">
+<div class="discord-profile-info">
+        <span class="discord-profile-label lang-switch-text">
+          DISCORD
+        </span>
 
-          <span class="discord-profile-label">
-            DISCORD
-          </span>
+        <strong class="lang-switch-text">
+          existofficial
+        </strong>
 
-          <strong>
-            existofficial
-          </strong>
-
-        </div>
+      </div>
 
       </div>
 

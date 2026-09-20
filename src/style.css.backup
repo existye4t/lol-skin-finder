@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap");
 
 /* =========================================
    1. PALETTE & DESIGN TOKENS (DARK / NEAR-BLACK)
@@ -37,6 +37,77 @@
   /* Timing */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --lang-switch-duration-out: 60ms;
+  --lang-switch-duration-in: 120ms;
+  --lang-switch-width-duration: 200ms;
+  --lang-switch-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================
+   LANGUAGE SWITCH ANIMATION
+   ========================================= */
+
+/* Text elements that should animate during a language switch. */
+.lang-switch-text {
+  transform-origin: left center;
+  transition:
+    opacity var(--lang-switch-duration-out) var(--lang-switch-easing),
+    filter var(--lang-switch-duration-out) var(--lang-switch-easing),
+    clip-path var(--lang-switch-duration-out) var(--lang-switch-easing),
+    width var(--lang-switch-width-duration) var(--lang-switch-easing),
+    height var(--lang-switch-width-duration) var(--lang-switch-easing);
+  will-change: opacity, filter, clip-path, width, height;
+}
+
+/* For inline elements (like hero title spans) that need clip-path to work properly */
+.lang-switch-text-inline {
+  display: inline-block;
+}
+
+body.lang-switching {
+  pointer-events: none;
+}
+
+/* Fade out and close the text from right to left. */
+body.lang-switching .lang-switch-text {
+  opacity: 0;
+  filter: blur(3px);
+  clip-path: inset(0 100% 0 0);
+}
+
+/* Fade in, deblur, and reveal the text from left to right in lockstep. */
+body:not(.lang-switching) .lang-switch-text {
+  opacity: 1;
+  filter: blur(0);
+  clip-path: inset(0 0 0 0);
+  transition:
+    opacity var(--lang-switch-duration-in) var(--lang-switch-easing),
+    filter var(--lang-switch-duration-in) var(--lang-switch-easing),
+    clip-path var(--lang-switch-duration-in) var(--lang-switch-easing),
+    width var(--lang-switch-width-duration) var(--lang-switch-easing),
+    height var(--lang-switch-width-duration) var(--lang-switch-easing);
+}
+
+/* Images and decorative layers remain visible while adjacent text switches. */
+body.lang-switching img,
+body.lang-switching .bg-paths,
+body.lang-switching .skin-card,
+body.lang-switching .card-shade,
+body.lang-switching .background-paths,
+body.lang-switching .discord-contact-icon,
+body.lang-switching .discord-contact-icon svg,
+body.lang-switching .favorite-icon,
+body.lang-switching .filter-button svg,
+body.lang-switching .favorite-filter svg,
+body.lang-switching .lang-switch svg,
+body.lang-switching .discord-modal-icon svg,
+body.lang-switching .discord-join-icon,
+body.lang-switching .discord-join-small svg,
+body.lang-switching .discord-invite-card svg,
+body.lang-switching .skin-card img,
+body.lang-switching .modal-image {
+  opacity: 1 !important;
+  transition: none !important;
 }
 
 /* =========================================
@@ -841,6 +912,12 @@ a:focus-visible,
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .discord-contact-label {
@@ -870,9 +947,19 @@ a:focus-visible,
   opacity: 0;
 }
 
+.discord-contact:hover .discord-contact-copy {
+  opacity: 0;
+  transform: translateX(-20px);
+  width: 0;
+}
+
 /* Smooth collapse for arrow */
 .discord-contact:not(:hover) .discord-contact-arrow {
   transition-delay: 0.05s;
+}
+
+.discord-contact:not(:hover) .discord-contact-copy {
+  transition-delay: 0.1s;
 }
 
 /* =========================================
@@ -1614,12 +1701,58 @@ dialog::backdrop {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.85);
 }
 
-.skin-modal > img {
-  display: block;
+.modal-image-wrapper {
+  position: relative;
   width: 100%;
   max-height: 290px;
   aspect-ratio: 16 / 7;
+  overflow: hidden;
+}
+
+.modal-image-blur {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  filter: blur(30px);
+  transform: scale(1.2);
+  z-index: 1;
+}
+
+.modal-image-sharp {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
+}
+
+.modal-brand-left,
+.modal-brand-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  font-size: 0.85rem;
+  letter-spacing: 0.35em;
+  color: #e8e0d0;
+  text-shadow:
+    0 0 24px rgba(0, 0, 0, 0.95),
+    0 2px 10px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.modal-brand-left {
+  left: 16px;
+}
+
+.modal-brand-right {
+  right: 16px;
 }
 
 .modal-body {
@@ -2251,6 +2384,139 @@ dialog::backdrop {
 
 .discord-modal-hint span:first-child {
   color: #2ecc71;
+}
+
+/* =========================================
+   DISCORD MODAL ANIMATIONS
+   ========================================= */
+
+/* Backdrop animation */
+.discord-modal::backdrop {
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0);
+  transition:
+    background 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.discord-modal[open]::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+/* Modal entrance/exit animations */
+.discord-modal {
+  opacity: 0;
+  transform: scale(0.92) translateY(24px);
+  transition:
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.discord-modal[open] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition:
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Closing animation */
+.discord-modal.closing {
+  opacity: 0;
+  transform: scale(0.92) translateY(24px);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Glow/backdrop animation */
+.discord-modal-glow {
+  opacity: 0;
+  transform: scale(1.1);
+  transition:
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.discord-modal[open] .discord-modal-glow {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.discord-modal.closing .discord-modal-glow {
+  opacity: 0;
+  transform: scale(1.1);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Staggered entrance for modal content elements */
+.discord-modal[open] .discord-modal-icon,
+.discord-modal[open] .discord-modal-eyebrow,
+.discord-modal[open] #discord-modal-title,
+.discord-modal[open] .discord-modal-description,
+.discord-modal[open] .discord-join-small,
+.discord-modal[open] .discord-join-button,
+.discord-modal[open] .discord-profile {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: modalContentEnter 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalContentEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered delays for each element */
+.discord-modal[open] .discord-modal-icon {
+  animation-delay: 50ms;
+}
+
+.discord-modal[open] .discord-modal-eyebrow {
+  animation-delay: 100ms;
+}
+
+.discord-modal[open] #discord-modal-title {
+  animation-delay: 150ms;
+}
+
+.discord-modal[open] .discord-modal-description {
+  animation-delay: 200ms;
+}
+
+.discord-modal[open] .discord-join-small,
+.discord-modal[open] .discord-join-button {
+  animation-delay: 250ms;
+}
+
+.discord-modal[open] .discord-profile {
+  animation-delay: 300ms;
+}
+
+/* Closing stagger - reverse order */
+.discord-modal.closing .discord-modal-icon,
+.discord-modal.closing .discord-modal-eyebrow,
+.discord-modal.closing #discord-modal-title,
+.discord-modal.closing .discord-modal-description,
+.discord-modal.closing .discord-join-small,
+.discord-modal.closing .discord-join-button,
+.discord-modal.closing .discord-profile {
+  animation: modalContentExit 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalContentExit {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
 }
 
 /* =========================================
