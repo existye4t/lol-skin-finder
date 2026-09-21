@@ -133,6 +133,21 @@
        AMBIENT BACKGROUND PATHS
        ========================================= -->
   <div id="background-paths" class="background-paths" aria-hidden="true"></div>
+
+  <!-- =========================================
+       GRADIENT MESH BACKGROUND (dekoratif, izole)
+       ========================================= -->
+  <div class="gradient-mesh-bg" aria-hidden="true">
+    <div class="mesh-blob mesh-blob-1"></div>
+    <div class="mesh-blob mesh-blob-2"></div>
+    <div class="mesh-blob mesh-blob-3"></div>
+  </div>
+
+  <!-- =========================================
+       NOISE / FILM GRAIN OVERLAY (dekoratif, izole)
+       ========================================= -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+  <!-- =========================================
        SOL ÜST SİTE MARKASI
        ========================================= -->
 
@@ -537,6 +552,38 @@
           </kbd>
 
         </label>
+
+        <button
+          id="command-palette-trigger"
+          class="command-palette-trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="command-palette"
+        >
+
+          <span
+            class="command-palette-trigger-icon"
+            aria-hidden="true"
+          >
+            ⌕
+          </span>
+
+          <span
+            class="command-palette-trigger-label"
+            data-i18n="commandPaletteTrigger"
+          >
+            Ara
+          </span>
+
+          <span
+            class="command-palette-trigger-keys"
+            aria-hidden="true"
+          >
+            <kbd>Ctrl</kbd>
+            <kbd>K</kbd>
+          </span>
+
+        </button>
 
         <button
           id="favorite-filter"
@@ -1300,6 +1347,49 @@
     </div>
 
   </dialog>
+
+  <!-- =========================================
+       COMMAND PALETTE (Ctrl+K / Cmd+K)
+       ========================================= -->
+
+  <dialog
+    id="command-palette"
+    class="command-palette"
+    aria-label="Komut paleti"
+  >
+
+    <div class="command-palette-input-wrap">
+      <span class="command-palette-icon" aria-hidden="true">⌕</span>
+      <input
+        id="command-palette-input"
+        class="command-palette-input"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Skin, şampiyon veya ID ara…"
+      />
+      <kbd class="command-palette-kbd">ESC</kbd>
+    </div>
+
+    <ul
+      id="command-palette-results"
+      class="command-palette-results"
+      role="listbox"
+      aria-label="Arama sonuçları"
+    ></ul>
+
+  </dialog>
+
+  <!-- =========================================
+       SCROLL-TO-TOP BUTONU
+       ========================================= -->
+
+  <button
+    id="scroll-to-top"
+    class="scroll-to-top"
+    type="button"
+    aria-label="Yukarı çık"
+  >↑</button>
 
   <!-- =========================================
        JAVASCRIPT

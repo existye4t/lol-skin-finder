@@ -2099,6 +2099,20 @@ function createSkinCard(group) {
     return null;
   }
 
+  /* ---------------------------------------
+     Scroll reveal + 3D tilt (izole eklenti)
+     Her yeni kart otomatik olarak iki efekti
+     de alır; render sonrası init fonksiyonları
+     observer/binding adımlarını tamamlar.
+  --------------------------------------- */
+
+  article.classList.add(
+    'scroll-reveal',
+    'card-tilt-effect'
+  );
+
+  attachCardTiltListeners(article);
+
   const displayName =
     getLocalizedSkinName(skin);
 
@@ -2246,6 +2260,194 @@ function createSkinCard(group) {
 }
 
 /* =========================================
+   SCROLL REVEAL ANIMASYONU (izole eklenti)
+   =========================================
+   .scroll-reveal            -> kart başlangıçta
+                                opacity:0, aşağıda
+   .scroll-reveal.visible    -> kart görünür oldu
+   .scroll-reveal-animating  -> sadece reveal
+                                anında geçiş süresi/easing
+                                tanımlıdır; tilt efektinin
+                                kendi transition'ı ile
+                                çakışmaması için animasyon
+                                bittiğinde kaldırılır.
+   IntersectionObserver ile
+   sadece ilk görünürlükte
+   tetiklenir; aynı anda görünen
+   kartlar 65ms stagger ile
+   sırayla belirir.
+========================================= */
+
+const SCROLL_REVEAL_THRESHOLD = 0.12;
+const SCROLL_REVEAL_STAGGER_MS = 65;
+const SCROLL_REVEAL_DURATION_MS = 600;
+
+let scrollRevealObserver = null;
+
+function initScrollRevealAnimation() {
+  const cards = document.querySelectorAll(
+    '.scroll-reveal:not(.visible)'
+  );
+
+  if (!cards.length) {
+    return;
+  }
+
+  if (!scrollRevealObserver) {
+    scrollRevealObserver =
+      new IntersectionObserver(
+        (entries) => {
+          let staggerIndex = 0;
+
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              return;
+            }
+
+            const el = entry.target;
+
+            scrollRevealObserver.unobserve(el);
+
+            const delay =
+              staggerIndex *
+              SCROLL_REVEAL_STAGGER_MS;
+
+            staggerIndex += 1;
+
+            setTimeout(() => {
+              el.classList.add(
+                'scroll-reveal-animating'
+              );
+              el.classList.add('visible');
+
+              setTimeout(() => {
+                el.classList.remove(
+                  'scroll-reveal-animating'
+                );
+              }, SCROLL_REVEAL_DURATION_MS);
+            }, delay);
+          });
+        },
+        {
+          threshold: SCROLL_REVEAL_THRESHOLD
+        }
+      );
+  }
+
+  cards.forEach((card) =>
+    scrollRevealObserver.observe(card)
+  );
+}
+
+/* =========================================
+   KART HOVER 3D TILT EFEKTİ (izole eklenti)
+   =========================================
+   Mouse kart üzerinde hareket ederken
+   pozisyona göre hafif rotateX/rotateY +
+   scale(1.03) uygulanır (perspective 800px,
+   maks. 7 derece). Mouse ayrıldığında kart
+   CSS transition (~280ms ease-out) ile
+   eski haline döner. mousemove hesapları
+   requestAnimationFrame ile sınırlanır.
+========================================= */
+
+const CARD_TILT_MAX_DEG = 7;
+const CARD_TILT_PERSPECTIVE_PX = 800;
+const CARD_TILT_SCALE = 1.03;
+
+function attachCardTiltListeners(article) {
+  if (
+    !article ||
+    article.dataset.tiltBound === 'true'
+  ) {
+    return;
+  }
+
+  article.dataset.tiltBound = 'true';
+
+  let tiltFrame = null;
+  let pendingEvent = null;
+
+  article.addEventListener(
+    'mousemove',
+    (event) => {
+      // Henüz reveal olmamış karta tilt
+      // uygulama (transform çakışmasını önler)
+      if (
+        !article.classList.contains('visible')
+      ) {
+        return;
+      }
+
+      pendingEvent = event;
+
+      if (tiltFrame) {
+        return;
+      }
+
+      tiltFrame =
+        requestAnimationFrame(() => {
+          tiltFrame = null;
+
+          const rect =
+            article.getBoundingClientRect();
+
+          const relativeX =
+            (pendingEvent.clientX -
+              rect.left) /
+            rect.width;
+
+          const relativeY =
+            (pendingEvent.clientY -
+              rect.top) /
+            rect.height;
+
+          const rotateY =
+            (relativeX - 0.5) *
+            2 *
+            CARD_TILT_MAX_DEG;
+
+          const rotateX =
+            (0.5 - relativeY) *
+            2 *
+            CARD_TILT_MAX_DEG;
+
+          article.style.transform =
+            `perspective(${CARD_TILT_PERSPECTIVE_PX}px) ` +
+            `rotateX(${rotateX.toFixed(2)}deg) ` +
+            `rotateY(${rotateY.toFixed(2)}deg) ` +
+            `scale(${CARD_TILT_SCALE})`;
+        });
+    }
+  );
+
+  article.addEventListener(
+    'mouseleave',
+    () => {
+      if (tiltFrame) {
+        cancelAnimationFrame(tiltFrame);
+        tiltFrame = null;
+      }
+
+      pendingEvent = null;
+      article.style.transform = '';
+    }
+  );
+}
+
+function initCardTiltEffect() {
+  const cards = document.querySelectorAll(
+    '.card-tilt-effect'
+  );
+
+  cards.forEach((card) =>
+    attachCardTiltListeners(card)
+  );
+}
+
+
+
+/* =========================================
    POPÜLER SKİNLER
 ========================================= */
 
@@ -2311,6 +2513,10 @@ function renderPopular() {
   popularGrid.replaceChildren(...cards);
   popularSection.hidden = false;
   popularRendered = true;
+
+  // Yeni render edilen kartlara scroll reveal + tilt uygula
+  initCardTiltEffect();
+  initScrollRevealAnimation();
 }
 
 /* =========================================
@@ -2550,6 +2756,10 @@ function renderNextBatch() {
 
   results.appendChild(fragment);
   renderState.renderedCount = nextCount;
+
+  // Yeni render edilen kartlara scroll reveal + tilt uygula
+  initCardTiltEffect();
+  initScrollRevealAnimation();
 
   // Update meta with current visible count
   if (meta && skinGroups.length) {

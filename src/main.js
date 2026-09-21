@@ -48,6 +48,11 @@ const TRANSLATIONS = {
     en: 'E.g. Omega Squad Twitch or 29004'
   },
 
+  commandPaletteTrigger: {
+    tr: 'Ara',
+    en: 'Search'
+  },
+
   showFavorites: {
     tr: 'Favorileri göster',
     en: 'Show favorites'
@@ -1733,6 +1738,17 @@ function toggleFavorite(
     is_favorite:
       favorites.has(id) ? 1 : 0
   });
+
+  /* Toast bildirimi (izole) */
+  showToast(
+    wasFavorite
+      ? (currentLang === 'en'
+          ? 'Removed from favorites'
+          : 'Favorilerden çıkarıldı')
+      : (currentLang === 'en'
+          ? 'Added to favorites ✓'
+          : 'Favorilere eklendi ✓')
+  );
 }
 
 /* =========================================
@@ -4689,3 +4705,556 @@ async function initDiscordPresence() {
 // Prevent tree-shaking by executing the initialization
 initDiscordPresence();
 
+
+/* =========================================
+   COMMAND PALETTE (Ctrl+K / Cmd+K)
+   =========================================
+   Mevcut arama kutusundan bagimsiz; sonuclari
+   mevcut getGroupSearchScore() fonksiyonunu
+   cagirarak hesaplar (arama mantigi yeniden
+   yazilmadi, yeniden kullanildi). Enter ile
+   secili skin'in modal'i acilir, Esc veya
+   backdrop tiklamasi ile kapanir.
+========================================= */
+
+
+
+function initCommandPalette() {
+  const palette =
+    document.querySelector('#command-palette');
+
+  const paletteInput =
+    document.querySelector(
+      '#command-palette-input'
+    );
+
+  const paletteResults =
+    document.querySelector(
+      '#command-palette-results'
+    );
+
+  if (!palette || !paletteInput || !paletteResults) {
+    return;
+  }
+
+  let paletteMatches = [];
+  let paletteActiveIndex = 0;
+
+  /* Palette acikken arka sayfanin
+     kaymasini engelle */
+  let savedBodyOverflow = null;
+
+  const closePalette = () => {
+    if (!palette.open) {
+      return;
+    }
+
+    palette.close();
+    resetPalette();
+  };
+
+  const openPalette = () => {
+    if (palette.open) {
+      return;
+    }
+
+    savedBodyOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+
+    renderPaletteResults();
+    palette.showModal();
+    paletteInput.focus({ preventScroll: true });
+    paletteInput.select();
+  };
+
+  const updatePaletteActiveItem = (scroll = true) => {
+    const items =
+      paletteResults.querySelectorAll(
+        '.command-palette-item'
+      );
+
+    items.forEach((item, index) => {
+      item.classList.toggle(
+        'is-active',
+        index === paletteActiveIndex
+      );
+    });
+
+    if (scroll) {
+      items[paletteActiveIndex]?.scrollIntoView(
+        { block: 'nearest' }
+      );
+    }
+  };
+
+  const renderPaletteResults = () => {
+    paletteResults.replaceChildren();
+
+    const query = normalize(paletteInput.value);
+
+    if (!query) {
+      paletteMatches = [];
+      paletteActiveIndex = 0;
+
+      const hint =
+        document.createElement('li');
+
+      hint.className = 'command-palette-empty';
+
+      hint.textContent =
+        currentLang === 'en'
+          ? 'Type to search skins…'
+          : 'Skin aramak için yazın…';
+
+      paletteResults.appendChild(hint);
+
+      return;
+    }
+
+    paletteMatches = skinGroups
+      .map((group) => ({
+        group,
+        score: getGroupSearchScore(
+          group,
+          query
+        )
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ group }) => group);
+
+    paletteActiveIndex = 0;
+
+    if (!paletteMatches.length) {
+      const emptyItem =
+        document.createElement('li');
+
+      emptyItem.className =
+        'command-palette-empty';
+
+      emptyItem.textContent =
+        currentLang === 'en'
+          ? 'No results found.'
+          : 'Sonuç bulunamadı.';
+
+      paletteResults.appendChild(emptyItem);
+
+      return;
+    }
+
+    /* Tum sonuclari tek seferde eklemek icin
+       DocumentFragment kullan: her item icin
+       ayri reflow yerine tek toplu DOM ekleme */
+
+    const fragment =
+      document.createDocumentFragment();
+
+    paletteMatches.forEach(
+      (group, index) => {
+        const skin = group.primary;
+
+        const item =
+          document.createElement('li');
+
+        item.className =
+          'command-palette-item';
+
+        item.dataset.index = String(index);
+        item.setAttribute('role', 'option');
+
+        const img =
+          document.createElement('img');
+
+        img.src = getSkinImageUrl(skin);
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+
+        const textWrap =
+          document.createElement('div');
+
+        textWrap.className =
+          'command-palette-item-text';
+
+        const nameEl =
+          document.createElement('span');
+
+        nameEl.className =
+          'command-palette-item-name';
+
+        applyMatchHighlight(
+          nameEl,
+          getLocalizedSkinName(skin),
+          paletteInput.value
+        );
+
+        const champEl =
+          document.createElement('span');
+
+        champEl.className =
+          'command-palette-item-champion';
+
+        champEl.textContent =
+          getLocalizedChampionName(skin);
+
+        textWrap.appendChild(nameEl);
+        textWrap.appendChild(champEl);
+
+        item.appendChild(img);
+        item.appendChild(textWrap);
+
+        item.addEventListener(
+          'mouseenter',
+          () => {
+            paletteActiveIndex = index;
+            updatePaletteActiveItem(false);
+          }
+        );
+
+        item.addEventListener(
+          'click',
+          () => {
+            closePalette();
+            openModal(group);
+          }
+        );
+
+        fragment.appendChild(item);
+      }
+    );
+
+    paletteResults.appendChild(fragment);
+
+    updatePaletteActiveItem();
+  };
+
+  /* Ctrl+K / Cmd+K kisayolu (genel) */
+
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'k'
+      ) {
+        event.preventDefault();
+
+        if (palette.open) {
+          closePalette();
+        } else {
+          openPalette();
+        }
+      }
+    }
+  );
+
+  /* Palet icindeki input davranislari */
+
+  /* Performans: her tus vurusunda aramayi
+     aninda calistirmak yerine 180ms debounce
+     uygula; kullanici yazmayi birakinca
+     arama + render tek seferde yapilir */
+
+  let paletteDebounceTimer = null;
+
+  paletteInput.addEventListener(
+    'input',
+    () => {
+      window.clearTimeout(
+        paletteDebounceTimer
+      );
+
+      paletteDebounceTimer =
+        window.setTimeout(
+          renderPaletteResults,
+          180
+        );
+    }
+  );
+
+  paletteInput.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+
+        if (paletteMatches.length) {
+          paletteActiveIndex =
+            (paletteActiveIndex + 1) %
+            paletteMatches.length;
+
+          updatePaletteActiveItem();
+        }
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+
+        if (paletteMatches.length) {
+          paletteActiveIndex =
+            (paletteActiveIndex - 1 +
+              paletteMatches.length) %
+            paletteMatches.length;
+
+          updatePaletteActiveItem();
+        }
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+
+        const group =
+          paletteMatches[paletteActiveIndex];
+
+        if (group) {
+          closePalette();
+          openModal(group);
+        }
+      }
+    }
+  );
+
+  // Only the top palette handles Escape; leave underlying dialogs open.
+  palette.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') event.stopPropagation();
+  });
+
+  /* Backdrop tiklamasi ile kapat */
+
+  palette.addEventListener(
+    'click',
+    (event) => {
+      if (event.target === palette) {
+        closePalette();
+      }
+    }
+  );
+
+  /* Eslenen metni vurgula (premium dokunus):
+     karakter karakter normalize ederek orijinal
+     metindeki indeksleri esler */
+
+  const applyMatchHighlight = (
+    nameEl,
+    displayName,
+    query
+  ) => {
+    const target = normalize(query);
+
+    if (!target) {
+      nameEl.textContent = displayName;
+      return;
+    }
+
+    const normMap = [];
+
+    for (
+      let i = 0;
+      i < displayName.length;
+      i++
+    ) {
+      const n = normalize(displayName[i]);
+
+      if (n) {
+        normMap.push({
+          originalIndex: i,
+          normalized: n
+        });
+      }
+    }
+
+    const sequence = normMap
+      .map((entry) => entry.normalized)
+      .join('');
+
+    const matchStart =
+      sequence.indexOf(target);
+
+    if (matchStart === -1) {
+      nameEl.textContent = displayName;
+      return;
+    }
+
+    const startOrig =
+      normMap[matchStart].originalIndex;
+
+    const endOrig =
+      normMap[
+        matchStart + target.length - 1
+      ].originalIndex + 1;
+
+    nameEl.replaceChildren(
+      document.createTextNode(
+        displayName.slice(0, startOrig)
+      )
+    );
+
+    const mark =
+      document.createElement('mark');
+
+    mark.textContent = displayName.slice(
+      startOrig,
+      endOrig
+    );
+
+    nameEl.appendChild(mark);
+
+    nameEl.appendChild(
+      document.createTextNode(
+        displayName.slice(endOrig)
+      )
+    );
+  };
+
+  /* Kapatilirken state'i sifirla ve body
+     scroll kilidini geri kaldir */
+
+  const resetPalette = () => {
+    /* Bekleyen debounce'lu aramayi iptal et */
+    window.clearTimeout(
+      paletteDebounceTimer
+    );
+
+    paletteInput.value = '';
+    paletteMatches = [];
+    paletteActiveIndex = 0;
+    paletteResults.replaceChildren();
+
+    if (savedBodyOverflow !== null) {
+      document.body.style.overflow =
+        savedBodyOverflow;
+      savedBodyOverflow = null;
+    }
+  };
+
+  palette.addEventListener(
+    'close',
+    () => {
+      // A queued close event must not reset a newly reopened palette.
+      if (!palette.open) resetPalette();
+    }
+  );
+
+  /* Tetikleyici buton: tiklayinca ac,
+     rozette isletim sistemine gore
+     Ctrl K / Cmd K goster */
+
+  const paletteTrigger =
+    document.querySelector(
+      '#command-palette-trigger'
+    );
+
+  if (paletteTrigger) {
+    paletteTrigger.addEventListener(
+      'click',
+      () => {
+        openPalette();
+      }
+    );
+
+    const platformText = (
+      navigator.platform ||
+      ''
+    ).toLowerCase();
+
+    if (platformText.includes('mac')) {
+      const keys =
+        paletteTrigger.querySelectorAll(
+          '.command-palette-trigger-keys kbd'
+        );
+
+      if (keys.length === 2) {
+        keys[0].textContent = '⌘';
+        keys[1].textContent = 'K';
+      }
+    }
+  }
+}
+
+initCommandPalette();
+
+/* =========================================
+   TOAST BİLDİRİMLERİ
+   =========================================
+   Ekranin sag altinda kisa sureli beliren
+   kucuk bildirim balonlari. Birden fazla
+   bildirim alt alta istiflenir.
+   Kullanim: showToast('Mesaj')
+========================================= */
+
+function showToast(message) {
+  let container =
+    document.querySelector('.toast-container');
+
+  if (!container) {
+    container =
+      document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast =
+    document.createElement('div');
+
+  toast.className = 'toast';
+  toast.textContent = message;
+  toast.setAttribute('role', 'status');
+
+  container.appendChild(toast);
+
+  /* Belirme animasyonunu tetikle */
+  requestAnimationFrame(() => {
+    toast.classList.add('toast-visible');
+  });
+
+  window.setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    toast.classList.add('toast-hiding');
+
+    window.setTimeout(() => {
+      toast.remove();
+
+      if (!container.children.length) {
+        container.remove();
+      }
+    }, 220);
+  }, 2500);
+}
+
+/* =========================================
+   SCROLL-TO-TOP (YUKARI ÇIK) BUTONU
+   ========================================= */
+
+function initScrollToTop() {
+  const button =
+    document.querySelector('#scroll-to-top');
+
+  if (!button) {
+    return;
+  }
+
+  const toggleVisibility = () => {
+    button.classList.toggle(
+      'scroll-to-top-visible',
+      window.scrollY > 450
+    );
+  };
+
+  window.addEventListener(
+    'scroll',
+    toggleVisibility,
+    { passive: true }
+  );
+
+  toggleVisibility();
+
+  button.addEventListener(
+    'click',
+    () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  );
+}
+
+initScrollToTop();
