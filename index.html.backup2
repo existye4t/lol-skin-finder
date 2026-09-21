@@ -1,0 +1,1404 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <!-- FAVICON -->
+  <link
+    rel="icon"
+    type="image/png"
+    href="/favicon.png"
+  />
+
+  <meta
+    name="theme-color"
+    content="#070b18"
+  />
+
+  <!-- ================================
+       OPEN GRAPH / DISCORD
+       ================================ -->
+
+  <meta
+    property="og:type"
+    content="website"
+  />
+
+  <meta
+    property="og:url"
+    content="https://existye4t.github.io/lol-skin-finder/"
+  />
+
+  <meta
+    property="og:title"
+    content="Exist LOL Skin Finder"
+  />
+
+  <meta
+    property="og:description"
+    content="League of Legends skinlerini ve Riot skin ID'lerini kolayca bul."
+  />
+
+  <meta
+    property="og:image"
+    content="https://existye4t.github.io/lol-skin-finder/preview.png"
+  />
+
+  <meta
+    property="og:image:secure_url"
+    content="https://existye4t.github.io/lol-skin-finder/preview.png"
+  />
+
+  <meta
+    property="og:image:type"
+    content="image/png"
+  />
+
+  <meta
+    property="og:image:width"
+    content="1200"
+  />
+
+  <meta
+    property="og:image:height"
+    content="630"
+  />
+
+  <meta
+    property="og:site_name"
+    content="Exist LOL Skin Finder"
+  />
+
+  <!-- ================================
+       TWITTER
+       ================================ -->
+
+  <meta
+    name="twitter:card"
+    content="summary_large_image"
+  />
+
+  <meta
+    name="twitter:title"
+    content="Exist LOL Skin Finder"
+  />
+
+  <meta
+    name="twitter:description"
+    content="League of Legends skinlerini ve Riot skin ID'lerini kolayca bul."
+  />
+
+  <meta
+    name="twitter:image"
+    content="https://existye4t.github.io/lol-skin-finder/preview.png"
+  />
+
+  <title>Exist LOL Skin Finder</title>
+
+  <!-- ================================
+       GOOGLE ANALYTICS
+       ================================ -->
+
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-S4N25T536G"
+  ></script>
+
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag("js", new Date());
+    gtag("config", "G-S4N25T536G");
+  </script>
+
+  <!-- STYLESHEET -->
+  <link
+    rel="stylesheet"
+    href="/src/style.css"
+  />
+</head>
+
+<body>
+
+  <!-- =========================================
+       AMBIENT BACKGROUND PATHS
+       ========================================= -->
+  <div id="background-paths" class="background-paths" aria-hidden="true"></div>
+
+  <!-- =========================================
+       GRADIENT MESH BACKGROUND (dekoratif, izole)
+       ========================================= -->
+  <div class="gradient-mesh-bg" aria-hidden="true">
+    <div class="mesh-blob mesh-blob-1"></div>
+    <div class="mesh-blob mesh-blob-2"></div>
+    <div class="mesh-blob mesh-blob-3"></div>
+  </div>
+
+  <!-- =========================================
+       NOISE / FILM GRAIN OVERLAY (dekoratif, izole)
+       ========================================= -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+  <!-- =========================================
+       SOL ÜST SİTE MARKASI
+       ========================================= -->
+
+  <div class="site-brand">
+    <span class="site-brand-main">EXIST</span>
+    <span class="site-brand-divider">/</span>
+    <span class="site-brand-sub">LOL SKIN FINDER</span>
+  </div>
+
+  <!-- =========================================
+       ÜST SAĞ AKSİYONLAR
+       ========================================= -->
+
+  <div class="top-actions">
+
+    <!-- =========================================
+         DİL SEÇİCİ
+         ========================================= -->
+
+    <div class="lang-switch-wrap">
+
+      <button
+        id="lang-switch"
+        class="lang-switch"
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded="false"
+        aria-controls="lang-menu"
+        title="Dil seç"
+      >
+
+        <span
+          id="lang-switch-flag"
+          class="lang-flag"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 30 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              width="30"
+              height="20"
+              fill="#E30A17"
+            />
+
+            <circle
+              cx="11"
+              cy="10"
+              r="5"
+              fill="#fff"
+            />
+
+            <circle
+              cx="12.4"
+              cy="10"
+              r="4"
+              fill="#E30A17"
+            />
+
+            <polygon
+              points="17.3,8.6 17.62,9.56 18.63,9.57 17.82,10.17 18.12,11.13 17.3,10.55 16.48,11.13 16.78,10.17 15.97,9.57 16.98,9.56"
+              fill="#fff"
+            />
+          </svg>
+        </span>
+
+        <span
+          id="lang-switch-code"
+          class="lang-switch-code"
+        >
+          TR
+        </span>
+
+        <span
+          class="lang-switch-chevron"
+          aria-hidden="true"
+        >
+          ▾
+        </span>
+
+      </button>
+
+      <ul
+        id="lang-menu"
+        class="lang-menu"
+        role="listbox"
+        aria-label="Dil seç"
+        hidden
+      >
+
+        <li role="presentation">
+
+          <button
+            type="button"
+            class="lang-menu-option"
+            role="option"
+            data-lang="tr"
+            aria-selected="true"
+          >
+
+            <span
+              class="lang-flag"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 30 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  width="30"
+                  height="20"
+                  fill="#E30A17"
+                />
+
+                <circle
+                  cx="11"
+                  cy="10"
+                  r="5"
+                  fill="#fff"
+                />
+
+                <circle
+                  cx="12.4"
+                  cy="10"
+                  r="4"
+                  fill="#E30A17"
+                />
+
+                <polygon
+                  points="17.3,8.6 17.62,9.56 18.63,9.57 17.82,10.17 18.12,11.13 17.3,10.55 16.48,11.13 16.78,10.17 15.97,9.57 16.98,9.56"
+                  fill="#fff"
+                />
+              </svg>
+            </span>
+
+            <span>Türkçe</span>
+
+          </button>
+
+        </li>
+
+        <li role="presentation">
+
+          <button
+            type="button"
+            class="lang-menu-option"
+            role="option"
+            data-lang="en"
+            aria-selected="false"
+          >
+
+            <span
+              class="lang-flag"
+              aria-hidden="true"
+            >
+              <svg
+                viewBox="0 0 30 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+
+                <rect
+                  width="30"
+                  height="20"
+                  fill="#fff"
+                />
+
+                <rect
+                  y="0"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="3.08"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="6.15"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="9.23"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="12.31"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="15.38"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  y="18.46"
+                  width="30"
+                  height="1.54"
+                  fill="#B22234"
+                />
+
+                <rect
+                  width="12"
+                  height="10.77"
+                  fill="#3C3B6E"
+                />
+
+                <g fill="#fff">
+                  <circle cx="2" cy="1.5" r="0.45"/>
+                  <circle cx="5" cy="1.5" r="0.45"/>
+                  <circle cx="8" cy="1.5" r="0.45"/>
+                  <circle cx="11" cy="1.5" r="0.45"/>
+
+                  <circle cx="3.5" cy="3" r="0.45"/>
+                  <circle cx="6.5" cy="3" r="0.45"/>
+                  <circle cx="9.5" cy="3" r="0.45"/>
+
+                  <circle cx="2" cy="4.5" r="0.45"/>
+                  <circle cx="5" cy="4.5" r="0.45"/>
+                  <circle cx="8" cy="4.5" r="0.45"/>
+                  <circle cx="11" cy="4.5" r="0.45"/>
+
+                  <circle cx="3.5" cy="6" r="0.45"/>
+                  <circle cx="6.5" cy="6" r="0.45"/>
+                  <circle cx="9.5" cy="6" r="0.45"/>
+
+                  <circle cx="2" cy="7.5" r="0.45"/>
+                  <circle cx="5" cy="7.5" r="0.45"/>
+                  <circle cx="8" cy="7.5" r="0.45"/>
+                  <circle cx="11" cy="7.5" r="0.45"/>
+
+                  <circle cx="3.5" cy="9" r="0.45"/>
+                  <circle cx="6.5" cy="9" r="0.45"/>
+                  <circle cx="9.5" cy="9" r="0.45"/>
+                </g>
+
+              </svg>
+            </span>
+
+            <span>English</span>
+
+          </button>
+
+        </li>
+
+      </ul>
+
+    </div>
+
+    <!-- =========================================
+         DISCORD BUTONU
+         ========================================= -->
+
+    <button
+      id="discord-contact"
+      class="discord-contact"
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls="discord-modal"
+    >
+
+      <span
+        class="discord-contact-icon"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.05 1.82-2.05c1.02 0 1.84.92 1.82 2.05 0 1.13-.8 2.05-1.82 2.05Z"
+          />
+        </svg>
+      </span>
+
+<span class="discord-contact-copy">
+
+        <span class="discord-contact-label">
+          DISCORD
+        </span>
+
+        <span class="discord-contact-name">
+          existofficial
+        </span>
+
+      </span>
+      <span class="discord-contact-profile" aria-hidden="true">
+        <span class="discord-contact-avatar">
+          <img src="assets/pfp.png" alt="" loading="lazy" />
+        </span>
+        <span class="discord-contact-info">
+          <span class="discord-contact-name">existofficial</span>
+          <span class="discord-contact-status">
+            <span class="discord-contact-status-dot" data-status="online"></span>
+            <span class="discord-contact-status-text lang-switch-text">Çevrimiçi</span>
+          </span>
+        </span>
+      </span>
+      <span
+        class="discord-contact-arrow"
+        aria-hidden="true"
+      >
+        ↗
+      </span>
+    </button>
+
+  </div>
+
+  <!-- =========================================
+       ANA SAYFA
+       ========================================= -->
+
+  <main class="page-shell">
+
+    <section class="hero">
+
+      <p
+        class="eyebrow"
+        data-i18n="heroEyebrow"
+      >
+        LEAGUE OF LEGENDS • SKIN VERİTABANI
+      </p>
+
+      <h1>
+        <span class="lang-switch-text-inline" data-i18n="heroTitleLine">
+          Aradığın skin
+        </span>
+
+        <br />
+
+        <em class="lang-switch-text-inline" data-i18n="heroTitleEm">
+          burada.
+        </em>
+      </h1>
+
+      <p
+        class="intro"
+        data-i18n="heroIntro"
+      >
+        Skin adını, şampiyonu veya Riot skin ID’sini yaz.
+        Sonuçlar anında filtrelenir.
+      </p>
+
+      <div class="community-actions" aria-label="Topluluk işlemleri">
+              <button id="updates-button" class="community-button community-button-updates" type="button" aria-haspopup="dialog" aria-controls="updates-modal">
+                <span aria-hidden="true">✦</span><span class="lang-switch-text" data-i18n="updates">Güncellemeler</span>
+              </button>
+              <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
+                <span aria-hidden="true">⚑</span><span class="lang-switch-text" data-i18n="bugReport">Hata Bildir</span>
+              </button>
+              <!-- =========================================
+               HOW TO USE BUTTON
+               ========================================= -->
+          <button
+            id="how-to-use-button"
+            class="community-button community-button-how-to-use"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="how-to-use-modal"
+          >
+            <span aria-hidden="true">❓</span><span data-i18n="howToUseButton">Nasıl kullanılır?</span>
+          </button>
+            </div>
+
+      <div class="search-row">
+
+        <label
+          class="search-box"
+          for="search"
+        >
+
+          <span aria-hidden="true">
+            ⌕
+          </span>
+
+          <input
+            id="search"
+            type="search"
+            autocomplete="off"
+            data-i18n-placeholder="searchPlaceholder"
+            placeholder="Örn. Omega Timi Twitch veya 29004"
+            autofocus
+          />
+
+          <kbd>
+            ESC
+          </kbd>
+
+        </label>
+
+        <button
+          id="command-palette-trigger"
+          class="command-palette-trigger"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="command-palette"
+        >
+
+          <span
+            class="command-palette-trigger-icon"
+            aria-hidden="true"
+          >
+            ⌕
+          </span>
+
+          <span
+            class="command-palette-trigger-label"
+            data-i18n="commandPaletteTrigger"
+          >
+            Ara
+          </span>
+
+          <span
+            class="command-palette-trigger-keys"
+            aria-hidden="true"
+          >
+            <kbd>Ctrl</kbd>
+            <kbd>K</kbd>
+          </span>
+
+        </button>
+
+        <button
+          id="favorite-filter"
+          class="favorite-filter"
+          type="button"
+          aria-pressed="false"
+          data-i18n-title="showFavorites"
+          title="Favorileri göster"
+        >
+
+          <span
+            class="favorite-filter-icon"
+            aria-hidden="true"
+          >
+            ☆
+          </span>
+
+          <span data-i18n="favoritesLabel">
+            Favoriler
+          </span>
+
+          <span
+            id="favorite-count"
+            class="favorite-count"
+            hidden
+          >
+            0
+          </span>
+
+        </button>
+
+        <button
+          id="filter-button"
+          class="filter-button"
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-pressed="false"
+          data-i18n-title="filtersLabel"
+          title="Filtreler"
+        >
+          <svg
+            class="filter-button-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16" />
+            <path d="M7 12h10" />
+            <path d="M10 18h4" />
+            <path d="M6.5 6l2.5 6v4l3 1.5V12l2.5-6" />
+          </svg>
+
+          <span data-i18n="filtersLabel">
+            Filtreler
+          </span>
+
+          <span
+            id="filter-count"
+            class="filter-count"
+            hidden
+          >
+            0
+          </span>
+        </button>
+
+      </div>
+
+      <div
+        id="champion-filter-panel"
+        class="champion-filter-panel"
+        hidden
+      >
+        <div class="filter-panel-header">
+          <div>
+            <p class="filter-panel-kicker" data-i18n="filtersLabel">
+              Filtreler
+            </p>
+            <h3 data-i18n="filterPanelTitle">
+              Şampiyon filtresi
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            class="filter-panel-close"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        <label
+          class="filter-search-box"
+          for="filter-search-input"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="5.5"></circle>
+            <path d="M16 16l4 4"></path>
+          </svg>
+
+          <input
+            id="filter-search-input"
+            type="search"
+            data-i18n-placeholder="filterSearchPlaceholder"
+            placeholder="Şampiyon ara"
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="filter-panel-tools">
+          <button
+            type="button"
+            class="filter-panel-action"
+            id="filter-select-all"
+            data-i18n="selectAll"
+          >
+            Tümünü Seç
+          </button>
+
+          <button
+            type="button"
+            class="filter-panel-action secondary"
+            id="filter-clear"
+            data-i18n="clearFilters"
+          >
+            Temizle
+          </button>
+        </div>
+
+        <div
+          id="filter-summary"
+          class="filter-summary lang-switch-text"
+        >
+          0 şampiyon seçildi
+        </div>
+
+        <div
+          id="filter-option-list"
+          class="filter-option-list"
+          role="listbox"
+          aria-label="Champion filters"
+        ></div>
+
+        <button
+          id="apply-filters"
+          class="apply-filters"
+          type="button"
+          data-i18n="applyFilters"
+        >
+          Filtreleri Uygula
+        </button>
+      </div>
+
+      <div
+        class="quick-searches"
+        data-i18n-aria-label="quickSearchesAriaLabel"
+        aria-label="Örnek aramalar"
+      >
+
+        <button
+          type="button"
+          data-query-tr="Omega Timi Twitch"
+          data-query-en="Omega Squad Twitch"
+          data-label-tr="Omega Timi Twitch"
+          data-label-en="Omega Squad Twitch"
+        >
+          Omega Timi Twitch
+        </button>
+
+        <button
+          type="button"
+          data-query-tr="Ahri"
+          data-query-en="Ahri"
+          data-label-tr="Ahri"
+          data-label-en="Ahri"
+        >
+          Ahri
+        </button>
+
+        <button
+          type="button"
+          data-query-tr="29004"
+          data-query-en="29004"
+          data-label-tr="ID: 29004"
+          data-label-en="ID: 29004"
+        >
+          ID: 29004
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- =========================================
+         POPÜLER SKİNLER
+         ========================================= -->
+
+    <section
+      id="popular-section"
+      class="results-section popular-section"
+      aria-label="Popüler skinler"
+    >
+
+      <div class="results-header">
+
+        <div>
+
+          <p
+            class="eyebrow"
+            data-i18n="popularEyebrow"
+          >
+            ÖNE ÇIKANLAR
+          </p>
+
+          <h2 data-i18n="popularHeading">
+            Popüler Skinler
+          </h2>
+
+        </div>
+
+      </div>
+
+      <div
+        id="popular-grid"
+        class="results-grid popular-grid"
+      ></div>
+
+    </section>
+
+    <!-- Medium Discord invite card (right side) -->
+
+    <div class="discord-invite-card" id="discord-invite-card" aria-hidden="false">
+
+      <div class="discord-invite-inner">
+
+        <div class="discord-invite-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.05 1.82-2.05c1.02 0 1.84.92 1.82 2.05 0 1.13-.8 2.05-1.82 2.05Z"/>
+          </svg>
+        </div>
+
+        <div class="discord-invite-body">
+
+          <h3 data-i18n="discordTitle">Discord Sunucumuza Katıl</h3>
+
+          <p data-i18n="discordDescription">Güncellemeleri takip etmek, hata bildirmek, favori skinlerini paylaşmak ve topluluğumuza katıl.</p>
+
+          <a class="discord-invite-cta" href="https://discord.com/invite/VFYj8yefn" target="_blank" rel="noopener noreferrer" data-i18n="discordJoinButton" aria-label="Join Discord">Discord'a Katıl</a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =========================================
+         FAVORİLER
+         ========================================= -->
+
+    <section
+      id="favorites-section"
+      class="favorites-section"
+      hidden
+      aria-label="Favori skinler"
+    >
+
+      <div class="favorites-header">
+
+        <div>
+
+          <p
+            class="eyebrow"
+            data-i18n="savedEyebrow"
+          >
+            KAYDEDİLENLER
+          </p>
+
+          <h2 data-i18n="favoritesHeading">
+            Favori skinlerin
+          </h2>
+
+        </div>
+
+        <button
+          id="clear-favorites"
+          class="clear-favorites"
+          type="button"
+          data-i18n="clearFavorites"
+        >
+          Favorileri temizle
+        </button>
+
+      </div>
+
+      <div
+        id="favorites-grid"
+        class="results-grid favorites-grid"
+      ></div>
+
+    </section>
+
+    <!-- =========================================
+         SONUÇLAR
+         ========================================= -->
+
+    <section
+      class="results-section"
+      aria-live="polite"
+    >
+
+      <div class="results-header">
+
+        <div>
+
+          <p
+            class="eyebrow"
+            data-i18n="resultsEyebrow"
+          >
+            SONUÇLAR
+          </p>
+
+          <h2
+            id="result-title"
+            data-i18n="exploreSkins"
+          >
+            Skinleri keşfet
+          </h2>
+
+        </div>
+
+        <p
+          id="meta"
+          data-i18n="loadingData"
+        >
+          Veriler yükleniyor…
+        </p>
+
+      </div>
+
+      <div
+        id="results"
+        class="results-grid"
+      ></div>
+
+      <div
+        id="empty"
+        class="empty-state"
+        hidden
+      >
+
+
+        <path
+          d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.92 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"
+        />
+
+      </svg>
+
+    </div>
+
+
+    <p
+      class="discord-modal-eyebrow"
+      data-i18n="discordEyebrow"
+    >
+      DISCORD İLETİŞİM
+    </p>
+
+
+    <h2
+      id="discord-modal-title"
+      data-i18n="discordTitle"
+    >
+      Discord Sunucumuza Katıl
+    </h2>
+
+
+    <p
+      class="discord-modal-description"
+      data-i18n="discordDescription"
+    >
+      Güncellemeleri takip etmek, hata bildirmek, favori skinlerini paylaşmak ve diğer üyelerle sohbet etmek için topluluğumuza katıl.
+    </p>
+
+
+    <!-- Small elegant join button inside the Discord modal -->
+    <a
+      id="discord-invite-small"
+      class="discord-join-small"
+      href="https://discord.com/invite/VFYj8yefn"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Join Discord"
+    >
+      <svg class="discord-join-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.92 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"/>
+      </svg>
+      <span class="discord-join-small-text" data-i18n="discordJoinButton">Discord'a Katıl</span>
+    </a>
+
+
+    <a
+      id="discord-invite"
+      class="discord-join-button"
+      href="https://discord.com/invite/VFYj8yefn"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-i18n="discordJoinButton"
+      aria-label="Join Discord"
+    >
+      <svg class="discord-join-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.92 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"/>
+      </svg>
+      <span class="discord-join-text" data-i18n="discordJoinButton">Discord'a Katıl</span>
+    </a>
+
+
+    <div class="discord-profile">
+
+      <div class="discord-profile-avatar">
+
+        <img
+          src="assets/pfp.png"
+          alt="existofficial Discord profil fotoğrafı"
+        />
+
+        <i aria-hidden="true"></i>
+
+      </div>
+
+
+      <div class="discord-profile-info">
+
+        <span class="discord-profile-label">
+          DISCORD
+        </span>
+
+        <strong>
+          existofficial
+        </strong>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =========================================
+       SKIN KARTI TEMPLATE
+       ========================================= -->
+
+  <template id="skin-template">
+
+    <article
+      class="skin-card"
+      tabindex="0"
+      role="button"
+    >
+
+      <button
+        class="favorite-button"
+        type="button"
+        data-i18n-aria-label="addFavorite"
+        aria-label="Favorilere ekle"
+        aria-pressed="false"
+        data-i18n-title="addFavorite"
+        title="Favorilere ekle"
+      >
+
+        <span
+          class="favorite-icon"
+          aria-hidden="true"
+        >
+          ☆
+        </span>
+
+      </button>
+
+      <img
+        loading="lazy"
+        alt=""
+      />
+
+      <div class="card-shade"></div>
+
+      <div class="card-content">
+
+        <p class="champion"></p>
+
+        <h3></h3>
+
+        <p class="skin-id"></p>
+
+      </div>
+
+    </article>
+
+  </template>
+
+  <!-- =========================================
+       SKIN MODAL
+       ========================================= -->
+
+  <dialog
+    id="skin-modal"
+    class="skin-modal"
+    aria-labelledby="modal-skin-name"
+  >
+
+    <button
+      class="modal-close"
+      type="button"
+      data-i18n-aria-label="close"
+      aria-label="Kapat"
+    >
+      ×
+    </button>
+
+    <img
+      id="modal-image"
+      alt=""
+    />
+
+    <div class="modal-image-wrapper">
+      <img
+        id="modal-image-blur"
+        class="modal-image-blur"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        id="modal-image-sharp"
+        class="modal-image-sharp"
+        alt=""
+      />
+      <span class="modal-brand-left" aria-hidden="true">EXIST</span>
+      <span class="modal-brand-right" aria-hidden="true">SKINS</span>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="modal-copy">
+
+        <p
+          id="modal-champion"
+          class="champion"
+        ></p>
+
+        <h2 id="modal-skin-name"></h2>
+
+        <p
+          id="modal-skin-id"
+          class="modal-id"
+        ></p>
+
+        <button
+          id="modal-favorite"
+          class="modal-favorite"
+          type="button"
+          aria-pressed="false"
+        >
+
+          <span
+            class="modal-favorite-icon"
+            aria-hidden="true"
+          >
+            ☆
+          </span>
+
+          <span
+            class="modal-favorite-text"
+            data-i18n="addFavorite"
+          >
+            Favorilere ekle
+          </span>
+
+        </button>
+
+      </div>
+
+      <section
+        class="download-list-wrap"
+        data-i18n-aria-label="downloadsAriaLabel"
+        aria-label="Skin ve chroma indirmeleri"
+      >
+
+        <p
+          class="download-heading"
+          data-i18n="downloadsHeading"
+        >
+          İNDİRMELER
+        </p>
+
+        <div
+          id="download-list"
+          class="download-list"
+        ></div>
+
+      </section>
+
+    </div>
+
+  </dialog>
+
+  <dialog id="updates-modal" class="community-modal" aria-labelledby="updates-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker">YENİLİKLER</p>
+    <h2 id="updates-modal-title">Güncellemeler</h2>
+    <div id="updates-list" class="updates-list" aria-live="polite"><p class="community-empty">Güncellemeler yükleniyor…</p></div>
+  </dialog>
+
+  <dialog id="bug-report-modal" class="community-modal" aria-labelledby="bug-report-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker">GERİ BİLDİRİM</p>
+    <h2 id="bug-report-modal-title">Hata bildir</h2>
+    <p class="community-description">Sorunu kısa ve net anlat; mümkünse tekrar üretme adımlarını ekle.</p>
+    <form id="bug-report-form" class="community-form">
+      <label>Başlık<input id="bug-report-title" name="title" maxlength="120" required placeholder="Örn. Skin görseli açılmıyor" /></label>
+      <label>Açıklama<textarea id="bug-report-description" name="description" maxlength="2000" required placeholder="Ne oldu, ne bekliyordun?"></textarea></label>
+      <label>Görsel bağlantısı <span>(opsiyonel)</span><input id="bug-report-image-url" name="imageUrl" type="url" maxlength="2048" placeholder="https://…" /></label>
+      <label>İlgili skin <span>(opsiyonel)</span><select id="bug-report-skin" name="skinId"><option value="">Skin seçme</option></select></label>
+      <p id="bug-report-status" class="community-form-status" aria-live="polite"></p>
+      <button class="community-submit" type="submit">Bildirimi gönder <span aria-hidden="true">→</span></button>
+    </form>
+  </dialog>
+
+  <!-- =========================================
+       HOW TO USE MODAL
+       ========================================= -->
+<dialog id="how-to-use-modal" class="community-modal" aria-labelledby="how-to-use-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker lang-switch-text" data-i18n="howToUseKicker"></p>
+    <h2 id="how-to-use-modal-title" class="lang-switch-text" data-i18n="howToUseModalTitle"></h2>
+    <div id="how-to-use-content" class="how-to-use-content lang-switch-text" aria-live="polite"></div>
+    <div id="how-to-use-videos" class="how-to-use-videos"></div>
+  </dialog>
+
+    <!-- =========================================
+         DISCORD MODALI
+         ========================================= -->
+
+  <dialog
+    id="discord-modal"
+    class="discord-modal"
+    aria-labelledby="discord-modal-title"
+  >
+
+    <div
+      class="discord-modal-glow"
+      aria-hidden="true"
+    ></div>
+
+    <button
+      id="discord-modal-close"
+      class="discord-modal-close"
+      type="button"
+      data-i18n-aria-label="closeDiscord"
+      aria-label="Discord penceresini kapat"
+    >
+      ×
+    </button>
+
+    <div class="discord-modal-content">
+
+      <div
+        class="discord-modal-icon"
+        aria-hidden="true"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+
+          <path
+            d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.05 1.82-2.05c1.02 0 1.84.92 1.82 2.05 0 1.13-.8 2.05-1.82 2.05Z"
+          />
+
+        </svg>
+
+      </div>
+
+      <p
+        class="discord-modal-eyebrow"
+        data-i18n="discordEyebrow"
+      >
+        DISCORD İLETİŞİM
+      </p>
+
+      <h2
+        id="discord-modal-title"
+        data-i18n="discordTitle"
+      >
+        Bir sorun mu var?
+      </h2>
+
+      <p
+        class="discord-modal-description"
+        data-i18n="discordDescription"
+      >
+        Problem, öneri veya sorularınız için Discord üzerinden
+        bana ulaşabilirsiniz.
+      </p>
+
+      <!-- small join button inside modal -->
+      <a
+        id="discord-modal-join"
+        class="discord-join-small"
+          href="https://discord.com/invite/VFYj8yefn"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Join Discord"
+      >
+        <svg class="discord-join-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.54 5.03A16.9 16.9 0 0 0 15.44 3.76c-.18.32-.39.75-.53 1.09a15.8 15.8 0 0 0-4.82 0c-.15-.34-.36-.77-.54-1.09a16.95 16.95 0 0 0-4.1 1.27C2.85 8.91 2.15 12.7 2.5 16.44a16.99 16.99 0 0 0 5.02 2.54c.41-.55.78-1.13 1.1-1.74-.6-.23-1.18-.52-1.72-.86.14-.1.28-.21.42-.31 3.32 1.55 6.92 1.55 10.2 0 .14.1.28.21.42.31-.55.34-1.13.63-1.73.86.32.61.69 1.19 1.1 1.74a16.95 16.95 0 0 0 5.03-2.54c.41-4.34-.7-8.1-2.8-11.41ZM8.75 14.59c-1 0-1.82-.92-1.82-2.05s.8-2.06 1.82-2.06c1.02 0 1.84.93 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Zm6.5 0c-1 0-1.82-.92-1.82-2.05s.8-2.05 1.82-2.05c1.02 0 1.84.92 1.82 2.06 0 1.13-.8 2.05-1.82 2.05Z"/></svg>
+        <span class="discord-join-small-text" data-i18n="discordJoinButton">Discord'a Katıl</span>
+      </a>
+
+      <div class="discord-profile">
+
+        <div class="discord-profile-avatar">
+
+          <img
+            src="assets/pfp.png"
+            alt="existofficial Discord profil fotoğrafı"
+          />
+
+          <i aria-hidden="true"></i>
+
+        </div>
+
+<div class="discord-profile-info">
+        <span class="discord-profile-label lang-switch-text">
+          DISCORD
+        </span>
+
+        <strong class="lang-switch-text">
+          existofficial
+        </strong>
+
+      </div>
+
+      </div>
+
+      <div class="discord-modal-hint">
+
+        <span aria-hidden="true">
+          ●
+        </span>
+
+        <span data-i18n="discordHint">
+          Yardım etmek için buradayım.
+        </span>
+
+      </div>
+
+    </div>
+
+  </dialog>
+
+  <!-- =========================================
+       COMMAND PALETTE (Ctrl+K / Cmd+K)
+       ========================================= -->
+
+  <dialog
+    id="command-palette"
+    class="command-palette"
+    aria-label="Komut paleti"
+  >
+
+    <div class="command-palette-input-wrap">
+      <span class="command-palette-icon" aria-hidden="true">⌕</span>
+      <input
+        id="command-palette-input"
+        class="command-palette-input"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Skin, şampiyon veya ID ara…"
+      />
+      <kbd class="command-palette-kbd">ESC</kbd>
+    </div>
+
+    <ul
+      id="command-palette-results"
+      class="command-palette-results"
+      role="listbox"
+      aria-label="Arama sonuçları"
+    ></ul>
+
+  </dialog>
+
+  <!-- =========================================
+       SCROLL-TO-TOP BUTONU
+       ========================================= -->
+
+  <button
+    id="scroll-to-top"
+    class="scroll-to-top"
+    type="button"
+    aria-label="Yukarı çık"
+  >↑</button>
+
+  <!-- =========================================
+       JAVASCRIPT
+       ========================================= -->
+
+  <script
+    type="module"
+    src="/src/main.js"
+  ></script>
+
+</body>
+</html>

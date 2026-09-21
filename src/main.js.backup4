@@ -4018,75 +4018,6 @@ function buildSkinGroups(
    VERİLERİ YÜKLE
 ========================================= */
 
-/* =========================================
-   SKELETON LOADING (YÜKLEME İSKELETİ)
-   =========================================
-   Veri yuklenirken gercek kart grid'ine
-   benzeyen gri, shimmer animasyonlu
-   placeholder kartlar gosterir.
-   Sadece DOM'a .skeleton-card elementleri
-   ekler/kaldirir; mevcut render mantigina
-   karismaz.
-========================================= */
-
-function renderSkeletonCards(container, count) {
-  if (!container) {
-    return;
-  }
-
-  /* Once varsa eski iskeletleri temizle */
-  clearSkeletonCards(container);
-
-  const fragment =
-    document.createDocumentFragment();
-
-  for (let i = 0; i < count; i++) {
-    const card =
-      document.createElement('div');
-
-    card.className = 'skeleton-card';
-    card.setAttribute('aria-hidden', 'true');
-
-    const image =
-      document.createElement('div');
-    image.className =
-      'skeleton-block skeleton-image skeleton-shimmer';
-
-    const title =
-      document.createElement('div');
-    title.className =
-      'skeleton-block skeleton-line skeleton-shimmer';
-
-    const subtitle =
-      document.createElement('div');
-    subtitle.className =
-      'skeleton-block skeleton-line skeleton-line-short skeleton-shimmer';
-
-    const textWrap =
-      document.createElement('div');
-    textWrap.className = 'skeleton-text';
-    textWrap.appendChild(title);
-    textWrap.appendChild(subtitle);
-
-    card.appendChild(image);
-    card.appendChild(textWrap);
-
-    fragment.appendChild(card);
-  }
-
-  container.appendChild(fragment);
-}
-
-function clearSkeletonCards(container) {
-  if (!container) {
-    return;
-  }
-
-  container
-    .querySelectorAll('.skeleton-card')
-    .forEach((card) => card.remove());
-}
-
 async function loadData() {
   if (
     !search ||
@@ -4099,11 +4030,6 @@ async function loadData() {
 
     return;
   }
-
-  /* Veri cekme baslamadan once iskelet
-     kartlari goster (izole, sadece DOM'a
-     ekleme yapar) */
-  renderSkeletonCards(results, 12);
 
   try {
     const [
@@ -4234,10 +4160,6 @@ async function loadData() {
 
     updateFavoriteCount();
 
-    /* Iskelet kartlari kaldir, gercek kartlari
-       render() baslat */
-    clearSkeletonCards(results);
-
     renderPopular();
     render();
 
@@ -4256,9 +4178,6 @@ async function loadData() {
       'Skin verileri yüklenemedi:',
       error
     );
-
-    /* Hata durumunda da iskeletleri temizle */
-    clearSkeletonCards(results);
 
     if (meta) {
       meta.textContent =
