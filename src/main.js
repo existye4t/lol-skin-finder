@@ -4310,7 +4310,7 @@ function getDefaultDiscordProfile() {
   return {
     nick: 'existofficial',
     avatarUrl: 'assets/pfp.png',
-    discordUrl: 'https://discord.com/invite/VFYj8yefn',
+    discordUrl: 'https://discord.gg/rvRxbf8B9N',
     status: 'online'
   };
 }
@@ -4320,7 +4320,7 @@ function applyDiscordProfile(profile) {
 
   const nick = profile.nick || 'existofficial';
   const avatarUrl = profile.avatarUrl || 'assets/pfp.png';
-  const discordUrl = profile.discordUrl || 'https://discord.com/invite/VFYj8yefn';
+  const discordUrl = profile.discordUrl || 'https://discord.gg/rvRxbf8B9N';
   const status = profile.status || 'online';
 
   // Update top-right Discord button

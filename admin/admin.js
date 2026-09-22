@@ -1328,7 +1328,7 @@ async function loadDiscordProfileData() {
     return {
       nick: 'existofficial',
       avatarUrl: 'assets/pfp.png',
-      discordUrl: 'https://discord.com/invite/VFYj8yefn',
+      discordUrl: 'https://discord.gg/rvRxbf8B9N',
       status: 'online'
     };
   }
@@ -1341,7 +1341,7 @@ async function loadDiscordProfileData() {
     return {
       nick: 'existofficial',
       avatarUrl: 'assets/pfp.png',
-      discordUrl: 'https://discord.com/invite/VFYj8yefn',
+      discordUrl: 'https://discord.gg/rvRxbf8B9N',
       status: 'online'
     };
   }
@@ -1381,7 +1381,7 @@ formDiscordProfile?.addEventListener('submit', async (event) => {
   const payload = {
     nick: discordProfileNick?.value.trim() || 'existofficial',
     avatarUrl: discordProfileAvatar?.value.trim() || 'assets/pfp.png',
-    discordUrl: discordProfileUrl?.value.trim() || 'https://discord.com/invite/VFYj8yefn',
+    discordUrl: discordProfileUrl?.value.trim() || 'https://discord.gg/rvRxbf8B9N',
     status: discordProfileStatus?.value || 'online'
   };
 

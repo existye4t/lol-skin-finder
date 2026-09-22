@@ -163,7 +163,7 @@ function adminDevApiPlugin(adminPassword) {
             let data = {
               nick: 'existofficial',
               avatarUrl: 'assets/pfp.png',
-              discordUrl: 'https://discord.com/invite/VFYj8yefn',
+              discordUrl: 'https://discord.gg/rvRxbf8B9N',
               status: 'online',
               showTopRight: true,
               showFooter: true
