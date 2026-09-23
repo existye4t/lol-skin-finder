@@ -340,7 +340,7 @@ a:focus-visible,
 .discord-join-button:hover,
 .apply-filters:hover,
 .community-submit:hover {
-  transform: translateY(-2px);
+  transform: scale(1.02);
   border-color: var(--accent-primary);
 
   box-shadow:
@@ -507,6 +507,11 @@ a:focus-visible,
   transform: translateY(-2px);
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.community-button:hover,
+.discord-join-small:hover {
+  transform: scale(1.02);
 }
 
 .btn-secondary-metal:active,
@@ -740,6 +745,61 @@ a:focus-visible,
 .lang-menu-option[aria-selected="true"] {
   color: #ffffff;
   background: #182236;
+}
+
+/* GitHub Button (Top Bar) */
+.github-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+
+  color: var(--text-primary);
+  background: rgba(11, 15, 23, 0.92);
+
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+
+  transition:
+    transform 0.2s var(--ease-spring),
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.github-contact:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  background: var(--surface-elevated);
+}
+
+.github-contact:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.github-contact-icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.github-contact-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.github-contact-label {
+  white-space: nowrap;
 }
 
 /* Discord Contact Button (Top Bar) */
@@ -1672,6 +1732,14 @@ dialog::backdrop {
   background: rgba(3, 5, 9, 0.85);
 }
 
+/* Kart -> modal shared-element geçi_i (View Transitions API) */
+::view-transition-group(skin-modal-shared),
+::view-transition-old(skin-modal-shared),
+::view-transition-new(skin-modal-shared) {
+  animation-duration: 400ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .skin-modal {
   position: relative;
   width: min(880px, calc(100vw - 32px));
@@ -1685,6 +1753,166 @@ dialog::backdrop {
   background: var(--surface);
 
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.85);
+}
+
+/* Premium acilis/kapanis motion (kart->modal FLIP/View Transition
+   sistemiyle catismaz: burada sadece opacity/transform tanimlanir,
+   FLIP inline style ile bunun uzerine yazar). */
+.skin-modal {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+  .skin-modal[open] {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+.skin-modal.closing {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skin-modal::backdrop {
+  background: rgba(3, 5, 9, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition:
+    background 400ms cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@starting-style {
+  .skin-modal[open]::backdrop {
+    background: rgba(3, 5, 9, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+.skin-modal.closing::backdrop {
+  background: rgba(3, 5, 9, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition:
+    background 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skin-modal[open] .modal-image-sharp {
+  animation: skinModalArtworkEnter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.skin-modal[open] .modal-image-blur {
+  animation: skinModalArtworkBgEnter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.skin-modal.closing .modal-image-sharp,
+.skin-modal.closing .modal-image-blur {
+  animation: skinModalArtworkExit 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes skinModalArtworkEnter {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes skinModalArtworkBgEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes skinModalArtworkExit {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(0.985);
+  }
+}
+
+.skin-modal[open] .modal-copy,
+.skin-modal[open] .download-list-wrap {
+  animation: skinModalContentEnter 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 60ms;
+}
+
+.skin-modal.closing .modal-copy,
+.skin-modal.closing .download-list-wrap {
+  animation: skinModalContentExit 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes skinModalContentEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes skinModalContentExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-modal,
+  .skin-modal.closing,
+  .skin-modal::backdrop,
+  .skin-modal.closing::backdrop {
+    transition-property: opacity !important;
+    transition-duration: 150ms !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .skin-modal[open] .modal-image-sharp,
+  .skin-modal[open] .modal-image-blur,
+  .skin-modal.closing .modal-image-sharp,
+  .skin-modal.closing .modal-image-blur,
+  .skin-modal[open] .modal-copy,
+  .skin-modal[open] .download-list-wrap,
+  .skin-modal.closing .modal-copy,
+  .skin-modal.closing .download-list-wrap {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
 }
 
 .modal-image-wrapper {
@@ -2552,6 +2780,15 @@ dialog::backdrop {
     padding: 0 10px;
   }
 
+  .github-contact-label {
+    display: none;
+  }
+
+  .github-contact {
+    min-width: 40px;
+    padding: 0 10px;
+  }
+
   .page-shell {
     padding: 80px 16px 60px;
   }
@@ -3308,6 +3545,7 @@ body,
 .site-brand,
 .lang-switch,
 .discord-contact,
+.github-contact,
 .skin-card,
 .favorite-button,
 .search-box,
@@ -3573,6 +3811,11 @@ html[data-appearance="gold"] .appearance-option:has(input:checked) {
 }
 
 .discord-contact {
+  background: rgba(13, 13, 13, 0.8);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.github-contact {
   background: rgba(13, 13, 13, 0.8);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }

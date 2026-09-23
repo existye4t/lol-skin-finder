@@ -1175,6 +1175,7 @@ function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
 let skins = [];
 let skinGroups = [];
 let activeModalGroup = null;
+let lastModalSourceEl = null;
 
 let searchTrackingTimer = null;
 let lastTrackedSearch = '';
@@ -2299,7 +2300,7 @@ function createSkinCard(group) {
   article.addEventListener(
     'click',
     () => {
-      openModal(group);
+      openModal(group, article);
     }
   );
 
@@ -2311,7 +2312,7 @@ function createSkinCard(group) {
         event.key === ' '
       ) {
         event.preventDefault();
-        openModal(group);
+        openModal(group, article);
       }
     }
   );
@@ -2878,7 +2879,7 @@ function setupRenderObserver() {
    SKIN MODALI
 ========================================= */
 
-function openModal(group) {
+function openModal(group, sourceEl, skipAnimation) {
   if (
     !modal ||
     !downloadList ||
@@ -3109,20 +3110,10 @@ activeModalGroup = group;
   );
 
   /* ---------------------------------------
-     Modal aç
+     Modal aç (shared-element geçişi)
   --------------------------------------- */
 
-  if (
-    typeof modal.showModal ===
-    'function'
-  ) {
-    modal.showModal();
-  } else {
-    modal.setAttribute(
-      'open',
-      ''
-    );
-  }
+  performModalOpenTransition(sourceEl, skipAnimation);
 
   track('skin_open', {
     skin_id: skin.id,
@@ -3132,23 +3123,176 @@ activeModalGroup = group;
 }
 
 /* =========================================
+   SKIN MODALI ÜRETEN/ÇÖZEN GEÇİŞLER
+   =========================================
+   Karta tıklanınca modal, tıklanan kartın
+   konumundan büyüyerek açılır ("shared
+   element" hissi). Destekleyen tarayıcılarda
+   View Transitions API (document.startViewTransition)
+   kullanılır; desteklenmiyorsa kartın
+   getBoundingClientRect() değeri ile manuel
+   FLIP (scale+translate) animasyonuna düşülür.
+   prefers-reduced-motion: reduce olan
+   kullanıcılarda geçiş atlanır, direkt açılır/kapanır.
+========================================= */
+
+const MODAL_TRANSITION_NAME = 'skin-modal-shared';
+const MODAL_TRANSITION_MS = 400;
+const MODAL_TRANSITION_EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+function applySkinModalOpenState() {
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    modal.setAttribute('open', '');
+  }
+}
+
+function applySkinModalCloseState() {
+  if (typeof modal.close === 'function') {
+    modal.close();
+  } else {
+    modal.removeAttribute('open');
+  }
+}
+
+function playModalFlip(cardRect, modalRect, isClosing, onDone) {
+  if (!modalRect.width || !modalRect.height) {
+    if (onDone) onDone();
+    return;
+  }
+
+  const scaleX = cardRect.width / modalRect.width;
+  const scaleY = cardRect.height / modalRect.height;
+  const translateX =
+    (cardRect.left + cardRect.width / 2) -
+    (modalRect.left + modalRect.width / 2);
+  const translateY =
+    (cardRect.top + cardRect.height / 2) -
+    (modalRect.top + modalRect.height / 2);
+
+  const cardTransform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+  const identityTransform = 'translate(0, 0) scale(1, 1)';
+
+  modal.style.transformOrigin = 'center center';
+  modal.style.transition = 'none';
+  modal.style.transform = isClosing ? identityTransform : cardTransform;
+  modal.style.opacity = isClosing ? '1' : '0.4';
+
+  void modal.offsetHeight;
+
+  modal.style.transition = `transform ${MODAL_TRANSITION_MS}ms ${MODAL_TRANSITION_EASE}, opacity ${MODAL_TRANSITION_MS}ms ${MODAL_TRANSITION_EASE}`;
+  modal.style.transform = isClosing ? cardTransform : identityTransform;
+  modal.style.opacity = isClosing ? '0.4' : '1';
+
+  window.setTimeout(() => {
+    modal.style.transition = '';
+    modal.style.transform = '';
+    modal.style.opacity = '';
+    modal.style.transformOrigin = '';
+    if (isClosing && onDone) onDone();
+  }, MODAL_TRANSITION_MS);
+}
+
+function animateModalOpenFallback(sourceEl) {
+  const cardRect = sourceEl.getBoundingClientRect();
+  applySkinModalOpenState();
+  const modalRect = modal.getBoundingClientRect();
+  playModalFlip(cardRect, modalRect, false);
+}
+
+function animateModalCloseFallback(sourceEl, onDone) {
+  const cardRect = sourceEl.getBoundingClientRect();
+  const modalRect = modal.getBoundingClientRect();
+  playModalFlip(cardRect, modalRect, true, onDone);
+}
+
+function performModalOpenTransition(sourceEl, skipAnimation) {
+  if (!modal) return;
+
+  lastModalSourceEl = sourceEl || null;
+  modal.classList.remove('closing');
+
+  if (skipAnimation || isReducedMotion()) {
+    applySkinModalOpenState();
+    return;
+  }
+
+  if (typeof document.startViewTransition === 'function') {
+    if (sourceEl) sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
+    modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
+
+    const transition = document.startViewTransition(() => {
+      applySkinModalOpenState();
+    });
+
+    transition.finished.finally(() => {
+      if (sourceEl) sourceEl.style.viewTransitionName = '';
+      modal.style.viewTransitionName = '';
+    });
+    return;
+  }
+
+  if (sourceEl) {
+    animateModalOpenFallback(sourceEl);
+  } else {
+    applySkinModalOpenState();
+  }
+}
+
+/* =========================================
    SKIN MODALI KAPAT
 ========================================= */
 
-function closeSkinModal() {
+function closeSkinModal(skipAnimation) {
   if (!modal) {
     return;
   }
 
-  if (
-    typeof modal.close ===
-    'function'
-  ) {
-    modal.close();
+  const sourceEl =
+    lastModalSourceEl &&
+    document.body.contains(lastModalSourceEl)
+      ? lastModalSourceEl
+      : null;
+  lastModalSourceEl = null;
+
+  if (skipAnimation || isReducedMotion()) {
+    modal.classList.remove('closing');
+    applySkinModalCloseState();
+    return;
+  }
+
+  // Backdrop/artwork/icerik fade-out'u kart->modal geçişiyle ayni pencerede
+  // (concurrent) oynatmak icin ekleniyor; FLIP/View Transition kendi
+  // transform/opacity'sini inline style ile ustune yazdigindan catisma olmaz.
+  modal.classList.add('closing');
+
+  if (typeof document.startViewTransition === 'function') {
+    if (sourceEl) sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
+    modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
+
+    const transition = document.startViewTransition(() => {
+      applySkinModalCloseState();
+      modal.classList.remove('closing');
+    });
+
+    transition.finished.finally(() => {
+      if (sourceEl) sourceEl.style.viewTransitionName = '';
+      modal.style.viewTransitionName = '';
+    });
+    return;
+  }
+
+  if (sourceEl) {
+    animateModalCloseFallback(sourceEl, () => {
+      applySkinModalCloseState();
+      modal.classList.remove('closing');
+    });
   } else {
-    modal.removeAttribute(
-      'open'
-    );
+    window.setTimeout(() => {
+      applySkinModalCloseState();
+      modal.classList.remove('closing');
+    }, MODAL_TRANSITION_MS);
   }
 }
 
@@ -3159,15 +3303,17 @@ function refreshOpenModal(group) {
 
   // openModal içerikleri yeniden oluşturur. showModal yalnızca kapalı bir
   // dialogda çağrılabildiği için önce mevcut dialogu kapatıyoruz.
-  closeSkinModal();
-  openModal(group);
+  // Bu sadece bir içerik yenilemesi olduğundan açılış/kapanış geçişi atlanır.
+  const sourceEl = lastModalSourceEl;
+  closeSkinModal(true);
+  openModal(group, sourceEl, true);
 }
 
 document
   .querySelector('.modal-close')
   ?.addEventListener(
     'click',
-    closeSkinModal
+    () => closeSkinModal()
   );
 
 modal?.addEventListener(
@@ -4678,9 +4824,37 @@ function setAppearance(value) {
   track('appearance_change', { appearance: value });
 }
 
+function initGithubButton(topActions) {
+  if (document.getElementById('github-contact')) return;
+
+  const githubButton = document.createElement('a');
+  githubButton.id = 'github-contact';
+  githubButton.className = 'github-contact';
+  githubButton.href = 'https://github.com/existye4t/lol-skin-finder';
+  githubButton.target = '_blank';
+  githubButton.rel = 'noopener';
+  githubButton.setAttribute('aria-label', 'GitHub');
+  githubButton.title = 'GitHub';
+
+  const icon = document.createElement('span');
+  icon.className = 'github-contact-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>';
+
+  const label = document.createElement('span');
+  label.className = 'github-contact-label';
+  label.textContent = 'GitHub';
+
+  githubButton.appendChild(icon);
+  githubButton.appendChild(label);
+  topActions.appendChild(githubButton);
+}
+
 function initAppearancePanel() {
   const topActions = document.querySelector('.top-actions');
   if (!topActions || document.getElementById('appearance-dialog')) return;
+
+  initGithubButton(topActions);
 
   const toggle = document.createElement('button');
   toggle.type = 'button';
@@ -5557,57 +5731,6 @@ function initHeroScrollDissolve() {
   update();
 }
 
-function initMagneticButtons() {
-  if (isReducedMotion() || !window.matchMedia('(pointer: fine)').matches) return;
-  const selectors = [
-    '.discord-invite-cta',
-    '#discord-invite',
-    '#discord-modal-join',
-    '#updates-button',
-    '#bug-report-button',
-    '#apply-filters',
-    '.community-submit'
-  ];
-  document.querySelectorAll(selectors.join(',')).forEach((btn) => {
-    if (btn.dataset.magneticBound === 'true') return;
-    btn.dataset.magneticBound = 'true';
-    let rect = btn.getBoundingClientRect();
-    let frame = null;
-    const refreshRect = () => {
-      rect = btn.getBoundingClientRect();
-    };
-    window.addEventListener('scroll', () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        refreshRect();
-      });
-    }, { passive: true });
-    window.addEventListener('resize', refreshRect);
-    btn.addEventListener('mousemove', (event) => {
-      if (frame || isReducedMotion()) return;
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dx = event.clientX - centerX;
-        const dy = event.clientY - centerY;
-        const distance = Math.hypot(dx, dy);
-        if (distance > 140 || distance === 0) {
-          btn.style.transform = '';
-          return;
-        }
-        const strength = 1 - distance / 140;
-        const offset = 8 * strength;
-        btn.style.transform = `translate(${(dx / distance) * offset}px, ${(dy / distance) * offset}px)`;
-      });
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = '';
-    });
-  });
-}
-
 function syncReducedMotion() {
   if (!isReducedMotion()) return;
   document.querySelectorAll('.scroll-reveal').forEach((el) => {
@@ -5628,10 +5751,8 @@ reducedMotionQuery.addEventListener('change', () => {
     syncReducedMotion();
   } else {
     initHeroScrollDissolve();
-    initMagneticButtons();
     initSectionHeadingReveal();
   }
 });
 
 initHeroScrollDissolve();
-initMagneticButtons();
