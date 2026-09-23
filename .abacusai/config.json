@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "strictness": "strict",
+    "allow": [
+      "Bash(git checkout -b apple-redesign; git status --short --branch)",
+      "Bash(cd \"C:\\Users\\Exist\\Documents\\Codex\\2026-08-17\\referenced-chatgpt-conversation-this-is-an-2\" && git status)",
+      "Bash(cd \"C:\\Users\\Exist\\Documents\\Codex\\2026-08-17\\referenced-chatgpt-conversation-this-is-an-2\" && grep -n \"^/\\*.*=\\|^\\.hero\\|^\\.main\\|^\\.section\\|^\\.skin-grid\\|^\\.modal\\|^\\.filter\" src/style.css | head -50)"
+    ]
+  }
+}

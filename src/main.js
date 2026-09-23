@@ -1,6 +1,25 @@
 import './style.css';
 import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders';
 
+const APPEARANCE_STORAGE_KEY = 'exist-lol-skin-appearance';
+const APPEARANCE_VALUES = ['mono', 'gold', 'neon'];
+let currentAppearance = 'mono';
+
+try {
+  const savedAppearance = localStorage.getItem(APPEARANCE_STORAGE_KEY);
+  if (APPEARANCE_VALUES.includes(savedAppearance)) {
+    currentAppearance = savedAppearance;
+  }
+} catch (error) {}
+
+document.documentElement.dataset.appearance = currentAppearance;
+
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function isReducedMotion() {
+  return reducedMotionQuery.matches;
+}
+
 /* =========================================
    DİL / i18n
 ========================================= */
@@ -406,6 +425,31 @@ const TRANSLATIONS = {
   discordProfileStatusOffline: {
     tr: 'Çevrimdışı',
     en: 'Offline'
+  },
+
+  appearanceTitle: {
+    tr: 'Görünüm',
+    en: 'Appearance'
+  },
+
+  appearanceClose: {
+    tr: 'Görünüm penceresini kapat',
+    en: 'Close appearance window'
+  },
+
+  appearanceMono: {
+    tr: 'Siyah-Beyaz',
+    en: 'Mono'
+  },
+
+  appearanceGold: {
+    tr: 'Hextech Altın',
+    en: 'Hextech Gold'
+  },
+
+  appearanceNeon: {
+    tr: 'Arcane Neon',
+    en: 'Arcane Neon'
   }
 };
 
@@ -2295,7 +2339,7 @@ function createSkinCard(group) {
 ========================================= */
 
 const SCROLL_REVEAL_THRESHOLD = 0.12;
-const SCROLL_REVEAL_STAGGER_MS = 65;
+const SCROLL_REVEAL_STAGGER_MS = 80;
 const SCROLL_REVEAL_DURATION_MS = 600;
 
 let scrollRevealObserver = null;
@@ -2306,6 +2350,13 @@ function initScrollRevealAnimation() {
   );
 
   if (!cards.length) {
+    return;
+  }
+
+  if (isReducedMotion()) {
+    cards.forEach((card) => {
+      card.classList.add('visible');
+    });
     return;
   }
 
@@ -2367,9 +2418,9 @@ function initScrollRevealAnimation() {
    requestAnimationFrame ile sınırlanır.
 ========================================= */
 
-const CARD_TILT_MAX_DEG = 7;
+const CARD_TILT_MAX_DEG = 6;
 const CARD_TILT_PERSPECTIVE_PX = 800;
-const CARD_TILT_SCALE = 1.03;
+const CARD_TILT_SCALE = 1.01;
 
 function attachCardTiltListeners(article) {
   if (
@@ -4619,9 +4670,141 @@ function initInteractiveRipples() {
    BAŞLAT
 ========================================= */
 
-initBackgroundPaths();
-initLiquidMetalButtons();
-initInteractiveRipples();
+function setAppearance(value) {
+  if (!APPEARANCE_VALUES.includes(value) || value === currentAppearance) return;
+  currentAppearance = value;
+  document.documentElement.dataset.appearance = value;
+  try { localStorage.setItem(APPEARANCE_STORAGE_KEY, value); } catch (error) {}
+  track('appearance_change', { appearance: value });
+}
+
+function initAppearancePanel() {
+  const topActions = document.querySelector('.top-actions');
+  if (!topActions || document.getElementById('appearance-dialog')) return;
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.id = 'appearance-toggle';
+  toggle.className = 'appearance-toggle';
+  toggle.setAttribute('aria-haspopup', 'dialog');
+  toggle.setAttribute('aria-controls', 'appearance-dialog');
+  toggle.setAttribute('data-i18n-aria-label', 'appearanceTitle');
+  toggle.setAttribute('data-i18n-title', 'appearanceTitle');
+  toggle.setAttribute('aria-label', t('appearanceTitle'));
+  toggle.title = t('appearanceTitle');
+  toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+
+  const dialog = document.createElement('dialog');
+  dialog.id = 'appearance-dialog';
+  dialog.className = 'appearance-dialog';
+  dialog.setAttribute('aria-labelledby', 'appearance-dialog-title');
+
+  const closeBtn = document.createElement('button');
+  closeBtn.type = 'button';
+  closeBtn.className = 'appearance-dialog-close';
+  closeBtn.setAttribute('data-i18n-aria-label', 'appearanceClose');
+  closeBtn.setAttribute('aria-label', t('appearanceClose'));
+  closeBtn.textContent = '×';
+
+  const title = document.createElement('h2');
+  title.id = 'appearance-dialog-title';
+  title.className = 'appearance-dialog-title';
+  title.setAttribute('data-i18n', 'appearanceTitle');
+  title.textContent = t('appearanceTitle');
+
+  const options = document.createElement('div');
+  options.className = 'appearance-options';
+  options.setAttribute('role', 'radiogroup');
+  options.setAttribute('data-i18n-aria-label', 'appearanceTitle');
+  options.setAttribute('aria-label', t('appearanceTitle'));
+
+  const themes = [
+    { value: 'mono', labelKey: 'appearanceMono', swatches: ['#000000', '#0d0d0d', '#f5f5f5'] },
+    { value: 'gold', labelKey: 'appearanceGold', swatches: ['#08090d', '#111319', '#c9a24a'] },
+    { value: 'neon', labelKey: 'appearanceNeon', swatches: ['#0b0714', '#150f24', '#3de8e0'] }
+  ];
+
+  themes.forEach((theme) => {
+    const label = document.createElement('label');
+    label.className = 'appearance-option';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'appearance';
+    input.value = theme.value;
+    input.checked = theme.value === currentAppearance;
+    const preview = document.createElement('span');
+    preview.className = 'appearance-preview';
+    preview.setAttribute('aria-hidden', 'true');
+    const bar = document.createElement('span');
+    bar.className = 'appearance-preview-bar';
+    bar.style.background = theme.swatches[1];
+    const body = document.createElement('span');
+    body.className = 'appearance-preview-body';
+    body.style.background = theme.swatches[0];
+    const dot = document.createElement('span');
+    dot.className = 'appearance-preview-dot';
+    dot.style.background = theme.swatches[2];
+    preview.appendChild(bar);
+    preview.appendChild(body);
+    preview.appendChild(dot);
+    const text = document.createElement('span');
+    text.className = 'appearance-option-label';
+    text.setAttribute('data-i18n', theme.labelKey);
+    text.textContent = t(theme.labelKey);
+    label.appendChild(input);
+    label.appendChild(preview);
+    label.appendChild(text);
+    options.appendChild(label);
+  });
+
+  dialog.appendChild(closeBtn);
+  dialog.appendChild(title);
+  dialog.appendChild(options);
+  document.body.appendChild(dialog);
+  topActions.appendChild(toggle);
+
+  const openDialog = () => {
+    if (dialog.open) return;
+    dialog.querySelectorAll('input[name="appearance"]').forEach((input) => {
+      input.checked = input.value === currentAppearance;
+    });
+    dialog.classList.remove('closing');
+    dialog.showModal();
+  };
+
+  const closeDialog = () => {
+    if (!dialog.open || dialog.classList.contains('closing')) return;
+    dialog.classList.add('closing');
+    window.setTimeout(() => {
+      dialog.close();
+      toggle.focus({ preventScroll: true });
+    }, isReducedMotion() ? 0 : 150);
+  };
+
+  toggle.addEventListener('click', openDialog);
+  closeBtn.addEventListener('click', closeDialog);
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) closeDialog();
+  });
+  dialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeDialog();
+  });
+  dialog.addEventListener('change', (event) => {
+    if (event.target.name === 'appearance') setAppearance(event.target.value);
+  });
+}
+
+initAppearancePanel();
+
+function initSectionHeadingReveal() {
+  document.querySelectorAll('.results-header h2, .favorites-header h2').forEach((heading) => {
+    heading.classList.add('scroll-reveal');
+  });
+  initScrollRevealAnimation();
+}
+
+initSectionHeadingReveal();
 
 applyStaticTranslations();
 
@@ -5339,3 +5522,116 @@ function initScrollToTop() {
 }
 
 initScrollToTop();
+
+let heroDissolveBound = false;
+
+function initHeroScrollDissolve() {
+  if (isReducedMotion() || heroDissolveBound) return;
+  heroDissolveBound = true;
+  const heading = document.querySelector('.hero h1');
+  const intro = document.querySelector('.hero .intro');
+  if (!heading && !intro) return;
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    if (isReducedMotion()) return;
+    const progress = Math.min(1, window.scrollY / 420);
+    const opacity = 1 - progress;
+    const translateY = progress * 36;
+    const scale = 1 - progress * 0.05;
+    if (heading) {
+      heading.style.opacity = String(opacity);
+      heading.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+    }
+    if (intro) {
+      intro.style.opacity = String(opacity);
+      intro.style.transform = `translateY(${translateY}px)`;
+    }
+  };
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  update();
+}
+
+function initMagneticButtons() {
+  if (isReducedMotion() || !window.matchMedia('(pointer: fine)').matches) return;
+  const selectors = [
+    '.discord-invite-cta',
+    '#discord-invite',
+    '#discord-modal-join',
+    '#updates-button',
+    '#bug-report-button',
+    '#apply-filters',
+    '.community-submit'
+  ];
+  document.querySelectorAll(selectors.join(',')).forEach((btn) => {
+    if (btn.dataset.magneticBound === 'true') return;
+    btn.dataset.magneticBound = 'true';
+    let rect = btn.getBoundingClientRect();
+    let frame = null;
+    const refreshRect = () => {
+      rect = btn.getBoundingClientRect();
+    };
+    window.addEventListener('scroll', () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        refreshRect();
+      });
+    }, { passive: true });
+    window.addEventListener('resize', refreshRect);
+    btn.addEventListener('mousemove', (event) => {
+      if (frame || isReducedMotion()) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dx = event.clientX - centerX;
+        const dy = event.clientY - centerY;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 140 || distance === 0) {
+          btn.style.transform = '';
+          return;
+        }
+        const strength = 1 - distance / 140;
+        const offset = 8 * strength;
+        btn.style.transform = `translate(${(dx / distance) * offset}px, ${(dy / distance) * offset}px)`;
+      });
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+}
+
+function syncReducedMotion() {
+  if (!isReducedMotion()) return;
+  document.querySelectorAll('.scroll-reveal').forEach((el) => {
+    el.classList.add('visible');
+    el.classList.remove('scroll-reveal-animating');
+  });
+  document.querySelectorAll('.hero h1, .hero .intro').forEach((el) => {
+    el.style.opacity = '';
+    el.style.transform = '';
+  });
+  document.querySelectorAll('.discord-invite-cta, #discord-invite, #discord-modal-join, #updates-button, #bug-report-button, #apply-filters, .community-submit').forEach((btn) => {
+    btn.style.transform = '';
+  });
+}
+
+reducedMotionQuery.addEventListener('change', () => {
+  if (isReducedMotion()) {
+    syncReducedMotion();
+  } else {
+    initHeroScrollDissolve();
+    initMagneticButtons();
+    initSectionHeadingReveal();
+  }
+});
+
+initHeroScrollDissolve();
+initMagneticButtons();
