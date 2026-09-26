@@ -3158,7 +3158,7 @@ activeModalGroup = group;
       );
 
     element.className =
-      `download-item${
+      `download-item chroma-card${
         hasFile
           ? ''
           : ' unavailable'
@@ -3172,20 +3172,8 @@ activeModalGroup = group;
         /\(([^)]+)\)$/
       )?.[1];
 
-    const baseDisplayName =
-      item === skin
-        ? `${t('mainSkin')} · ${item.id}`
-        : `${
-            chromaName ||
-            itemDisplayName
-          } · ${item.id}`;
-
-    const lineText = hasFile
-      ? baseDisplayName
-      : `${baseDisplayName} · ${t('noFile') || 'dosya yok'}`;
-
     const dot = document.createElement('div');
-    dot.className = 'download-dot';
+    dot.className = 'download-dot chroma-preview';
 
     const { hexColor, previewUrl } =
       getChromaColorAndImage(item, skin);
@@ -3205,9 +3193,24 @@ activeModalGroup = group;
     element.appendChild(dot);
 
     const textSpan = document.createElement('span');
-    textSpan.className = 'download-item-text';
-    textSpan.textContent = lineText;
+    textSpan.className = 'download-item-text chroma-name';
+    textSpan.textContent =
+      item === skin
+        ? t('mainSkin')
+        : (chromaName || itemDisplayName);
     element.appendChild(textSpan);
+
+    const idSpan = document.createElement('span');
+    idSpan.className = 'chroma-id';
+    idSpan.textContent = item.id;
+    element.appendChild(idSpan);
+
+    if (hexColor) {
+      const colorDot = document.createElement('span');
+      colorDot.className = 'chroma-color-dot';
+      colorDot.style.backgroundColor = hexColor;
+      element.appendChild(colorDot);
+    }
 
     if (hasFile) {
       element.href =

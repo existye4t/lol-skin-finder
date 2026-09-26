@@ -2015,75 +2015,130 @@ dialog::backdrop {
 
 .download-list {
   display: flex;
-  max-height: 180px;
-  flex-direction: column;
-  gap: 7px;
+  flex-wrap: wrap;
+  max-height: 280px;
+  gap: 8px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
-.download-item {
+.download-item.chroma-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 5px;
+  width: 112px;
+  min-height: 128px;
+  padding: 14px 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-primary);
-  background: #0e1522;
-  font-size: 0.84rem;
+  background: var(--surface-elevated);
+  font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+  position: relative;
   transition:
-    transform 0.15s ease,
-    border-color 0.15s ease,
-    background 0.15s ease;
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.download-item:hover {
+.download-item.chroma-card:hover {
   border-color: var(--accent-primary);
-  background: #151e30;
-  transform: translateX(3px);
+  background: var(--card-hover);
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.download-item:hover .download-dot {
-  transform: scale(1.15);
+.download-item.chroma-card:hover .download-dot {
+  transform: scale(1.06);
 }
 
-.download-item.unavailable {
+.download-item.chroma-card.unavailable {
   color: var(--text-muted);
-  background: #080c13;
+  background: var(--bg);
   cursor: not-allowed;
 }
 
-.download-item.unavailable:hover {
+.download-item.chroma-card.unavailable:hover {
   border-color: var(--border);
-  background: #080c13;
+  background: var(--bg);
+  transform: none;
+  box-shadow: none;
+}
+
+.download-item.chroma-card.unavailable:hover .download-dot {
   transform: none;
 }
 
-.download-item.unavailable:hover .download-dot {
-  transform: none;
-}
-
-.download-dot {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
+.download-dot.chroma-preview {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
   border-radius: 50%;
   flex-shrink: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #2a3447;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
-.download-item.unavailable .download-dot {
+.download-item.chroma-card.unavailable .download-dot {
   opacity: 0.35;
+}
+
+.chroma-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.chroma-id {
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-family: "DM Mono", monospace;
+  letter-spacing: 0.04em;
+}
+
+.chroma-color-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.download-item.chroma-card[href]::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12m-5-5l5 5 5-5M5 21h14'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.download-item.chroma-card[href]:hover::after {
+  opacity: 0.7;
 }
 
 /* =========================================
