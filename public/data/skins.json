@@ -1,6 +1,6 @@
 {
   "version": "16.17.1",
-  "updatedAt": "2026-09-25T22:36:07.242Z",
+  "updatedAt": "2026-09-26T15:08:12.366Z",
   "skins": [
     {
       "id": "876045",
@@ -123989,7 +123989,9 @@
       "championEn": "Nasus",
       "championId": "Nasus",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nasus_5.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/nasus/skins/skin05/images/nasus_splash_centered_5.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/nasus/skins/skin05/images/nasus_splash_centered_5.jpg",
+      "modifiedAt": "2026-09-26T15:08:12.331Z",
+      "customFantome": true
     },
     {
       "id": "2044",
