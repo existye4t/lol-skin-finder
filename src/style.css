@@ -1177,6 +1177,7 @@ h1 em {
 .search-box input::placeholder {
   color: var(--text-muted);
   font-weight: 500;
+  font-size: 0.88rem;
 }
 
 .search-box input::-webkit-search-cancel-button {
@@ -1732,7 +1733,7 @@ dialog::backdrop {
   background: rgba(3, 5, 9, 0.85);
 }
 
-/* Kart -> modal shared-element geçi_i (View Transitions API) */
+/* Kart -> modal shared-element geï¢¼i_i (View Transitions API) */
 ::view-transition-group(skin-modal-shared),
 ::view-transition-old(skin-modal-shared),
 ::view-transition-new(skin-modal-shared) {
@@ -2022,8 +2023,10 @@ dialog::backdrop {
 }
 
 .download-item {
-  display: block;
-  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text-primary);
@@ -2043,10 +2046,44 @@ dialog::backdrop {
   transform: translateX(3px);
 }
 
+.download-item:hover .download-dot {
+  transform: scale(1.15);
+}
+
 .download-item.unavailable {
   color: var(--text-muted);
   background: #080c13;
   cursor: not-allowed;
+}
+
+.download-item.unavailable:hover {
+  border-color: var(--border);
+  background: #080c13;
+  transform: none;
+}
+
+.download-item.unavailable:hover .download-dot {
+  transform: none;
+}
+
+.download-dot {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #2a3447;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.download-item.unavailable .download-dot {
+  opacity: 0.35;
 }
 
 /* =========================================
@@ -3238,7 +3275,7 @@ dialog::backdrop {
 /* =========================================
    COMMAND PALETTE TETIKLEYICI BUTON
    Arama satirinda, normal arama kutusunun
-   yaninda duran ayrÄ± bir buton.
+   yaninda duran ayrâ”€â–’ bir buton.
    ========================================= */
 
 .command-palette-trigger {
@@ -3309,7 +3346,7 @@ dialog::backdrop {
 
 
 /* =========================================
-   TOAST BÝLDÝRÝMLERÝ (izole)
+   TOAST BÂ¦LDÂ¦RÂ¦MLERÂ¦ (izole)
    ========================================= */
 
 .toast-container {

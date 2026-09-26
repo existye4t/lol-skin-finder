@@ -63,8 +63,8 @@ const TRANSLATIONS = {
   },
 
   searchPlaceholder: {
-    tr: 'Örn. Omega Timi Twitch veya 29004',
-    en: 'E.g. Omega Squad Twitch or 29004'
+    tr: 'Örn. Omega Timi Twitch',
+    en: 'Omega Squad Twitch'
   },
 
   commandPaletteTrigger: {
@@ -235,6 +235,11 @@ const TRANSLATIONS = {
   fileNotFound: {
     tr: 'Bu dosya klasörde bulunamadı',
     en: 'This file was not found in the folder'
+  },
+
+  noFile: {
+    tr: 'dosya yok',
+    en: 'no file'
   },
 
   downloadFantomeTitle: {
@@ -2876,6 +2881,142 @@ function setupRenderObserver() {
 }
 
 /* =========================================
+   CHROMA RENK & GÖRSEL YARDIMCILARI
+========================================= */
+
+const CHROMA_HEX_MAP = {
+  yakut: '#d33528',
+  ruby: '#d33528',
+  ametist: '#9333ea',
+  amethyst: '#9333ea',
+  safir: '#2563eb',
+  sapphire: '#2563eb',
+  zümrüt: '#10b981',
+  emerald: '#10b981',
+  obsidiyen: '#2d3748',
+  obsidian: '#2d3748',
+  'pembe kuvars': '#f472b6',
+  'rose quartz': '#f472b6',
+  kedigözü: '#facc15',
+  catseye: '#facc15',
+  'inci beyazı': '#f3f4f6',
+  inci: '#f3f4f6',
+  pearl: '#f3f4f6',
+  turkuvaz: '#06b6d4',
+  turquoise: '#06b6d4',
+  tanzanit: '#6366f1',
+  tanzanite: '#6366f1',
+  'deniz mavisi': '#0284c7',
+  aquamarine: '#0284c7',
+  turuncu: '#f97316',
+  citrine: '#f97316',
+  gökkuşağı: '#ec4899',
+  rainbow: '#ec4899',
+  altın: '#eab308',
+  gold: '#eab308',
+  meteor: '#ef4444',
+  gece: '#1e293b',
+  night: '#1e293b',
+  yeşim: '#059669',
+  jade: '#059669',
+  güneştaşı: '#fb923c',
+  sunstone: '#fb923c',
+  kumtaşı: '#d97706',
+  sandstone: '#d97706',
+  mercan: '#f87171',
+  coral: '#f87171',
+  peridot: '#84cc16',
+  platin: '#cbd5e1',
+  platinum: '#cbd5e1',
+  alaca: '#a855f7',
+  speckled: '#a855f7',
+  alaz: '#dc2626',
+  blaze: '#dc2626',
+  hayat: '#10b981',
+  life: '#10b981',
+  zindelik: '#06b6d4',
+  vitality: '#06b6d4',
+  lanetli: '#7c3aed',
+  cursed: '#7c3aed',
+  soylu: '#e11d48',
+  noble: '#e11d48',
+  çelik: '#64748b',
+  steel: '#64748b',
+  zehir: '#16a34a',
+  venom: '#16a34a',
+  alev: '#ea580c',
+  flame: '#ea580c',
+  zırhlı: '#78716c',
+  armored: '#78716c',
+  şekerleme: '#f43f5e',
+  candy: '#f43f5e',
+  öncü: '#3b82f6',
+  vanguard: '#3b82f6',
+  ilkbahar: '#84cc16',
+  spring: '#84cc16',
+  kargözeten: '#67e8f9',
+  karanlık: '#1e1b4b',
+  dark: '#1e1b4b',
+  ışık: '#fef08a',
+  light: '#fef08a'
+};
+
+function getChromaColorAndImage(item, baseSkin) {
+  const isMainSkin = item === baseSkin;
+  const chroma = item.chroma || item;
+
+  // 1) Renk tespiti: chroma.colors ilk hex rengi
+  let hexColor = '';
+  const colors = chroma?.colors || item?.colors;
+  if (Array.isArray(colors) && colors.length > 0 && typeof colors[0] === 'string') {
+    hexColor = colors[0];
+  } else if (typeof chroma?.color === 'string') {
+    hexColor = chroma.color;
+  } else if (typeof item?.color === 'string') {
+    hexColor = item.color;
+  }
+
+  // Renk dizisi yoksa ve chroma ise bilinen chroma renk haritasından eşle
+  if (!hexColor && !isMainSkin) {
+    const itemDisplayName = getLocalizedSkinName(item);
+    const chromaName = (
+      itemDisplayName.match(/\(([^)]+)\)$/)?.[1] || itemDisplayName
+    ).toLowerCase();
+    for (const [nameKey, colorVal] of Object.entries(CHROMA_HEX_MAP)) {
+      if (chromaName.includes(nameKey)) {
+        hexColor = colorVal;
+        break;
+      }
+    }
+  }
+
+  // 2) Önizleme görseli (background-image)
+  let previewUrl =
+    chroma?.chromaPath ||
+    item?.chromaPath ||
+    chroma?.previewUrl ||
+    item?.previewUrl ||
+    '';
+
+  if (previewUrl && previewUrl.startsWith('/lol-game-data/assets/')) {
+    previewUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/${previewUrl.replace(/^\/lol-game-data\/assets\//i, '')}`;
+  }
+
+  if (!previewUrl) {
+    if (isMainSkin) {
+      previewUrl = item.imageFallback || item.image || '';
+    } else {
+      const champKey = Math.floor(Number(item.id) / 1000);
+      if (champKey && item.id) {
+        previewUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/${champKey}/${item.id}.png`;
+      }
+    }
+  }
+
+  return { hexColor, previewUrl };
+}
+
+/* =========================================
    SKIN MODALI
 ========================================= */
 
@@ -3031,13 +3172,42 @@ activeModalGroup = group;
         /\(([^)]+)\)$/
       )?.[1];
 
-    element.textContent =
+    const baseDisplayName =
       item === skin
         ? `${t('mainSkin')} · ${item.id}`
         : `${
             chromaName ||
             itemDisplayName
           } · ${item.id}`;
+
+    const lineText = hasFile
+      ? baseDisplayName
+      : `${baseDisplayName} · ${t('noFile') || 'dosya yok'}`;
+
+    const dot = document.createElement('div');
+    dot.className = 'download-dot';
+
+    const { hexColor, previewUrl } =
+      getChromaColorAndImage(item, skin);
+
+    if (hexColor) {
+      dot.style.backgroundColor = hexColor;
+    }
+
+    if (previewUrl) {
+      dot.style.backgroundImage = `url("${previewUrl}")`;
+    }
+
+    if (!hasFile) {
+      dot.style.opacity = '0.35';
+    }
+
+    element.appendChild(dot);
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'download-item-text';
+    textSpan.textContent = lineText;
+    element.appendChild(textSpan);
 
     if (hasFile) {
       element.href =
@@ -4998,12 +5168,21 @@ await loadDiscordProfile();
 const LANYARD_API = 'https://api.lanyard.rest/v1';
 const DISCORD_USER_ID = '772232490445176842';
 let latestDiscordPresence = null;
+let lastKnownDiscordUsername = null;
 
 const discordContactElements = {
+  // Header button (#discord-contact)
   name: document.querySelector('.discord-contact-name'),
+  nameInProfile: document.querySelector('.discord-contact-info .discord-contact-name'),
   avatar: document.querySelector('.discord-contact-avatar img'),
   statusDot: document.querySelector('.discord-contact-status-dot'),
   statusText: document.querySelector('.discord-contact-status-text'),
+
+  // Footer .discord-profile (outside any dialog, in main page flow)
+  footerName: document.querySelector('main .discord-profile .discord-profile-info strong'),
+  footerAvatar: document.querySelector('main .discord-profile .discord-profile-avatar img'),
+
+  // Modal .discord-profile (inside #discord-modal dialog)
   modalName: document.querySelector('#discord-modal .discord-profile-info strong'),
   modalAvatar: document.querySelector('#discord-modal .discord-profile-avatar img'),
 };
@@ -5057,7 +5236,12 @@ function updateDiscordUI(presence) {
   const { discord_user, discord_status } = presence;
   const lang = currentLang || 'tr';
 
-  // Update button avatar
+  // Store last known username for fallback
+  if (discord_user?.username) {
+    lastKnownDiscordUsername = discord_user.username;
+  }
+
+  // Update header button avatar
   if (discordContactElements.avatar && discord_user) {
     const avatarHash = discord_user.avatar;
     const avatarUrl = avatarHash
@@ -5067,13 +5251,28 @@ function updateDiscordUI(presence) {
     discordContactElements.avatar.alt = `${discord_user.username} avatar`;
   }
 
-  // Update button username
+  // Update header button username (both locations)
   if (discordContactElements.name && discord_user) {
-    const displayName = discord_user.username;
-    discordContactElements.name.textContent = displayName;
+    discordContactElements.name.textContent = discord_user.username;
+  }
+  if (discordContactElements.nameInProfile && discord_user) {
+    discordContactElements.nameInProfile.textContent = discord_user.username;
   }
 
-  // Update modal avatar
+  // Update footer .discord-profile
+  if (discordContactElements.footerAvatar && discord_user) {
+    const avatarHash = discord_user.avatar;
+    const avatarUrl = avatarHash
+      ? `https://cdn.discordapp.com/avatars/${discord_user.id}/${avatarHash}.png?size=128`
+      : `https://cdn.discordapp.com/embed/avatars/${Number(discord_user.discriminator) % 5}.png`;
+    discordContactElements.footerAvatar.src = avatarUrl;
+    discordContactElements.footerAvatar.alt = `${discord_user.username} avatar`;
+  }
+  if (discordContactElements.footerName && discord_user) {
+    discordContactElements.footerName.textContent = discord_user.username;
+  }
+
+  // Update modal .discord-profile
   if (discordContactElements.modalAvatar && discord_user) {
     const avatarHash = discord_user.avatar;
     const avatarUrl = avatarHash
@@ -5082,16 +5281,12 @@ function updateDiscordUI(presence) {
     discordContactElements.modalAvatar.src = avatarUrl;
     discordContactElements.modalAvatar.alt = `${discord_user.username} avatar`;
   }
-
-  // Update modal username
   if (discordContactElements.modalName && discord_user) {
-    const displayName = discord_user.username;
-    discordContactElements.modalName.textContent = displayName;
+    discordContactElements.modalName.textContent = discord_user.username;
   }
 
   // Update status in button
   const statusLabel = getStatusLabel(discord_status, lang);
-  const statusDotClass = getStatusDotClass(discord_status);
 
   if (discordContactElements.statusText) {
     discordContactElements.statusText.textContent = statusLabel;
@@ -5103,8 +5298,15 @@ function updateDiscordUI(presence) {
 
 function setDiscordFallback() {
   const lang = currentLang || 'tr';
+  const fallbackName = lastKnownDiscordUsername || 'Discord';
+  const fallbackAvatar = 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+  // Header button
   if (discordContactElements.name) {
-    discordContactElements.name.textContent = 'existofficial';
+    discordContactElements.name.textContent = fallbackName;
+  }
+  if (discordContactElements.nameInProfile) {
+    discordContactElements.nameInProfile.textContent = fallbackName;
   }
   if (discordContactElements.statusText) {
     discordContactElements.statusText.textContent = lang === 'tr' ? 'Çevrimdışı' : 'Offline';
@@ -5113,15 +5315,26 @@ function setDiscordFallback() {
     discordContactElements.statusDot.dataset.status = 'offline';
   }
   if (discordContactElements.avatar) {
-    discordContactElements.avatar.src = 'assets/pfp.png';
-    discordContactElements.avatar.alt = 'existofficial Discord profil fotoğrafı';
+    discordContactElements.avatar.src = fallbackAvatar;
+    discordContactElements.avatar.alt = `${fallbackName} avatar`;
   }
+
+  // Footer .discord-profile
+  if (discordContactElements.footerName) {
+    discordContactElements.footerName.textContent = fallbackName;
+  }
+  if (discordContactElements.footerAvatar) {
+    discordContactElements.footerAvatar.src = fallbackAvatar;
+    discordContactElements.footerAvatar.alt = `${fallbackName} avatar`;
+  }
+
+  // Modal .discord-profile
   if (discordContactElements.modalName) {
-    discordContactElements.modalName.textContent = 'existofficial';
+    discordContactElements.modalName.textContent = fallbackName;
   }
   if (discordContactElements.modalAvatar) {
-    discordContactElements.modalAvatar.src = 'assets/pfp.png';
-    discordContactElements.modalAvatar.alt = 'existofficial Discord profil fotoğrafı';
+    discordContactElements.modalAvatar.src = fallbackAvatar;
+    discordContactElements.modalAvatar.alt = `${fallbackName} avatar`;
   }
 }
 
