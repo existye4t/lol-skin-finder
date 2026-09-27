@@ -11,6 +11,33 @@ const FANTOME_DIR = resolve(PUBLIC_DIR, 'fantome');
 const IMAGES_DIR = resolve(PUBLIC_DIR, 'images', 'skins');
 
 function adminDevApiPlugin(adminPassword) {
+  const AUTH_TOKEN = 'local-dev-token';
+  const ALLOWED_ORIGINS = [
+    'https://existye4t.github.io',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+  const loginAttempts = new Map();
+  const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+  const RATE_LIMIT_MAX = 5;
+
+  function checkRateLimit(ip) {
+    const now = Date.now();
+    const entry = loginAttempts.get(ip);
+    if (!entry || now > entry.resetTime) {
+      loginAttempts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+      return true;
+    }
+    entry.count++;
+    return entry.count <= RATE_LIMIT_MAX;
+  }
+
+  function verifyToken(req) {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.replace(/^Bearer\s+/i, '');
+    return token === AUTH_TOKEN;
+  }
+
   return {
     name: 'admin-dev-api-middleware',
 
@@ -25,26 +52,34 @@ function adminDevApiPlugin(adminPassword) {
           return next();
         }
 
+        const origin = req.headers.origin || '';
+
         const sendJson = (statusCode, data) => {
-          res.writeHead(statusCode, {
+          const headers = {
             'Content-Type': 'application/json; charset=utf-8',
-            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers':
               'Content-Type, Authorization'
-          });
-
+          };
+          if (ALLOWED_ORIGINS.includes(origin)) {
+            headers['Access-Control-Allow-Origin'] = origin;
+            headers['Vary'] = 'Origin';
+          }
+          res.writeHead(statusCode, headers);
           res.end(JSON.stringify(data));
         };
 
         if (req.method === 'OPTIONS') {
-          res.writeHead(204, {
-            'Access-Control-Allow-Origin': '*',
+          const headers = {
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
             'Access-Control-Allow-Headers':
               'Content-Type, Authorization'
-          });
-
+          };
+          if (ALLOWED_ORIGINS.includes(origin)) {
+            headers['Access-Control-Allow-Origin'] = origin;
+            headers['Vary'] = 'Origin';
+          }
+          res.writeHead(204, headers);
           return res.end();
         }
 
@@ -82,12 +117,15 @@ function adminDevApiPlugin(adminPassword) {
               data.updatedAt = new Date().toISOString();
               await writeFile(reportsPath, JSON.stringify(data, null, 2), 'utf8');
               return sendJson(201, { success: true });
-            } catch (error) { return sendJson(500, { error: error.message }); }
+            } catch (error) { console.error('[Vite Admin] Bug-report hatası:', error); return sendJson(500, { error: 'İşlem başarısız.' }); }
           });
           return;
         }
 
         if (req.method === 'POST' && url.pathname === '/api/admin/updates') {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           let body = '';
           req.on('data', (chunk) => { body += chunk; });
           req.on('end', async () => {
@@ -105,7 +143,7 @@ function adminDevApiPlugin(adminPassword) {
               data.updatedAt = new Date().toISOString();
               await writeFile(updatesPath, JSON.stringify(data, null, 2), 'utf8');
               return sendJson(201, { success: true });
-            } catch (error) { return sendJson(500, { error: error.message }); }
+            } catch (error) { console.error('[Vite Admin] Updates hatası:', error); return sendJson(500, { error: 'İşlem başarısız.' }); }
           });
           return;
         }
@@ -118,6 +156,9 @@ function adminDevApiPlugin(adminPassword) {
           req.method === 'GET' &&
           url.pathname === '/api/admin/how-to-use'
         ) {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           try {
             const howToUsePath = resolve(DATA_DIR, 'how-to-use.json');
             let data = {
@@ -130,11 +171,15 @@ function adminDevApiPlugin(adminPassword) {
             } catch {}
             return sendJson(200, data);
           } catch (error) {
-            return sendJson(500, { error: error.message });
+            console.error('[Vite Admin] How-to-use GET hatası:', error);
+            return sendJson(500, { error: 'İşlem başarısız.' });
           }
         }
 
         if (req.method === 'POST' && url.pathname === '/api/admin/how-to-use') {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           let body = '';
           req.on('data', (chunk) => { body += chunk; });
           req.on('end', async () => {
@@ -144,7 +189,8 @@ function adminDevApiPlugin(adminPassword) {
               await writeFile(howToUsePath, JSON.stringify(payload, null, 2) + '\n', 'utf8');
               return sendJson(200, { success: true });
             } catch (error) {
-              return sendJson(500, { error: error.message });
+              console.error('[Vite Admin] How-to-use POST hatası:', error);
+              return sendJson(500, { error: 'İşlem başarısız.' });
             }
           });
           return;
@@ -158,6 +204,9 @@ function adminDevApiPlugin(adminPassword) {
           req.method === 'GET' &&
           url.pathname === '/api/admin/discord-profile'
         ) {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           try {
             const profilePath = resolve(DATA_DIR, 'discord-profile.json');
             let data = {
@@ -174,11 +223,15 @@ function adminDevApiPlugin(adminPassword) {
             } catch {}
             return sendJson(200, data);
           } catch (error) {
-            return sendJson(500, { error: error.message });
+            console.error('[Vite Admin] Discord-profile GET hatası:', error);
+            return sendJson(500, { error: 'İşlem başarısız.' });
           }
         }
 
         if (req.method === 'POST' && url.pathname === '/api/admin/discord-profile') {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           let body = '';
           req.on('data', (chunk) => { body += chunk; });
           req.on('end', async () => {
@@ -208,7 +261,8 @@ function adminDevApiPlugin(adminPassword) {
               await writeFile(profilePath, JSON.stringify(filteredPayload, null, 2) + '\n', 'utf8');
               return sendJson(200, { success: true });
             } catch (error) {
-              return sendJson(500, { error: error.message });
+              console.error('[Vite Admin] Discord-profile POST hatası:', error);
+              return sendJson(500, { error: 'İşlem başarısız.' });
             }
           });
           return;
@@ -222,6 +276,10 @@ function adminDevApiPlugin(adminPassword) {
           req.method === 'POST' &&
           url.pathname === '/api/auth/login'
         ) {
+          const ip = req.socket.remoteAddress || 'unknown';
+          if (!checkRateLimit(ip)) {
+            return sendJson(429, { error: 'Çok fazla giriş denemesi. Lütfen bir dakika bekleyin.' });
+          }
           let body = '';
 
           req.on('data', (chunk) => {
@@ -270,6 +328,9 @@ function adminDevApiPlugin(adminPassword) {
           req.method === 'POST' &&
           url.pathname === '/api/admin/save'
         ) {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           let body = '';
 
           req.on('data', (chunk) => {
@@ -581,7 +642,7 @@ function adminDevApiPlugin(adminPassword) {
               );
 
               return sendJson(500, {
-                error: error.message
+                error: 'İşlem başarısız.'
               });
             }
           });
@@ -597,6 +658,9 @@ function adminDevApiPlugin(adminPassword) {
           req.method === 'POST' &&
           url.pathname === '/api/admin/revert'
         ) {
+          if (!verifyToken(req)) {
+            return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });
+          }
           let body = '';
 
           req.on('data', (chunk) => {
@@ -696,8 +760,9 @@ function adminDevApiPlugin(adminPassword) {
                   `Skin ${skinId} orijinal veriye döndürüldü.`
               });
             } catch (error) {
+              console.error('[Vite Admin] Revert hatası:', error);
               return sendJson(500, {
-                error: error.message
+                error: 'İşlem başarısız.'
               });
             }
           });

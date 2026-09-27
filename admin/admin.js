@@ -314,8 +314,10 @@ authForm?.addEventListener('submit', async (e) => {
   }
 
   const apiBase = getApiBaseUrl();
-  console.log('[Admin Login] API Base:', apiBase);
-  console.log('[Admin Login] Sending request to:', `${apiBase}/api/auth/login`);
+  if (import.meta.env?.DEV) {
+    console.log('[Admin Login] API Base:', apiBase);
+    console.log('[Admin Login] Sending request to:', `${apiBase}/api/auth/login`);
+  }
 
   try {
     const res = await fetch(`${apiBase}/api/auth/login`, {
@@ -324,11 +326,15 @@ authForm?.addEventListener('submit', async (e) => {
       body: JSON.stringify({ password })
     });
 
-    console.log('[Admin Login] Response status:', res.status, res.statusText);
+    if (import.meta.env?.DEV) {
+      console.log('[Admin Login] Response status:', res.status, res.statusText);
+    }
 
     if (res.ok) {
       const data = await res.json();
-      console.log('[Admin Login] Success:', data);
+      if (import.meta.env?.DEV) {
+        console.log('[Admin Login] Success:', data);
+      }
       sessionStorage.setItem(AUTH_STORAGE_KEY, data.token || 'auth-ok');
       authGate.classList.add('unlocked');
       authErrorMsg.hidden = true;
@@ -336,7 +342,9 @@ authForm?.addEventListener('submit', async (e) => {
       return;
     } else {
       const err = await res.json().catch(() => ({}));
-      console.error('[Admin Login] Error response:', err);
+      if (import.meta.env?.DEV) {
+        console.error('[Admin Login] Error response:', err);
+      }
       authErrorMsg.textContent = err.error || `HTTP ${res.status}: Geçersiz yönetici şifresi.`;
       authErrorMsg.hidden = false;
       authPassword.value = '';
@@ -344,19 +352,13 @@ authForm?.addEventListener('submit', async (e) => {
       return;
     }
   } catch (err) {
-    console.error('[Admin Login] Network/Fetch error:', err);
-    // Yerel çevrimdışı modda temel şifre doğrulaması
-    if (password === 'admin' || password.length >= 4) {
-      sessionStorage.setItem(AUTH_STORAGE_KEY, btoa(password));
-      authGate.classList.add('unlocked');
-      authErrorMsg.hidden = true;
-      showToast('Yönetim paneline giriş yapıldı (Yerel Mod - API erişilemedi).', 'warning');
-    } else {
-      authErrorMsg.textContent = 'Geçersiz yönetici şifresi.';
-      authErrorMsg.hidden = false;
-      authPassword.value = '';
-      authPassword.focus();
+    if (import.meta.env?.DEV) {
+      console.error('[Admin Login] Network/Fetch error:', err);
     }
+    authErrorMsg.textContent = 'Sunucuya bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
+    authErrorMsg.hidden = false;
+    authPassword.value = '';
+    authPassword.focus();
   }
 });
 
@@ -552,18 +554,48 @@ function renderSkinList() {
         ? assetUrl(skin.image)
         : '';
 
-    itemEl.innerHTML = `
-      <img class="skin-item-thumb" src="${thumbSrc}" alt="${skin.name}" loading="lazy" onerror="this.style.opacity='0.2'" />
-      <div class="skin-item-info">
-        <p class="skin-item-champ">${skin.champion || 'Bilinmiyor'}</p>
-        <p class="skin-item-name">${skin.name || 'İsimsiz Skin'}</p>
-        <div class="skin-item-footer">
-          <span class="skin-item-id">#${skin.id}</span>
-          ${badgeHtml}
-          ${fantomeIndicator}
-        </div>
-      </div>
-    `;
+    const img = document.createElement('img');
+    img.className = 'skin-item-thumb';
+    img.src = thumbSrc;
+    img.alt = skin.name || '';
+    img.loading = 'lazy';
+    img.onerror = () => { img.style.opacity = '0.2'; };
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'skin-item-info';
+
+    const champP = document.createElement('p');
+    champP.className = 'skin-item-champ';
+    champP.textContent = skin.champion || 'Bilinmiyor';
+
+    const nameP = document.createElement('p');
+    nameP.className = 'skin-item-name';
+    nameP.textContent = skin.name || 'İsimsiz Skin';
+
+    const footerDiv = document.createElement('div');
+    footerDiv.className = 'skin-item-footer';
+
+    const idSpan = document.createElement('span');
+    idSpan.className = 'skin-item-id';
+    idSpan.textContent = `#${skin.id}`;
+    footerDiv.appendChild(idSpan);
+
+    if (badgeHtml) {
+      const badgeTemp = document.createElement('template');
+      badgeTemp.innerHTML = badgeHtml.trim();
+      footerDiv.appendChild(badgeTemp.content.firstChild);
+    }
+
+    const fantomeTemp = document.createElement('template');
+    fantomeTemp.innerHTML = fantomeIndicator.trim();
+    footerDiv.appendChild(fantomeTemp.content.firstChild);
+
+    infoDiv.appendChild(champP);
+    infoDiv.appendChild(nameP);
+    infoDiv.appendChild(footerDiv);
+
+    itemEl.appendChild(img);
+    itemEl.appendChild(infoDiv);
 
     itemEl.addEventListener('click', () => selectSkin(skin));
     fragment.appendChild(itemEl);

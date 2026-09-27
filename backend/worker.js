@@ -3,21 +3,69 @@
  * Secure GitHub API Bridge with HMAC Authentication and Atomic Git Commits
  */
 
+const ALLOWED_ORIGINS = [
+  'https://existye4t.github.io',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+];
+
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Max-Age': '86400'
 };
 
-function jsonResponse(data, status = 200) {
+function getCorsHeaders(origin) {
+  const headers = {
+    ...CORS_HEADERS,
+    'Vary': 'Origin'
+  };
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
+
+function jsonResponse(data, status = 200, origin) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      ...CORS_HEADERS
+      ...getCorsHeaders(origin)
     }
   });
+}
+
+/* =========================================================
+   Rate limiting
+   ========================================================= */
+
+const loginAttempts = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+
+  if (!entry || now >= entry.resetTime) {
+    loginAttempts.set(ip, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW_MS
+    });
+
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count += 1;
+
+  return true;
 }
 
 /* =========================================================
@@ -317,10 +365,12 @@ async function authenticateRequest(request, jwtSecret) {
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get('Origin');
+
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
-        headers: CORS_HEADERS
+        headers: getCorsHeaders(origin)
       });
     }
 
@@ -331,6 +381,11 @@ export default {
     try {
       config = getConfig(env);
     } catch (error) {
+      console.error(
+        'Config error:',
+        error
+      );
+
       /*
        * Health endpoint should still work enough
        * to tell us that the Worker itself is alive.
@@ -343,13 +398,13 @@ export default {
           status: 'error',
           server: 'cloudflare-worker',
           configured: false,
-          error: error.message
-        }, 500);
+          error: 'İşlem başarısız.'
+        }, 500, origin);
       }
 
       return jsonResponse({
-        error: error.message
-      }, 500);
+        error: 'İşlem başarısız.'
+      }, 500, origin);
     }
 
     const {
@@ -373,7 +428,7 @@ export default {
         status: 'ok',
         server: 'cloudflare-worker',
         configured: true
-      });
+      }, 200, origin);
     }
 
     /* =====================================================
@@ -385,6 +440,20 @@ export default {
       url.pathname === '/api/auth/login'
     ) {
       try {
+        const ip =
+          request.headers.get('cf-connecting-ip') || 'unknown';
+
+        if (!checkRateLimit(ip)) {
+          return jsonResponse(
+            {
+              error:
+                'Çok fazla giriş denemesi. Lütfen bir dakika bekleyin.'
+            },
+            429,
+            origin
+          );
+        }
+
         const body = await request.json();
 
         const password =
@@ -397,7 +466,8 @@ export default {
             {
               error: 'Geçersiz yönetici şifresi.'
             },
-            401
+            401,
+            origin
           );
         }
 
@@ -415,13 +485,14 @@ export default {
         return jsonResponse({
           success: true,
           token
-        });
+        }, 200, origin);
       } catch {
         return jsonResponse(
           {
             error: 'İstek biçimi geçersiz.'
           },
-          400
+          400,
+          origin
         );
       }
     }
@@ -445,14 +516,15 @@ export default {
           {
             error: 'Oturum süresi doldu.'
           },
-          401
+          401,
+          origin
         );
       }
 
       return jsonResponse({
         valid: true,
         role: user.role
-      });
+      }, 200, origin);
     }
 
     /* =====================================================
@@ -472,7 +544,8 @@ export default {
             error:
               'Bu işlem için yetkilendirme gerekli.'
           },
-          401
+          401,
+          origin
         );
       }
 
@@ -481,7 +554,8 @@ export default {
           {
             error: 'Yetkisiz erişim.'
           },
-          403
+          403,
+          origin
         );
       }
 
@@ -491,7 +565,8 @@ export default {
             error:
               'Sunucu GITHUB_TOKEN yapılandırılmamış.'
           },
-          500
+          500,
+          origin
         );
       }
 
@@ -521,7 +596,8 @@ export default {
                 error:
                   'Geçersiz skin ID.'
               },
-              400
+              400,
+              origin
             );
           }
 
@@ -892,7 +968,8 @@ export default {
                 error:
                   'Kaydedilecek herhangi bir değişiklik bulunamadı.'
               },
-              400
+              400,
+              origin
             );
           }
 
@@ -972,7 +1049,7 @@ export default {
               newCommit.sha,
             message:
               'Değişiklikler GitHub repositorysine başarıyla commit edildi.'
-          });
+          }, 200, origin);
         } catch (error) {
           console.error(
             'Admin save error:',
@@ -981,11 +1058,10 @@ export default {
 
           return jsonResponse(
             {
-              error:
-                error.message ||
-                'Bilinmeyen sunucu hatası.'
+              error: 'İşlem başarısız.'
             },
-            500
+            500,
+            origin
           );
         }
       }
@@ -1016,7 +1092,8 @@ export default {
                 error:
                   'Geçersiz skin ID.'
               },
-              400
+              400,
+              origin
             );
           }
 
@@ -1224,7 +1301,7 @@ export default {
               newCommit.sha,
             message:
               `Skin ${skinId} başarıyla orijinal veriye döndürüldü.`
-          });
+          }, 200, origin);
         } catch (error) {
           console.error(
             'Admin revert error:',
@@ -1233,122 +1310,120 @@ export default {
 
           return jsonResponse(
             {
-              error:
-                error.message ||
-                'Geri alma işlemi başarısız.'
+              error: 'İşlem başarısız.'
             },
-            500
+            500,
+            origin
           );
+        }
+      }
+
+      /* ===================================================
+         HOW-TO-USE
+         =================================================== */
+
+      if (
+        request.method === 'GET' &&
+        url.pathname === '/api/admin/how-to-use'
+      ) {
+        try {
+          const howToUseRes = await getGitHubFile(
+            'public/data/how-to-use.json',
+            GITHUB_TOKEN,
+            REPO_OWNER,
+            REPO_NAME,
+            REPO_BRANCH
+          );
+          const howToUseContent = decodeGitHubBase64(howToUseRes.content);
+          const howToUseData = JSON.parse(howToUseContent);
+          return jsonResponse(howToUseData, 200, origin);
+        } catch (error) {
+          // If the file doesn't exist, return a default structure
+          return jsonResponse({
+            tr: { title: 'Nasıl kullanılır?', content: 'Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.', videos: [] },
+            en: { title: 'How to Use?', content: 'Follow the steps below to learn how to use the website.', videos: [] }
+          }, 200, origin);
+        }
+      }
+
+      if (
+        request.method === 'POST' &&
+        url.pathname === '/api/admin/how-to-use'
+      ) {
+        try {
+          const payload = await request.json();
+          const howToUseBlob = await createBlob(
+            JSON.stringify(payload, null, 2) + '\n',
+            GITHUB_TOKEN,
+            REPO_OWNER,
+            REPO_NAME,
+            'utf-8'
+          );
+          const treeEntries = [{
+            path: 'public/data/how-to-use.json',
+            mode: '100644',
+            type: 'blob',
+            sha: howToUseBlob.sha
+          }];
+          const refData = await githubRequest(
+            `/repos/${REPO_OWNER}/${REPO_NAME}/git/ref/heads/${REPO_BRANCH}`,
+            GITHUB_TOKEN
+          );
+          const latestCommitSha = refData.object.sha;
+          const latestCommit = await githubRequest(
+            `/repos/${REPO_OWNER}/${REPO_NAME}/git/commits/${latestCommitSha}`,
+            GITHUB_TOKEN
+          );
+          const baseTreeSha = latestCommit.tree.sha;
+          const newTree = await githubRequest(
+            `/repos/${REPO_OWNER}/${REPO_NAME}/git/trees`,
+            GITHUB_TOKEN,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                base_tree: baseTreeSha,
+                tree: treeEntries
+              })
+            }
+          );
+          const commitMessage = `admin: update how-to-use content\n\nUpdated via Admin Panel.`;
+          const newCommit = await githubRequest(
+            `/repos/${REPO_OWNER}/${REPO_NAME}/git/commits`,
+            GITHUB_TOKEN,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                message: commitMessage,
+                tree: newTree.sha,
+                parents: [latestCommitSha]
+              })
+            }
+          );
+          await githubRequest(
+            `/repos/${REPO_OWNER}/${REPO_NAME}/git/refs/heads/${REPO_BRANCH}`,
+            GITHUB_TOKEN,
+            {
+              method: 'PATCH',
+              body: JSON.stringify({
+                sha: newCommit.sha,
+                force: false
+              })
+            }
+          );
+          return jsonResponse({ success: true }, 200, origin);
+        } catch (error) {
+          console.error('How-to-use save error:', error);
+          return jsonResponse({ error: 'İşlem başarısız.' }, 500, origin);
         }
       }
     }
 
     return jsonResponse(
       {
-        error:
-    /* ===================================================
-       HOW-TO-USE
-       =================================================== */
-
-    if (
-        request.method === 'GET' &&
-        url.pathname === '/api/admin/how-to-use'
-    ) {
-        try {
-            const howToUseRes = await getGitHubFile(
-                'public/data/how-to-use.json',
-                GITHUB_TOKEN,
-                REPO_OWNER,
-                REPO_NAME,
-                REPO_BRANCH
-            );
-            const howToUseContent = decodeGitHubBase64(howToUseRes.content);
-            const howToUseData = JSON.parse(howToUseContent);
-            return jsonResponse(howToUseData);
-        } catch (error) {
-            // If the file doesn't exist, return a default structure
-            return jsonResponse({
-                tr: { title: 'Nasıl kullanılır?', content: 'Siteyi kullanmak için aşağıdaki adımları takip edebilirsiniz.', videos: [] },
-                en: { title: 'How to Use?', content: 'Follow the steps below to learn how to use the website.', videos: [] }
-            });
-        }
-    }
-
-    if (
-        request.method === 'POST' &&
-        url.pathname === '/api/admin/how-to-use'
-    ) {
-        try {
-            const payload = await request.json();
-            const howToUseBlob = await createBlob(
-                JSON.stringify(payload, null, 2) + '\n',
-                GITHUB_TOKEN,
-                REPO_OWNER,
-                REPO_NAME,
-                'utf-8'
-            );
-            const treeEntries = [{
-                path: 'public/data/how-to-use.json',
-                mode: '100644',
-                type: 'blob',
-                sha: howToUseBlob.sha
-            }];
-            const refData = await githubRequest(
-                `/repos/${REPO_OWNER}/${REPO_NAME}/git/ref/heads/${REPO_BRANCH}`,
-                GITHUB_TOKEN
-            );
-            const latestCommitSha = refData.object.sha;
-            const latestCommit = await githubRequest(
-                `/repos/${REPO_OWNER}/${REPO_NAME}/git/commits/${latestCommitSha}`,
-                GITHUB_TOKEN
-            );
-            const baseTreeSha = latestCommit.tree.sha;
-            const newTree = await githubRequest(
-                `/repos/${REPO_OWNER}/${REPO_NAME}/git/trees`,
-                GITHUB_TOKEN,
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        base_tree: baseTreeSha,
-                        tree: treeEntries
-                    })
-                }
-            );
-            const commitMessage = `admin: update how-to-use content\n\nUpdated via Admin Panel.`;
-            const newCommit = await githubRequest(
-                `/repos/${REPO_OWNER}/${REPO_NAME}/git/commits`,
-                GITHUB_TOKEN,
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        message: commitMessage,
-                        tree: newTree.sha,
-                        parents: [latestCommitSha]
-                    })
-                }
-            );
-            await githubRequest(
-                `/repos/${REPO_OWNER}/${REPO_NAME}/git/refs/heads/${REPO_BRANCH}`,
-                GITHUB_TOKEN,
-                {
-                    method: 'PATCH',
-                    body: JSON.stringify({
-                        sha: newCommit.sha,
-                        force: false
-                    })
-                }
-            );
-            return jsonResponse({ success: true });
-        } catch (error) {
-            console.error('How-to-use save error:', error);
-            return jsonResponse({ error: error.message || 'Bilinmeyen sunucu hatası.' }, 500);
-        }
-    }
-
-
-          'Endpoint bulunamadı.'
+        error: 'Endpoint bulunamadı.'
       },
-      404
+      404,
+      origin
     );
   }
 };

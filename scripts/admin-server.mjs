@@ -12,29 +12,70 @@ const IMAGES_DIR = resolve(PUBLIC_DIR, 'images', 'skins');
 
 const PORT = 3001;
 
-// Gerekli klasörleri hazırla
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const AUTH_TOKEN = 'local-dev-token';
+
+const ALLOWED_ORIGINS = [
+  'https://existye4t.github.io',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+];
+
+const loginAttempts = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+
 await mkdir(DATA_DIR, { recursive: true });
 await mkdir(FANTOME_DIR, { recursive: true });
 await mkdir(IMAGES_DIR, { recursive: true });
 
-function sendJson(res, statusCode, data) {
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
+if (!ADMIN_PASSWORD) {
+  console.warn('\n⚠️  ADMIN_PASSWORD environment variable is not set!');
+  console.warn('   Admin login will be rejected. Add ADMIN_PASSWORD to your .env file.\n');
+}
+
+function getCorsHeaders(origin) {
+  const headers = {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+    headers['Vary'] = 'Origin';
+  }
+  return headers;
+}
+
+function sendJson(res, statusCode, data, origin) {
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    ...getCorsHeaders(origin)
   });
   res.end(JSON.stringify(data));
 }
 
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry || now > entry.resetTime) {
+    loginAttempts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= RATE_LIMIT_MAX;
+}
+
+function verifyToken(req) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '');
+  return token === AUTH_TOKEN;
+}
+
 const server = http.createServer(async (req, res) => {
-  // CORS Preflight
+  const origin = req.headers.origin || '';
+
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
+    res.writeHead(204, getCorsHeaders(origin));
     return res.end();
   }
 
@@ -42,7 +83,7 @@ const server = http.createServer(async (req, res) => {
 
   // 1. Health check
   if (req.method === 'GET' && url.pathname === '/api/health') {
-    return sendJson(res, 200, { status: 'ok', server: 'local-admin-server' });
+    return sendJson(res, 200, { status: 'ok', server: 'local-admin-server' }, origin);
   }
 
   if (req.method === 'POST' && url.pathname === '/api/bug-reports') {
@@ -54,8 +95,8 @@ const server = http.createServer(async (req, res) => {
         const title = String(payload.title || '').trim().slice(0, 120);
         const description = String(payload.description || '').trim().slice(0, 2000);
         const imageUrl = String(payload.imageUrl || '').trim().slice(0, 2048);
-        if (!title || !description) return sendJson(res, 400, { error: 'Başlık ve açıklama zorunludur.' });
-        if (imageUrl && !/^https?:\/\//i.test(imageUrl)) return sendJson(res, 400, { error: 'Görsel bağlantısı geçerli bir http(s) URL olmalıdır.' });
+        if (!title || !description) return sendJson(res, 400, { error: 'Başlık ve açıklama zorunludur.' }, origin);
+        if (imageUrl && !/^https?:\/\//i.test(imageUrl)) return sendJson(res, 400, { error: 'Görsel bağlantısı geçerli bir http(s) URL olmalıdır.' }, origin);
         const file = resolve(DATA_DIR, 'bug-reports.json');
         let data = { updatedAt: null, reports: [] };
         try { data = JSON.parse(await readFile(file, 'utf8')); } catch {}
@@ -64,13 +105,19 @@ const server = http.createServer(async (req, res) => {
         data.reports = data.reports.slice(0, 500);
         data.updatedAt = new Date().toISOString();
         await writeFile(file, JSON.stringify(data, null, 2), 'utf8');
-        return sendJson(res, 201, { success: true });
-      } catch (error) { return sendJson(res, 500, { error: error.message }); }
+        return sendJson(res, 201, { success: true }, origin);
+      } catch (error) {
+        console.error('[Admin Local] Bug report hatası:', error);
+        return sendJson(res, 500, { error: 'İşlem başarısız.' }, origin);
+      }
     });
     return;
   }
 
   if (req.method === 'POST' && url.pathname === '/api/admin/updates') {
+    if (!verifyToken(req)) {
+      return sendJson(res, 401, { error: 'Bu işlem için yetkilendirme gerekli.' }, origin);
+    }
     let body = '';
     req.on('data', (chunk) => { body += chunk; });
     req.on('end', async () => {
@@ -78,7 +125,7 @@ const server = http.createServer(async (req, res) => {
         const payload = JSON.parse(body || '{}');
         const title = String(payload.title || '').trim().slice(0, 120);
         const description = String(payload.description || '').trim().slice(0, 3000);
-        if (!title || !description) return sendJson(res, 400, { error: 'Başlık ve açıklama zorunludur.' });
+        if (!title || !description) return sendJson(res, 400, { error: 'Başlık ve açıklama zorunludur.' }, origin);
         const file = resolve(DATA_DIR, 'updates.json');
         let data = { updatedAt: null, updates: [] };
         try { data = JSON.parse(await readFile(file, 'utf8')); } catch {}
@@ -87,25 +134,35 @@ const server = http.createServer(async (req, res) => {
         data.updates = data.updates.slice(0, 100);
         data.updatedAt = new Date().toISOString();
         await writeFile(file, JSON.stringify(data, null, 2), 'utf8');
-        return sendJson(res, 201, { success: true });
-      } catch (error) { return sendJson(res, 500, { error: error.message }); }
+        return sendJson(res, 201, { success: true }, origin);
+      } catch (error) {
+        console.error('[Admin Local] Updates kaydetme hatası:', error);
+        return sendJson(res, 500, { error: 'İşlem başarısız.' }, origin);
+      }
     });
     return;
   }
 
   // 2. Auth login
   if (req.method === 'POST' && url.pathname === '/api/auth/login') {
+    const ip = req.socket.remoteAddress || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return sendJson(res, 429, { error: 'Çok fazla giriş denemesi. Lütfen bir dakika bekleyin.' }, origin);
+    }
     let body = '';
     req.on('data', (c) => body += c);
     req.on('end', () => {
       try {
         const { password } = JSON.parse(body || '{}');
-        if (password === 'admin' || password.length >= 4) {
-          return sendJson(res, 200, { success: true, token: 'local-dev-token' });
+        if (!ADMIN_PASSWORD) {
+          return sendJson(res, 500, { error: 'ADMIN_PASSWORD yapılandırılmamış.' }, origin);
         }
-        return sendJson(res, 401, { error: 'Geçersiz yönetici şifresi.' });
+        if (typeof password === 'string' && password === ADMIN_PASSWORD) {
+          return sendJson(res, 200, { success: true, token: AUTH_TOKEN }, origin);
+        }
+        return sendJson(res, 401, { error: 'Geçersiz yönetici şifresi.' }, origin);
       } catch (e) {
-        return sendJson(res, 400, { error: 'Geçersiz JSON formatı.' });
+        return sendJson(res, 400, { error: 'Geçersiz JSON formatı.' }, origin);
       }
     });
     return;
@@ -113,6 +170,9 @@ const server = http.createServer(async (req, res) => {
 
   // 3. Save Skin Override / File
   if (req.method === 'POST' && url.pathname === '/api/admin/save') {
+    if (!verifyToken(req)) {
+      return sendJson(res, 401, { error: 'Bu işlem için yetkilendirme gerekli.' }, origin);
+    }
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
@@ -125,7 +185,7 @@ const server = http.createServer(async (req, res) => {
 
         // Güvenlik: ID sadece rakamlardan oluşmalıdır (Path traversal engelleme)
         if (!skinId || !/^\d+$/.test(skinId)) {
-          return sendJson(res, 400, { error: 'Geçersiz skin ID formatı.' });
+          return sendJson(res, 400, { error: 'Geçersiz skin ID formatı.' }, origin);
         }
 
         const { override, imageFileBase64, fantomeFileBase64, isCustomSkin } = payload;
@@ -224,10 +284,10 @@ const server = http.createServer(async (req, res) => {
           }
         }
 
-        return sendJson(res, 200, { success: true, skinId, message: 'Değişiklikler yerel diske kaydedildi.' });
+        return sendJson(res, 200, { success: true, skinId, message: 'Değişiklikler yerel diske kaydedildi.' }, origin);
       } catch (error) {
         console.error('[Admin Local] Kaydetme hatası:', error);
-        return sendJson(res, 500, { error: error.message });
+        return sendJson(res, 500, { error: 'İşlem başarısız.' }, origin);
       }
     });
     return;
@@ -235,12 +295,15 @@ const server = http.createServer(async (req, res) => {
 
   // 4. Revert Skin
   if (req.method === 'POST' && url.pathname === '/api/admin/revert') {
+    if (!verifyToken(req)) {
+      return sendJson(res, 401, { error: 'Bu işlem için yetkilendirme gerekli.' }, origin);
+    }
     let body = '';
     req.on('data', (c) => body += c);
     req.on('end', async () => {
       try {
         const { skinId, originalSkin } = JSON.parse(body || '{}');
-        if (!skinId) return sendJson(res, 400, { error: 'skinId gerekli.' });
+        if (!skinId) return sendJson(res, 400, { error: 'skinId gerekli.' }, origin);
 
         const overridesPath = resolve(DATA_DIR, 'admin-overrides.json');
         const raw = await readFile(overridesPath, 'utf8');
@@ -264,16 +327,17 @@ const server = http.createServer(async (req, res) => {
           }
         }
 
-        return sendJson(res, 200, { success: true, message: `Skin ${skinId} orijinal veriye döndürüldü.` });
+        return sendJson(res, 200, { success: true, message: `Skin ${skinId} orijinal veriye döndürüldü.` }, origin);
       } catch (e) {
-        return sendJson(res, 500, { error: e.message });
+        console.error('[Admin Local] Revert hatası:', e);
+        return sendJson(res, 500, { error: 'İşlem başarısız.' }, origin);
       }
     });
     return;
   }
 
   // 404
-  return sendJson(res, 404, { error: 'Not found' });
+  return sendJson(res, 404, { error: 'Not found' }, origin);
 });
 
 server.listen(PORT, '127.0.0.1', () => {
