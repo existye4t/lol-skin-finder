@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+Sitemap: https://existye4t.github.io/lol-skin-finder/sitemap.xml

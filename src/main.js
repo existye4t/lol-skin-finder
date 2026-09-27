@@ -48,8 +48,8 @@ const TRANSLATIONS = {
   },
 
   heroIntro: {
-    tr: 'Skin adını, şampiyonu veya Riot skin ID’sini yaz. Sonuçlar anında filtrelenir.',
-    en: 'Type the skin name, champion, or Riot skin ID. Results filter instantly.'
+    tr: 'League of Legends skinleri, chroma ve Fantome dosyalarını ara. Skin adı, şampiyon veya Riot skin ID yaz, sonuçlar anında filtrelenir.',
+    en: 'Search League of Legends skins, chromas and Fantome files. Type a skin name, champion, or Riot skin ID. Results filter instantly.'
   },
 
   updates: {
