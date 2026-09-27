@@ -10,8 +10,17 @@ const WORKER_URL_STORAGE_KEY = 'exist_admin_worker_url';
    ASSET & API URL HELPERS
    ========================================= */
 const assetUrl = (path) => {
-  const base = import.meta.env?.BASE_URL || '/';
-  return `${base}${String(path).replace(/^\/+/, '')}`;
+  const base = import.meta.env?.BASE_URL || './';
+
+  const normalizedPath = String(path).replace(/^\/+/, '').replace(/^\.\//, '');
+
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+
+  if (base === './' || base === '/') {
+    return `../${normalizedPath}`;
+  }
+
+  return `${normalizedBase}${normalizedPath}`;
 };
 
 function getApiBaseUrl() {
