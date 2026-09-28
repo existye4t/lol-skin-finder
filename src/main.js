@@ -62,6 +62,11 @@ const TRANSLATIONS = {
     en: 'Report Bug'
   },
 
+  suggestion: {
+    tr: 'Öneri Yap',
+    en: 'Suggest'
+  },
+
   searchPlaceholder: {
     tr: 'Örn. Omega Timi Twitch',
     en: 'Omega Squad Twitch'
@@ -3536,6 +3541,19 @@ const bugReportPreviewImg = document.querySelector('#bug-report-preview-img');
 const bugReportRemoveImage = document.querySelector('#bug-report-remove-image');
 const bugReportVideoLink = document.querySelector('#bug-report-video-link');
 let bugReportSelectedFile = null;
+
+const suggestionButton = document.querySelector('#suggestion-button');
+const suggestionModal = document.querySelector('#suggestion-modal');
+const suggestionForm = document.querySelector('#suggestion-form');
+const suggestionStatus = document.querySelector('#suggestion-status');
+const suggestionDropZone = document.querySelector('#suggestion-drop-zone');
+const suggestionImageInput = document.querySelector('#suggestion-image');
+const suggestionFilePreview = document.querySelector('#suggestion-file-preview');
+const suggestionPreviewImg = document.querySelector('#suggestion-preview-img');
+const suggestionRemoveImage = document.querySelector('#suggestion-remove-image');
+const suggestionVideoLink = document.querySelector('#suggestion-video-link');
+const suggestionSubmitBtn = document.querySelector('.suggestion-submit');
+let suggestionSelectedFile = null;
 const howToUseContent = document.querySelector('#how-to-use-content');
 const howToUseVideos = document.querySelector('#how-to-use-videos');
 
@@ -3946,7 +3964,7 @@ document.querySelectorAll('[data-close-community-modal]').forEach((button) => {
   button.addEventListener('click', () => closeCommunityModal(button.closest('dialog')));
 });
 
-[updatesModal, bugReportModal, howToUseModal].forEach((dialog) => dialog?.addEventListener('click', (event) => {
+[updatesModal, bugReportModal, howToUseModal, suggestionModal].forEach((dialog) => dialog?.addEventListener('click', (event) => {
   if (event.target === dialog) closeCommunityModal(dialog);
 }));
 
@@ -4043,6 +4061,197 @@ bugReportForm?.addEventListener('submit', async (event) => {
   } catch (error) {
     bugReportStatus.textContent = 'Sunucuya bağlanılamıyor. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
     bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+  }
+});
+
+function getSuggestionApiBaseUrl() {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return '';
+  }
+  const metaWorkerUrl = document.querySelector('meta[name="worker-api-url"]')?.content;
+  if (metaWorkerUrl && metaWorkerUrl.trim().startsWith('http')) {
+    return metaWorkerUrl.trim().replace(/\/+$/, '');
+  }
+  return null;
+}
+
+const SUGGESTION_MAX_FILE_SIZE = 8 * 1024 * 1024;
+
+function handleSuggestionFileSelect(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    suggestionStatus.textContent = 'Sadece resim dosyası yüklenebilir.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (file.size > SUGGESTION_MAX_FILE_SIZE) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    suggestionStatus.textContent = `Dosya çok büyük (${sizeMB}MB). Maksimum 8MB olabilir.`;
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  suggestionSelectedFile = file;
+  suggestionPreviewImg.src = URL.createObjectURL(file);
+  suggestionFilePreview.hidden = false;
+  suggestionDropZone.querySelector('.suggestion-drop-zone-content').style.display = 'none';
+  suggestionStatus.textContent = '';
+  suggestionStatus.style.color = '';
+}
+
+function clearSuggestionFile() {
+  if (suggestionPreviewImg.src) URL.revokeObjectURL(suggestionPreviewImg.src);
+  suggestionSelectedFile = null;
+  suggestionImageInput.value = '';
+  suggestionPreviewImg.src = '';
+  suggestionFilePreview.hidden = true;
+  suggestionDropZone.querySelector('.suggestion-drop-zone-content').style.display = '';
+}
+
+suggestionDropZone?.addEventListener('click', () => {
+  suggestionImageInput?.click();
+});
+
+suggestionDropZone?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    suggestionImageInput?.click();
+  }
+});
+
+suggestionImageInput?.addEventListener('change', () => {
+  const file = suggestionImageInput.files?.[0];
+  if (file) handleSuggestionFileSelect(file);
+});
+
+suggestionDropZone?.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  suggestionDropZone.classList.add('drag-over');
+});
+
+suggestionDropZone?.addEventListener('dragleave', () => {
+  suggestionDropZone.classList.remove('drag-over');
+});
+
+suggestionDropZone?.addEventListener('drop', (e) => {
+  e.preventDefault();
+  suggestionDropZone.classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) {
+    suggestionImageInput.files = e.dataTransfer.files;
+    handleSuggestionFileSelect(file);
+  }
+});
+
+suggestionRemoveImage?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  clearSuggestionFile();
+});
+
+suggestionButton?.addEventListener('click', () => {
+  suggestionStatus.textContent = '';
+  suggestionStatus.style.color = '';
+  clearSuggestionFile();
+  openCommunityModal(suggestionModal);
+});
+
+suggestionForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const name = String(suggestionForm.querySelector('#suggestion-name')?.value || '').trim();
+  const title = String(suggestionForm.querySelector('#suggestion-title')?.value || '').trim();
+  const description = String(suggestionForm.querySelector('#suggestion-description')?.value || '').trim();
+  const videoLink = String(suggestionVideoLink?.value || '').trim();
+
+  suggestionStatus.style.color = '';
+
+  if (!title && !description) {
+    suggestionStatus.textContent = 'Lütfen başlık ve öneri alanlarını doldurun.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+  if (!title) {
+    suggestionStatus.textContent = 'Başlık alanı boş — lütfen bir başlık girin.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+  if (!description) {
+    suggestionStatus.textContent = 'Öneri alanı boş — lütfen önerini yazın.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (videoLink && !/^https?:\/\//i.test(videoLink)) {
+    suggestionStatus.textContent = 'Video linki http veya https ile başlamalıdır.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (suggestionSelectedFile && suggestionSelectedFile.size > SUGGESTION_MAX_FILE_SIZE) {
+    const sizeMB = (suggestionSelectedFile.size / (1024 * 1024)).toFixed(1);
+    suggestionStatus.textContent = `Dosya çok büyük (${sizeMB}MB). Maksimum 8MB olabilir.`;
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  const apiBase = getSuggestionApiBaseUrl();
+
+  if (apiBase === null) {
+    suggestionStatus.textContent = 'Sunucuya ulaşılamıyor — öneri worker\'ı henüz yapılandırılmamış.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  if (name) formData.append('name', name);
+  if (videoLink) formData.append('videoLink', videoLink);
+  if (suggestionSelectedFile) formData.append('image', suggestionSelectedFile);
+
+  suggestionStatus.textContent = 'Gönderiliyor...';
+  suggestionStatus.style.color = '';
+  suggestionSubmitBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${apiBase}/api/suggestions`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      suggestionForm.reset();
+      clearSuggestionFile();
+      suggestionStatus.textContent = 'Önerin başarıyla gönderildi.';
+      suggestionStatus.style.color = 'var(--gold-light, #f0b90b)';
+      return;
+    }
+
+    const result = await response.json().catch(() => ({}));
+
+    if (response.status === 429) {
+      suggestionStatus.textContent = 'Çok fazla öneri gönderdin. Lütfen bir dakika bekleyin.';
+    } else if (response.status === 413) {
+      suggestionStatus.textContent = 'Dosya çok büyük. Maksimum 8MB olabilir.';
+    } else if (response.status === 503) {
+      suggestionStatus.textContent = 'Sunucuya ulaşılamıyor — öneri worker\'ı henüz yapılandırılmamış.';
+    } else if (response.status === 502) {
+      suggestionStatus.textContent = 'Öneri Discord\'a gönderilemedi. Lütfen daha sonra tekrar deneyin.';
+    } else if (response.status === 404 || response.status === 405) {
+      suggestionStatus.textContent = 'Sunucuya ulaşılamıyor — worker henüz yapılandırılmamış veya endpoint bulunamadı.';
+    } else if (response.status === 400) {
+      suggestionStatus.textContent = result.error || 'Formda eksik veya hatalı bilgi var.';
+    } else {
+      suggestionStatus.textContent = result.error || `Gönderim başarısız (HTTP ${response.status}).`;
+    }
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+  } catch (error) {
+    suggestionStatus.textContent = 'Sunucuya bağlanılamıyor. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
+    suggestionStatus.style.color = 'var(--discord-red, #ed4245)';
+  } finally {
+    suggestionSubmitBtn.disabled = false;
   }
 });
 
@@ -5107,6 +5316,7 @@ function initLiquidMetalButtons() {
     '#discord-modal-join',
     '#updates-button',
     '#bug-report-button',
+    '#suggestion-button',
     '#apply-filters',
     '.community-submit'
   ];
@@ -5324,8 +5534,13 @@ updateFavoriteCount();
 
 setFavoriteFilter(false);
 
-await loadData();
-await loadDiscordProfile();
+loadData().catch((error) => {
+  console.error('loadData failed:', error);
+});
+
+loadDiscordProfile().catch((error) => {
+  console.error('loadDiscordProfile failed:', error);
+});
 
 /* =========================================
    DISCORD PRESENCE (LANYARD API)
@@ -6120,7 +6335,7 @@ function syncReducedMotion() {
     el.style.opacity = '';
     el.style.transform = '';
   });
-  document.querySelectorAll('.discord-invite-cta, #discord-invite, #discord-modal-join, #updates-button, #bug-report-button, #apply-filters, .community-submit').forEach((btn) => {
+  document.querySelectorAll('.discord-invite-cta, #discord-invite, #discord-modal-join, #updates-button, #bug-report-button, #suggestion-button, #apply-filters, .community-submit').forEach((btn) => {
     btn.style.transform = '';
   });
 }

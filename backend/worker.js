@@ -99,6 +99,36 @@ function checkBugReportRateLimit(ip) {
 }
 
 /* =========================================================
+   Suggestion rate limiting (2/min per IP)
+   ========================================================= */
+
+const suggestionAttempts = new Map();
+const SUGGESTION_RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const SUGGESTION_RATE_LIMIT_MAX = 2;
+
+function checkSuggestionRateLimit(ip) {
+  const now = Date.now();
+  const entry = suggestionAttempts.get(ip);
+
+  if (!entry || now >= entry.resetTime) {
+    suggestionAttempts.set(ip, {
+      count: 1,
+      resetTime: now + SUGGESTION_RATE_LIMIT_WINDOW_MS
+    });
+
+    return true;
+  }
+
+  if (entry.count >= SUGGESTION_RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count += 1;
+
+  return true;
+}
+
+/* =========================================================
    Base64URL helpers
    ========================================================= */
 
@@ -651,6 +681,266 @@ export default {
       } catch (error) {
         console.error(
           'Bug report error:',
+          error
+        );
+
+        return jsonResponse(
+          {
+            error: 'İşlem başarısız.'
+          },
+          500,
+          origin
+        );
+      }
+    }
+
+    /* =====================================================
+       0b. Suggestion (public, rate-limited, Discord webhook)
+       Placed BEFORE getConfig so it works without admin secrets.
+       Uses SUGGESTION_WEBHOOK_URL (separate from BUG_REPORT_WEBHOOK_URL).
+       ===================================================== */
+
+    if (
+      request.method === 'POST' &&
+      url.pathname === '/api/suggestions'
+    ) {
+      try {
+        const ip =
+          request.headers.get('cf-connecting-ip') ||
+          'unknown';
+
+        if (!checkSuggestionRateLimit(ip)) {
+          return jsonResponse(
+            {
+              error:
+                'Çok fazla öneri gönderdin. Lütfen bir dakika bekleyin.'
+            },
+            429,
+            origin
+          );
+        }
+
+        const formData = await request.formData();
+
+        const name = String(
+          formData.get('name') || ''
+        )
+          .trim()
+          .slice(0, 100);
+
+        const title = String(
+          formData.get('title') || ''
+        )
+          .trim()
+          .slice(0, 120);
+
+        const description = String(
+          formData.get('description') || ''
+        )
+          .trim()
+          .slice(0, 2000);
+
+        const videoLink = String(
+          formData.get('videoLink') || ''
+        )
+          .trim()
+          .slice(0, 2048);
+
+        const imageFile = formData.get('image');
+
+        if (!title || !description) {
+          return jsonResponse(
+            {
+              error:
+                'Başlık ve öneri zorunludur.'
+            },
+            400,
+            origin
+          );
+        }
+
+        if (
+          videoLink &&
+          !/^https?:\/\//i.test(videoLink)
+        ) {
+          return jsonResponse(
+            {
+              error:
+                'Video linki geçerli bir http(s) URL olmalıdır.'
+            },
+            400,
+            origin
+          );
+        }
+
+        const webhookUrl =
+          env.SUGGESTION_WEBHOOK_URL;
+
+        if (!webhookUrl) {
+          return jsonResponse(
+            {
+              error:
+                'Öneri webhook\'u yapılandırılmamış.'
+            },
+            503,
+            origin
+          );
+        }
+
+        let hasImage = false;
+        let imageName = 'suggestion.png';
+
+        if (
+          imageFile &&
+          imageFile instanceof File &&
+          imageFile.size > 0
+        ) {
+          if (
+            imageFile.size >
+            8 * 1024 * 1024
+          ) {
+            return jsonResponse(
+              {
+                error:
+                  'Dosya çok büyük. Maksimum 8MB.'
+              },
+              413,
+              origin
+            );
+          }
+
+          if (
+            !String(
+              imageFile.type || ''
+            ).startsWith('image/')
+          ) {
+            return jsonResponse(
+              {
+                error:
+                  'Sadece resim dosyası yüklenebilir.'
+              },
+              400,
+              origin
+            );
+          }
+
+          hasImage = true;
+          imageName =
+            imageFile.name || 'suggestion.png';
+        }
+
+        const fields = [];
+
+        fields.push({
+          name: 'Başlık',
+          value: title.slice(0, 1024)
+        });
+
+        fields.push({
+          name: 'Öneri',
+          value: description.slice(0, 1024)
+        });
+
+        if (name) {
+          fields.push({
+            name: 'Gönderen',
+            value: name.slice(0, 1024),
+            inline: true
+          });
+        }
+
+        if (videoLink) {
+          fields.push({
+            name: 'Video',
+            value: videoLink.slice(0, 1024)
+          });
+        }
+
+        const embed = {
+          title: '💡 Yeni Öneri',
+          color: 5814783,
+          fields: fields,
+          footer: {
+            text: 'Exist LOL Skin Finder • Öneri'
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        if (hasImage) {
+          embed.image = {
+            url: `attachment://${imageName}`
+          };
+        }
+
+        let discordResponse;
+
+        if (hasImage) {
+          const discordForm =
+            new FormData();
+
+          discordForm.append(
+            'payload_json',
+            JSON.stringify({
+              embeds: [embed]
+            })
+          );
+
+          discordForm.append(
+            'files[0]',
+            imageFile,
+            imageName
+          );
+
+          discordResponse = await fetch(
+            webhookUrl,
+            {
+              method: 'POST',
+              body: discordForm
+            }
+          );
+        } else {
+          discordResponse = await fetch(
+            webhookUrl,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                embeds: [embed]
+              })
+            }
+          );
+        }
+
+        if (!discordResponse.ok) {
+          console.error(
+            'Suggestion webhook error:',
+            discordResponse.status,
+            await discordResponse.text().catch(
+              () => ''
+            )
+          );
+
+          return jsonResponse(
+            {
+              error:
+                'Öneri Discord\'a gönderilemedi.'
+            },
+            502,
+            origin
+          );
+        }
+
+        return jsonResponse(
+          { success: true },
+          200,
+          origin
+        );
+      } catch (error) {
+        console.error(
+          'Suggestion error:',
           error
         );
 
