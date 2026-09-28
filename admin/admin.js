@@ -1178,12 +1178,8 @@ function renderCommunityRows(container, entries, type) {
 }
 
 async function loadCommunityData() {
-  const [updates, reports] = await Promise.all([
-    fetch(assetUrl('data/updates.json'), { cache: 'no-cache' }).then((r) => r.ok ? r.json() : { updates: [] }),
-    fetch(assetUrl('data/bug-reports.json'), { cache: 'no-cache' }).then((r) => r.ok ? r.json() : { reports: [] })
-  ]);
-  renderCommunityRows(adminUpdatesList, Array.isArray(updates.updates) ? updates.updates : [], 'update');
-  renderCommunityRows(adminReportsList, Array.isArray(reports.reports) ? reports.reports : [], 'report');
+  const updatesRes = await fetch(assetUrl('data/updates.json'), { cache: 'no-cache' }).then((r) => r.ok ? r.json() : { updates: [] });
+  renderCommunityRows(adminUpdatesList, Array.isArray(updatesRes.updates) ? updatesRes.updates : [], 'update');
 }
 
 /* =========================================
@@ -1445,8 +1441,13 @@ document.querySelector('#btn-manage-updates')?.addEventListener('click', async (
   openAdminModal(updatesAdminModal);
 });
 
-document.querySelector('#btn-view-bug-reports')?.addEventListener('click', async () => {
-  await loadCommunityData();
+document.querySelector('#btn-view-bug-reports')?.addEventListener('click', () => {
+  if (adminReportsList) {
+    adminReportsList.replaceChildren();
+    const info = document.createElement('p');
+    info.innerHTML = 'Hata bildirimleri artık Discord webhook\'una gönderiliyor.<br>Eskiden burada görüntülenen <code>bug-reports.json</code> dosyası güvenlik nedeniyle kaldırıldı.<br>Bildirimleri Discord sunucunuzdan görüntüleyebilirsiniz.';
+    adminReportsList.append(info);
+  }
   openAdminModal(reportsAdminModal);
 });
 

@@ -69,6 +69,36 @@ function checkRateLimit(ip) {
 }
 
 /* =========================================================
+   Bug report rate limiting (2/min per IP)
+   ========================================================= */
+
+const bugReportAttempts = new Map();
+const BUG_REPORT_RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const BUG_REPORT_RATE_LIMIT_MAX = 2;
+
+function checkBugReportRateLimit(ip) {
+  const now = Date.now();
+  const entry = bugReportAttempts.get(ip);
+
+  if (!entry || now >= entry.resetTime) {
+    bugReportAttempts.set(ip, {
+      count: 1,
+      resetTime: now + BUG_REPORT_RATE_LIMIT_WINDOW_MS
+    });
+
+    return true;
+  }
+
+  if (entry.count >= BUG_REPORT_RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count += 1;
+
+  return true;
+}
+
+/* =========================================================
    Base64URL helpers
    ========================================================= */
 
@@ -375,6 +405,264 @@ export default {
     }
 
     const url = new URL(request.url);
+
+    /* =====================================================
+       0. Bug Report (public, rate-limited, Discord webhook)
+       Placed BEFORE getConfig so it works without admin secrets.
+       ===================================================== */
+
+    if (
+      request.method === 'POST' &&
+      url.pathname === '/api/bug-report'
+    ) {
+      try {
+        const ip =
+          request.headers.get('cf-connecting-ip') ||
+          'unknown';
+
+        if (!checkBugReportRateLimit(ip)) {
+          return jsonResponse(
+            {
+              error:
+                'Çok fazla hata bildirimi gönderdin. Lütfen bir dakika bekleyin.'
+            },
+            429,
+            origin
+          );
+        }
+
+        const formData = await request.formData();
+
+        const title = String(
+          formData.get('title') || ''
+        )
+          .trim()
+          .slice(0, 120);
+
+        const description = String(
+          formData.get('description') || ''
+        )
+          .trim()
+          .slice(0, 2000);
+
+        const skinId = String(
+          formData.get('skinId') || ''
+        ).slice(0, 50);
+
+        const skinName = String(
+          formData.get('skinName') || ''
+        ).slice(0, 160);
+
+        const videoLink = String(
+          formData.get('videoLink') || ''
+        )
+          .trim()
+          .slice(0, 2048);
+
+        const imageFile = formData.get('image');
+
+        if (!title || !description) {
+          return jsonResponse(
+            {
+              error:
+                'Başlık ve açıklama zorunludur.'
+            },
+            400,
+            origin
+          );
+        }
+
+        if (
+          videoLink &&
+          !/^https?:\/\//i.test(videoLink)
+        ) {
+          return jsonResponse(
+            {
+              error:
+                'Video linki geçerli bir http(s) URL olmalıdır.'
+            },
+            400,
+            origin
+          );
+        }
+
+        const webhookUrl =
+          env.BUG_REPORT_WEBHOOK_URL;
+
+        if (!webhookUrl) {
+          return jsonResponse(
+            {
+              error:
+                'Hata bildirim webhook\'u yapılandırılmamış.'
+            },
+            503,
+            origin
+          );
+        }
+
+        let hasImage = false;
+        let imageName = 'screenshot.png';
+
+        if (
+          imageFile &&
+          imageFile instanceof File &&
+          imageFile.size > 0
+        ) {
+          if (
+            imageFile.size >
+            8 * 1024 * 1024
+          ) {
+            return jsonResponse(
+              {
+                error:
+                  'Dosya çok büyük. Maksimum 8MB.'
+              },
+              413,
+              origin
+            );
+          }
+
+          if (
+            !String(
+              imageFile.type || ''
+            ).startsWith('image/')
+          ) {
+            return jsonResponse(
+              {
+                error:
+                  'Sadece resim dosyası yüklenebilir.'
+              },
+              400,
+              origin
+            );
+          }
+
+          hasImage = true;
+          imageName =
+            imageFile.name || 'screenshot.png';
+        }
+
+        const fields = [];
+
+        if (skinName) {
+          fields.push({
+            name: 'İlgili Skin',
+            value: skinName,
+            inline: true
+          });
+        }
+
+        if (videoLink) {
+          fields.push({
+            name: 'Video Linki',
+            value: videoLink
+          });
+        }
+
+        const embed = {
+          title: title.slice(0, 256),
+          description: description.slice(
+            0,
+            4096
+          ),
+          color: 5814783,
+          footer: {
+            text: 'Exist Skin Finder • Hata Bildirimi'
+          },
+          timestamp: new Date().toISOString()
+        };
+
+        if (fields.length > 0) {
+          embed.fields = fields;
+        }
+
+        if (hasImage) {
+          embed.image = {
+            url: `attachment://${imageName}`
+          };
+        }
+
+        let discordResponse;
+
+        if (hasImage) {
+          const discordForm =
+            new FormData();
+
+          discordForm.append(
+            'payload_json',
+            JSON.stringify({
+              embeds: [embed]
+            })
+          );
+
+          discordForm.append(
+            'files[0]',
+            imageFile,
+            imageName
+          );
+
+          discordResponse = await fetch(
+            webhookUrl,
+            {
+              method: 'POST',
+              body: discordForm
+            }
+          );
+        } else {
+          discordResponse = await fetch(
+            webhookUrl,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                embeds: [embed]
+              })
+            }
+          );
+        }
+
+        if (!discordResponse.ok) {
+          console.error(
+            'Discord webhook error:',
+            discordResponse.status,
+            await discordResponse.text().catch(
+              () => ''
+            )
+          );
+
+          return jsonResponse(
+            {
+              error:
+                'Bildirim Discord\'a gönderilemedi.'
+            },
+            502,
+            origin
+          );
+        }
+
+        return jsonResponse(
+          { success: true },
+          200,
+          origin
+        );
+      } catch (error) {
+        console.error(
+          'Bug report error:',
+          error
+        );
+
+        return jsonResponse(
+          {
+            error: 'İşlem başarısız.'
+          },
+          500,
+          origin
+        );
+      }
+    }
 
     let config;
 

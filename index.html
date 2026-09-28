@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
 
   <!-- Content-Security-Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com data:; connect-src 'self' https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com; script-src 'self' https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'none';">
+  <!-- NOTE: Worker deploy edildiğinde, worker URL'ini connect-src'ye ekleyin.
+       Örnek: connect-src 'self' https://your-worker.workers.dev ... -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com data:; connect-src 'self' https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com; script-src 'self' https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'none';">
+  <!-- Worker API URL - Production'da Cloudflare Worker URL'si ile güncellenmeli (CSP connect-src'ye de eklenmeli) -->
+  <meta name="worker-api-url" content="https://lol-skin-finder-admin.existskins.workers.dev" />
 
   <meta
     name="viewport"
@@ -1240,7 +1244,21 @@
     <form id="bug-report-form" class="community-form">
       <label>Başlık<input id="bug-report-title" name="title" maxlength="120" required placeholder="Örn. Skin görseli açılmıyor" /></label>
       <label>Açıklama<textarea id="bug-report-description" name="description" maxlength="2000" required placeholder="Ne oldu, ne bekliyordun?"></textarea></label>
-      <label>Görsel bağlantısı <span>(opsiyonel)</span><input id="bug-report-image-url" name="imageUrl" type="url" maxlength="2048" placeholder="https://…" /></label>
+      <label>Ekran görüntüsü <span>(opsiyonel, maks. 8MB)</span></label>
+      <div id="bug-report-drop-zone" class="bug-report-drop-zone" tabindex="0" role="button" aria-label="Resim seç">
+        <input id="bug-report-image" name="image" type="file" accept="image/*" hidden />
+        <div class="bug-report-drop-zone-content">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          <span class="bug-report-drop-zone-text">Resim seçmek için tıkla veya sürükle bırak</span>
+        </div>
+        <div id="bug-report-file-preview" class="bug-report-file-preview" hidden>
+          <img id="bug-report-preview-img" alt="Önizleme" />
+          <button id="bug-report-remove-image" type="button" class="bug-report-remove-image" aria-label="Resmi kaldır">×</button>
+        </div>
+      </div>
+      <label>Video linki <span>(opsiyonel — Streamable, YouTube vb.)</span><input id="bug-report-video-link" name="videoLink" type="url" maxlength="2048" placeholder="https://..." /></label>
       <label>İlgili skin <span>(opsiyonel)</span><select id="bug-report-skin" name="skinId"><option value="">Skin seçme</option></select></label>
       <p id="bug-report-status" class="community-form-status" aria-live="polite"></p>
       <button class="community-submit" type="submit">Bildirimi gönder <span aria-hidden="true">→</span></button>

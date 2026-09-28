@@ -86,26 +86,55 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, { status: 'ok', server: 'local-admin-server' }, origin);
   }
 
-  if (req.method === 'POST' && url.pathname === '/api/bug-reports') {
-    let body = '';
-    req.on('data', (chunk) => { body += chunk; });
+  if (req.method === 'POST' && url.pathname === '/api/bug-report') {
+    const chunks = [];
+    req.on('data', (chunk) => { chunks.push(chunk); });
     req.on('end', async () => {
       try {
-        const payload = JSON.parse(body || '{}');
-        const title = String(payload.title || '').trim().slice(0, 120);
-        const description = String(payload.description || '').trim().slice(0, 2000);
-        const imageUrl = String(payload.imageUrl || '').trim().slice(0, 2048);
+        const bodyBuffer = Buffer.concat(chunks);
+        const headers = new Headers();
+        for (const [key, value] of Object.entries(req.headers)) {
+          if (value) headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+        }
+        const webRequest = new Request(`http://${req.headers.host}${req.url}`, {
+          method: req.method, headers,
+          body: bodyBuffer.length > 0 ? bodyBuffer : undefined
+        });
+        const formData = await webRequest.formData();
+        const title = String(formData.get('title') || '').trim().slice(0, 120);
+        const description = String(formData.get('description') || '').trim().slice(0, 2000);
+        const skinId = String(formData.get('skinId') || '').slice(0, 50);
+        const skinName = String(formData.get('skinName') || '').slice(0, 160);
+        const videoLink = String(formData.get('videoLink') || '').trim().slice(0, 2048);
+        const imageFile = formData.get('image');
         if (!title || !description) return sendJson(res, 400, { error: 'Başlık ve açıklama zorunludur.' }, origin);
-        if (imageUrl && !/^https?:\/\//i.test(imageUrl)) return sendJson(res, 400, { error: 'Görsel bağlantısı geçerli bir http(s) URL olmalıdır.' }, origin);
-        const file = resolve(DATA_DIR, 'bug-reports.json');
-        let data = { updatedAt: null, reports: [] };
-        try { data = JSON.parse(await readFile(file, 'utf8')); } catch {}
-        data.reports = Array.isArray(data.reports) ? data.reports : [];
-        data.reports.unshift({ id: crypto.randomUUID(), title, description, imageUrl, skinId: String(payload.skinId || ''), skinName: String(payload.skinName || '').slice(0, 160), createdAt: new Date().toISOString(), status: 'new' });
-        data.reports = data.reports.slice(0, 500);
-        data.updatedAt = new Date().toISOString();
-        await writeFile(file, JSON.stringify(data, null, 2), 'utf8');
-        return sendJson(res, 201, { success: true }, origin);
+        if (videoLink && !/^https?:\/\//i.test(videoLink)) return sendJson(res, 400, { error: 'Video linki geçerli bir http(s) URL olmalıdır.' }, origin);
+        if (imageFile && imageFile.size > 0) {
+          if (imageFile.size > 8 * 1024 * 1024) return sendJson(res, 413, { error: 'Dosya çok büyük. Maksimum 8MB.' }, origin);
+          if (!String(imageFile.type || '').startsWith('image/')) return sendJson(res, 400, { error: 'Sadece resim dosyası yüklenebilir.' }, origin);
+        }
+        const webhookUrl = process.env.BUG_REPORT_WEBHOOK_URL;
+        if (webhookUrl) {
+          const fields = [];
+          if (skinName) fields.push({ name: 'İlgili Skin', value: skinName, inline: true });
+          if (videoLink) fields.push({ name: 'Video Linki', value: videoLink });
+          const embed = { title: title.slice(0, 256), description: description.slice(0, 4096), color: 5814783, footer: { text: 'Exist Skin Finder • Hata Bildirimi' }, timestamp: new Date().toISOString() };
+          if (fields.length > 0) embed.fields = fields;
+          if (imageFile && imageFile.size > 0) {
+            embed.image = { url: `attachment://${imageFile.name || 'screenshot.png'}` };
+            const discordForm = new FormData();
+            discordForm.append('payload_json', JSON.stringify({ embeds: [embed] }));
+            discordForm.append('files[0]', imageFile, imageFile.name || 'screenshot.png');
+            const discordRes = await fetch(webhookUrl, { method: 'POST', body: discordForm });
+            if (!discordRes.ok) return sendJson(res, 502, { error: 'Bildirim Discord\'a gönderilemedi.' }, origin);
+          } else {
+            const discordRes = await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ embeds: [embed] }) });
+            if (!discordRes.ok) return sendJson(res, 502, { error: 'Bildirim Discord\'a gönderilemedi.' }, origin);
+          }
+        } else {
+          console.log('[Admin Local] BUG_REPORT_WEBHOOK_URL ayarlı değil — dev modunda başarı simüle ediliyor.');
+        }
+        return sendJson(res, 200, { success: true }, origin);
       } catch (error) {
         console.error('[Admin Local] Bug report hatası:', error);
         return sendJson(res, 500, { error: 'İşlem başarısız.' }, origin);

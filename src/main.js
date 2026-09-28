@@ -3529,6 +3529,13 @@ const updatesList = document.querySelector('#updates-list');
 const bugReportForm = document.querySelector('#bug-report-form');
 const bugReportSkin = document.querySelector('#bug-report-skin');
 const bugReportStatus = document.querySelector('#bug-report-status');
+const bugReportDropZone = document.querySelector('#bug-report-drop-zone');
+const bugReportImageInput = document.querySelector('#bug-report-image');
+const bugReportFilePreview = document.querySelector('#bug-report-file-preview');
+const bugReportPreviewImg = document.querySelector('#bug-report-preview-img');
+const bugReportRemoveImage = document.querySelector('#bug-report-remove-image');
+const bugReportVideoLink = document.querySelector('#bug-report-video-link');
+let bugReportSelectedFile = null;
 const howToUseContent = document.querySelector('#how-to-use-content');
 const howToUseVideos = document.querySelector('#how-to-use-videos');
 
@@ -3543,6 +3550,92 @@ function closeCommunityModal(dialog) {
   if (typeof dialog.close === 'function') dialog.close();
   else dialog.removeAttribute('open');
 }
+
+function getBugReportApiBaseUrl() {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return '';
+  }
+  const metaWorkerUrl = document.querySelector('meta[name="worker-api-url"]')?.content;
+  if (metaWorkerUrl && metaWorkerUrl.trim().startsWith('http')) {
+    return metaWorkerUrl.trim().replace(/\/+$/, '');
+  }
+  return null;
+}
+
+const BUG_REPORT_MAX_FILE_SIZE = 8 * 1024 * 1024;
+
+function handleBugReportFileSelect(file) {
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    bugReportStatus.textContent = 'Sadece resim dosyası yüklenebilir.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (file.size > BUG_REPORT_MAX_FILE_SIZE) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    bugReportStatus.textContent = `Dosya çok büyük (${sizeMB}MB). Maksimum 8MB olabilir.`;
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  bugReportSelectedFile = file;
+  bugReportPreviewImg.src = URL.createObjectURL(file);
+  bugReportFilePreview.hidden = false;
+  bugReportDropZone.querySelector('.bug-report-drop-zone-content').style.display = 'none';
+  bugReportStatus.textContent = '';
+  bugReportStatus.style.color = '';
+}
+
+function clearBugReportFile() {
+  if (bugReportPreviewImg.src) URL.revokeObjectURL(bugReportPreviewImg.src);
+  bugReportSelectedFile = null;
+  bugReportImageInput.value = '';
+  bugReportPreviewImg.src = '';
+  bugReportFilePreview.hidden = true;
+  bugReportDropZone.querySelector('.bug-report-drop-zone-content').style.display = '';
+}
+
+bugReportDropZone?.addEventListener('click', () => {
+  bugReportImageInput?.click();
+});
+
+bugReportDropZone?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    bugReportImageInput?.click();
+  }
+});
+
+bugReportImageInput?.addEventListener('change', () => {
+  const file = bugReportImageInput.files?.[0];
+  if (file) handleBugReportFileSelect(file);
+});
+
+bugReportDropZone?.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  bugReportDropZone.classList.add('drag-over');
+});
+
+bugReportDropZone?.addEventListener('dragleave', () => {
+  bugReportDropZone.classList.remove('drag-over');
+});
+
+bugReportDropZone?.addEventListener('drop', (e) => {
+  e.preventDefault();
+  bugReportDropZone.classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) {
+    bugReportImageInput.files = e.dataTransfer.files;
+    handleBugReportFileSelect(file);
+  }
+});
+
+bugReportRemoveImage?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  clearBugReportFile();
+});
 
 function populateBugReportSkins() {
   if (!bugReportSkin || bugReportSkin.options.length > 1) return;
@@ -3840,6 +3933,8 @@ updatesButton?.addEventListener('click', () => {
 bugReportButton?.addEventListener('click', () => {
   populateBugReportSkins();
   bugReportStatus.textContent = '';
+  bugReportStatus.style.color = '';
+  clearBugReportFile();
   openCommunityModal(bugReportModal);
 });
 
@@ -3857,29 +3952,97 @@ document.querySelectorAll('[data-close-community-modal]').forEach((button) => {
 
 bugReportForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const formData = new FormData(bugReportForm);
-  const payload = Object.fromEntries(formData.entries());
-  const selectedSkin = skins.find((skin) => String(skin.id) === String(payload.skinId));
 
-  bugReportStatus.textContent = 'Gönderiliyor…';
+  const title = String(bugReportForm.querySelector('#bug-report-title')?.value || '').trim();
+  const description = String(bugReportForm.querySelector('#bug-report-description')?.value || '').trim();
+  const videoLink = String(bugReportVideoLink?.value || '').trim();
+  const selectedSkin = skins.find((skin) => String(skin.id) === String(bugReportSkin?.value || ''));
+
+  bugReportStatus.style.color = '';
+
+  if (!title && !description) {
+    bugReportStatus.textContent = 'Lütfen başlık ve açıklama alanlarını doldurun.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+  if (!title) {
+    bugReportStatus.textContent = 'Başlık alanı boş — lütfen bir başlık girin.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+  if (!description) {
+    bugReportStatus.textContent = 'Açıklama alanı boş — lütfen sorunu açıklayın.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (videoLink && !/^https?:\/\//i.test(videoLink)) {
+    bugReportStatus.textContent = 'Video linki http veya https ile başlamalıdır.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  if (bugReportSelectedFile && bugReportSelectedFile.size > BUG_REPORT_MAX_FILE_SIZE) {
+    const sizeMB = (bugReportSelectedFile.size / (1024 * 1024)).toFixed(1);
+    bugReportStatus.textContent = `Dosya çok büyük (${sizeMB}MB). Maksimum 8MB olabilir.`;
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  const apiBase = getBugReportApiBaseUrl();
+
+  if (apiBase === null) {
+    bugReportStatus.textContent = 'Sunucuya ulaşılamıyor — hata bildirim worker\'ı henüz yapılandırılmamış.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('skinId', selectedSkin?.id || '');
+  formData.append('skinName', selectedSkin ? getLocalizedSkinName(selectedSkin, 'tr') : '');
+  if (videoLink) formData.append('videoLink', videoLink);
+  if (bugReportSelectedFile) formData.append('image', bugReportSelectedFile);
+
+  bugReportStatus.textContent = 'Gönderiliyor...';
+  bugReportStatus.style.color = '';
+
   try {
-    const response = await fetch('./api/bug-reports', {
+    const response = await fetch(`${apiBase}/api/bug-report`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: String(payload.title || '').trim(),
-        description: String(payload.description || '').trim(),
-        imageUrl: String(payload.imageUrl || '').trim(),
-        skinId: selectedSkin?.id || '',
-        skinName: selectedSkin ? getLocalizedSkinName(selectedSkin, 'tr') : ''
-      })
+      body: formData
     });
+
+    if (response.ok) {
+      bugReportForm.reset();
+      clearBugReportFile();
+      bugReportStatus.textContent = 'Teşekkürler! Hata bildirimin gönderildi.';
+      bugReportStatus.style.color = 'var(--gold-light, #f0b90b)';
+      return;
+    }
+
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || 'Bildiriminiz gönderilemedi.');
-    bugReportForm.reset();
-    bugReportStatus.textContent = 'Teşekkürler! Hata bildirimin kaydedildi.';
+
+    if (response.status === 429) {
+      bugReportStatus.textContent = 'Çok fazla hata bildirimi gönderdin. Lütfen bir dakika bekleyin.';
+    } else if (response.status === 413) {
+      bugReportStatus.textContent = 'Dosya çok büyük. Maksimum 8MB olabilir.';
+    } else if (response.status === 503) {
+      bugReportStatus.textContent = 'Sunucuya ulaşılamıyor — hata bildirim worker\'ı henüz yapılandırılmamış.';
+    } else if (response.status === 502) {
+      bugReportStatus.textContent = 'Bildirim Discord\'a gönderilemedi. Lütfen daha sonra tekrar deneyin.';
+    } else if (response.status === 404 || response.status === 405) {
+      bugReportStatus.textContent = 'Sunucuya ulaşılamıyor — worker henüz yapılandırılmamış veya endpoint bulunamadı.';
+    } else if (response.status === 400) {
+      bugReportStatus.textContent = result.error || 'Formda eksik veya hatalı bilgi var.';
+    } else {
+      bugReportStatus.textContent = result.error || `Gönderim başarısız (HTTP ${response.status}).`;
+    }
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
   } catch (error) {
-    bugReportStatus.textContent = error.message || 'Bildiriminiz gönderilemedi.';
+    bugReportStatus.textContent = 'Sunucuya bağlanılamıyor. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
+    bugReportStatus.style.color = 'var(--discord-red, #ed4245)';
   }
 });
 
