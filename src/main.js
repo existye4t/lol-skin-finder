@@ -331,6 +331,16 @@ const TRANSLATIONS = {
     en: 'I\u2019m here to help.'
   },
 
+  bugReportInfo: {
+    tr: 'Bildirdiğiniz hata Discord sunucumuzdaki <span class="channel-pill">#hata-bildir</span> kanalına iletilecektir.',
+    en: 'Your bug report will be sent to the <span class="channel-pill">#bug-reports</span> channel on our Discord server.'
+  },
+
+  suggestionInfo: {
+    tr: 'Yaptığınız öneri Discord sunucumuzdaki <span class="channel-pill">#öneriler</span> kanalına iletilecektir.',
+    en: 'Your suggestion will be sent to the <span class="channel-pill">#suggestions</span> channel on our Discord server.'
+  },
+
   closeDiscord: {
     tr: 'Discord penceresini kapat',
     en: 'Close the Discord window'
@@ -570,6 +580,13 @@ function applyStaticTranslations() {
     .querySelectorAll('[data-i18n]')
     .forEach((element) => {
       setElementTranslation(element, t(element.dataset.i18n));
+    });
+
+  document
+    .querySelectorAll('[data-i18n-html]')
+    .forEach((element) => {
+      element.innerHTML = t(element.dataset.i18nHtml);
+      element.classList.add('lang-switch-text');
     });
 
   document
