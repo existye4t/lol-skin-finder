@@ -3,3 +3,8 @@ dist/
 work/
 .vite/
 .env
+vite-out.txt
+vite-err.txt
+test-results/.last-run.json
+dev.log
+test-results/csp-test-CSP-violations-check-chromium/error-context.md
