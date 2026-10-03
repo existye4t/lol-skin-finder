@@ -1876,6 +1876,69 @@ function getYouTubeWatchUrl(videoId) {
    ARAMA RELEVANS SKORU
 ======================================= */
 
+// Bounded Levenshtein (düzenleme mesafesi) hesabı.
+// maxDistance aşılırsa -1 döner; aksi halde gerçek mesafeyi döner.
+// Tek satırlık DP ve mesafe bandı (banding) ile erken çıkış yapar.
+function levenshteinDistance(
+  a,
+  b,
+  maxDistance = Infinity
+) {
+  if (a === b) return 0;
+
+  const aLen = a.length;
+  const bLen = b.length;
+
+  if (!aLen) return bLen;
+  if (!bLen) return aLen;
+
+  if (
+    Math.abs(aLen - bLen) > maxDistance
+  ) {
+    return -1;
+  }
+
+  let previousRow = new Array(bLen + 1);
+
+  for (let j = 0; j <= bLen; j++) {
+    previousRow[j] = j;
+  }
+
+  for (let i = 1; i <= aLen; i++) {
+    let currentRow = [i];
+    let rowMin = i;
+
+    for (let j = 1; j <= bLen; j++) {
+      const cost =
+        a[i - 1] === b[j - 1] ? 0 : 1;
+
+      const value = Math.min(
+        previousRow[j] + 1, // silme
+        currentRow[j - 1] + 1, // ekleme
+        previousRow[j - 1] + cost // değiştirme
+      );
+
+      currentRow[j] = value;
+
+      if (value < rowMin) {
+        rowMin = value;
+      }
+    }
+
+    // Bu satırdaki en iyi değer bile sınırı aşıyorsa
+    // mesafe hiçbir zaman maxDistance içine giremez.
+    if (rowMin > maxDistance) {
+      return -1;
+    }
+
+    previousRow = currentRow;
+  }
+
+  return previousRow[bLen] <= maxDistance
+    ? previousRow[bLen]
+    : -1;
+}
+
 // Score match against an already-normalized text string
 function scoreNormalizedMatch(normalizedText, normalizedQuery) {
   if (!normalizedText || !normalizedQuery) {
@@ -1939,53 +2002,57 @@ function scoreNormalizedMatch(normalizedText, normalizedQuery) {
    );
   }
 
-  let lastIndex = -1;
-  let orderedCount = 0;
-  let consecutiveCount = 0;
-  let totalGapDistance = 0;
-
-  for (const character of normalizedQuery) {
-   const nextIndex =
-     normalizedText.indexOf(
-       character,
-       lastIndex + 1
-     );
-
-   if (nextIndex === -1) {
-     return 0;
-   }
-
-   if (nextIndex > lastIndex) {
-     orderedCount += 1;
-   }
-
-   if (
-     lastIndex !== -1 &&
-     nextIndex === lastIndex + 1
-   ) {
-     consecutiveCount += 1;
-   }
-
-   if (lastIndex !== -1) {
-     totalGapDistance +=
-       nextIndex - lastIndex;
-   }
-
-   lastIndex = nextIndex;
-  }
-
-  if (orderedCount !== normalizedQuery.length) {
+  // Çok kısa sorgular için typo toleransı anlamsız — eşleşme yok.
+  if (normalizedQuery.length <= 2) {
    return 0;
   }
 
-  const fuzzyScore =
-   orderedCount * 150 +
-   consecutiveCount * 120 -
-   totalGapDistance * 25;
+  // Kelime bazlı sınırlı Levenshtein: her kelime ayrı ayrı sorguya
+  // yakın mı diye kontrol edilir. Eski "harfler metnin herhangi bir
+  // yerinde sırayla geçiyor mu" mantığı çok kelimeli alakasız
+  // metinlerde yanlış eşleşmelere yol açıyordu.
+  let bestDistance = Infinity;
 
-  return fuzzyScore > 0
-   ? fuzzyScore
-   : 1;
+  for (const token of tokens) {
+    // BUG 2 FIX: Hard gate - token'ın ilk harfi sorgunun ilk harfiyle
+    // aynı değilse Levenshtein'a sokma, direkt atla.
+    // Bu kural SADECE bu fuzzy/typo fallback katmanına uygulanır,
+    // önceki katmanları (tam eşleşme, startsWith, token eşitliği, includes)
+    // ETKİLEMEZ.
+    if (token[0] !== normalizedQuery[0]) {
+      continue;
+    }
+
+    // BUG 1 FIX: maxDistance her token için KENDİ uzunluğuna göre
+    // hesaplanmalı (sorgu uzunluğuna göre değil).
+    const tokenMaxDistance = Math.min(3, Math.max(1, Math.floor(token.length / 2.5)));
+
+    if (
+      Math.abs(token.length - normalizedQuery.length) >
+      tokenMaxDistance
+    ) {
+      continue;
+    }
+
+    const distance = levenshteinDistance(
+      token,
+      normalizedQuery,
+      tokenMaxDistance
+    );
+
+    if (
+      distance !== -1 &&
+      distance < bestDistance
+    ) {
+      bestDistance = distance;
+    }
+  }
+
+  if (bestDistance === Infinity) {
+    return 0;
+  }
+
+  return 300_000 - bestDistance * 50_000;
 }
 
 function getGroupSearchScore(

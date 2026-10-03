@@ -6,7 +6,7 @@
   <!-- Content-Security-Policy -->
   <!-- NOTE: Worker deploy edildiğinde, worker URL'ini connect-src'ye ekleyin.
        Örnek: connect-src 'self' https://your-worker.workers.dev ... -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com data:; connect-src 'self' https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com; script-src 'self' https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google data:; connect-src 'self' https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com; frame-ancestors 'none';">
   <!-- Worker API URL - Production'da Cloudflare Worker URL'si ile güncellenmeli (CSP connect-src'ye de eklenmeli) -->
   <meta name="worker-api-url" content="https://lol-skin-finder-admin.existskins.workers.dev" />
 
@@ -173,6 +173,13 @@
     gtag("js", new Date());
     gtag("config", "G-S4N25T536G");
   </script>
+
+  <!-- Google AdSense -->
+  <script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7913714372580113"
+    crossorigin="anonymous"
+  ></script>
 
   <!-- STYLESHEET -->
   <link
