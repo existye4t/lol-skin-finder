@@ -1,6 +1,6 @@
 {
-  "version": "16.17.1",
-  "updatedAt": "2026-09-26T15:08:12.366Z",
+  "version": "16.20.1",
+  "updatedAt": "2026-10-07T12:57:56.236Z",
   "skins": [
     {
       "id": "876045",
@@ -1683,9 +1683,7 @@
       "championId": "Leblanc",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_61.jpg",
       "imageFallback": "",
-      "parentSkinId": "7005",
-      "modifiedAt": "2026-09-13T13:46:44.014Z",
-      "customFantome": true
+      "parentSkinId": "7005"
     },
     {
       "id": "516002",
@@ -4327,9 +4325,7 @@
       "championId": "Akali",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_104.jpg",
       "imageFallback": "",
-      "parentSkinId": "84082",
-      "modifiedAt": "2026-09-13T13:47:02.731Z",
-      "customFantome": true
+      "parentSkinId": "84082"
     },
     {
       "id": "84090",
@@ -11764,7 +11760,7 @@
       "championEn": "Aurora",
       "championId": "Aurora",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aurora_20.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aurora/skins/skin20/images/aurora_splash_centered_20.skins_aurora_skin20.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aurora/skins/skin20/images/aurora_splash_centered_20.jpg"
     },
     {
       "id": "893027",
@@ -12014,7 +12010,7 @@
       "championEn": "Jhin",
       "championId": "Jhin",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jhin_64.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/jhin/skins/skin64/images/jhin_splash_centered_64.skins_jhin_skin64.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/jhin/skins/skin64/images/jhin_splash_centered_64.jpg"
     },
     {
       "id": "202067",
@@ -12611,7 +12607,7 @@
       "championEn": "Shen",
       "championId": "Shen",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Shen_54.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/shen/skins/skin54/images/shen_splash_centered_54.skins_shen_skin54.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/shen/skins/skin54/images/shen_splash_centered_54.jpg"
     },
     {
       "id": "98061",
@@ -16201,7 +16197,7 @@
       "nameEn": "Coven Ahri (Pristine)",
       "championEn": "Ahri",
       "championId": "Ahri",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ahri/skins/skin96/chromapreview.chroma_ahri_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_96.jpg",
       "imageFallback": "",
       "parentSkinId": "103042"
     },
@@ -16535,7 +16531,7 @@
       "nameEn": "Coven Ashe (Pristine)",
       "championEn": "Ashe",
       "championId": "Ashe",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ashe/skins/skin93/chromapreview.chroma_ashe_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ashe_93.jpg",
       "imageFallback": "",
       "parentSkinId": "22032"
     },
@@ -17101,10 +17097,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (İnci Beyazı)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Pearl)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin73/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_73.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17115,10 +17111,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (Kedigözü)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Catseye)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin71/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_71.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17129,10 +17125,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (Obsidiyen)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Obsidian)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin72/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_72.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17143,10 +17139,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (Pembe Kuvars)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Rose Quartz)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin70/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_70.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17157,10 +17153,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (Safir)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Sapphire)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin69/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_69.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17171,10 +17167,10 @@
       "champion": "Janna",
       "nameTr": "Cadılar Meclisi Janna (Yakut)",
       "championTr": "Janna",
-      "nameEn": "Coven Janna",
+      "nameEn": "Coven Janna (Ruby)",
       "championEn": "Janna",
       "championId": "Janna",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin68/chromapreview.chroma_janna_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Janna_68.jpg",
       "imageFallback": "",
       "parentSkinId": "40067"
     },
@@ -17462,10 +17458,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Deniz Mavisi)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Aquamarine)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin14/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_14.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17476,10 +17472,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (İnci Beyazı)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Pearl)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin20/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_20.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17490,10 +17486,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Kedigözü)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Catseye)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin17/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_17.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17504,10 +17500,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Obsidiyen)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Obsidian)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin16/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_16.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17518,10 +17514,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Pembe Kuvars)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Rose Quartz)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin18/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_18.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17532,10 +17528,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Tanzanit)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Tanzanite)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin19/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_19.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17546,10 +17542,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Turkuvaz)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Turquoise)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin15/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_15.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17560,10 +17556,10 @@
       "champion": "Mel",
       "nameTr": "Cadılar Meclisi Mel (Yakut)",
       "championTr": "Mel",
-      "nameEn": "Coven Mel",
+      "nameEn": "Coven Mel (Ruby)",
       "championEn": "Mel",
       "championId": "Mel",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/mel/skins/skin13/chromapreview.chroma_mel_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Mel_13.jpg",
       "imageFallback": "",
       "parentSkinId": "800012"
     },
@@ -17632,7 +17628,7 @@
       "nameEn": "Coven Morgana (Pristine)",
       "championEn": "Morgana",
       "championId": "Morgana",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/morgana/skins/skin83/chromapreview.chroma_morgana_coven.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Morgana_83.jpg",
       "imageFallback": "",
       "parentSkinId": "25026"
     },
@@ -30585,9 +30581,7 @@
       "championId": "Taliyah",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Taliyah_33.jpg",
       "imageFallback": "",
-      "parentSkinId": "163001",
-      "modifiedAt": "2026-09-13T13:46:22.716Z",
-      "customFantome": true
+      "parentSkinId": "163001"
     },
     {
       "id": "3006",
@@ -30861,7 +30855,7 @@
       "championEn": "Irelia",
       "championId": "Irelia",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_63.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/irelia/skins/skin63/images/irelia_splash_centered_63.skins_irelia_skin63.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/irelia/skins/skin63/images/irelia_splash_centered_63.jpg"
     },
     {
       "id": "39071",
@@ -40585,6 +40579,575 @@
       "parentSkinId": "141020"
     },
     {
+      "id": "523041",
+      "skinNum": 41,
+      "name": "HEARTSTEEL Live My Life Aphelios",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_41.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin41/images/aphelios_splash_centered_41.skins_aphelios_skin41.jpg"
+    },
+    {
+      "id": "523049",
+      "skinNum": 49,
+      "name": "HEARTSTEEL Live My Life Aphelios (Deniz Mavisi)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Deniz Mavisi)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Aquamarine)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_49.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523046",
+      "skinNum": 46,
+      "name": "HEARTSTEEL Live My Life Aphelios (Fıstık Yeşili)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Fıstık Yeşili)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Peridot)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_46.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523044",
+      "skinNum": 44,
+      "name": "HEARTSTEEL Live My Life Aphelios (İnci Beyazı)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (İnci Beyazı)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Pearl)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_44.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523045",
+      "skinNum": 45,
+      "name": "HEARTSTEEL Live My Life Aphelios (Kedigözü)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Kedigözü)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Catseye)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_45.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523047",
+      "skinNum": 47,
+      "name": "HEARTSTEEL Live My Life Aphelios (Obsidiyen)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Obsidiyen)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Obsidian)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_47.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523048",
+      "skinNum": 48,
+      "name": "HEARTSTEEL Live My Life Aphelios (Pembe Kuvars)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Pembe Kuvars)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Rose Quartz)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_48.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523043",
+      "skinNum": 43,
+      "name": "HEARTSTEEL Live My Life Aphelios (Tanzanit)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Tanzanit)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Tanzanite)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_43.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "523042",
+      "skinNum": 42,
+      "name": "HEARTSTEEL Live My Life Aphelios (Yakut)",
+      "champion": "Aphelios",
+      "nameTr": "HEARTSTEEL Live My Life Aphelios (Yakut)",
+      "championTr": "Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Ruby)",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_42.jpg",
+      "imageFallback": "",
+      "parentSkinId": "523041"
+    },
+    {
+      "id": "81078",
+      "skinNum": 78,
+      "name": "HEARTSTEEL Live My Life Ezreal",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_78.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ezreal/skins/skin78/images/ezreal_splash_centered_78.skins_ezreal_skin78.jpg"
+    },
+    {
+      "id": "81086",
+      "skinNum": 86,
+      "name": "HEARTSTEEL Live My Life Ezreal (Fıstık Yeşili)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Fıstık Yeşili)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Peridot)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_86.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81085",
+      "skinNum": 85,
+      "name": "HEARTSTEEL Live My Life Ezreal (İnci Beyazı)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (İnci Beyazı)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Pearl)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_85.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81081",
+      "skinNum": 81,
+      "name": "HEARTSTEEL Live My Life Ezreal (Kedigözü)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Kedigözü)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Catseye)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_81.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81084",
+      "skinNum": 84,
+      "name": "HEARTSTEEL Live My Life Ezreal (Obsidiyen)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Obsidiyen)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Obsidian)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_84.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81083",
+      "skinNum": 83,
+      "name": "HEARTSTEEL Live My Life Ezreal (Pembe Kuvars)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Pembe Kuvars)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Rose Quartz)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_83.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81080",
+      "skinNum": 80,
+      "name": "HEARTSTEEL Live My Life Ezreal (Safir)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Safir)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Sapphire)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_80.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81082",
+      "skinNum": 82,
+      "name": "HEARTSTEEL Live My Life Ezreal (Tanzanit)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Tanzanit)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Tanzanite)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_82.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "81079",
+      "skinNum": 79,
+      "name": "HEARTSTEEL Live My Life Ezreal (Yakut)",
+      "champion": "Ezreal",
+      "nameTr": "HEARTSTEEL Live My Life Ezreal (Yakut)",
+      "championTr": "Ezreal",
+      "nameEn": "HEARTSTEEL Live My Life Ezreal (Ruby)",
+      "championEn": "Ezreal",
+      "championId": "Ezreal",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ezreal_79.jpg",
+      "imageFallback": "",
+      "parentSkinId": "81078"
+    },
+    {
+      "id": "897018",
+      "skinNum": 18,
+      "name": "HEARTSTEEL Live My Life K'Sante",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_18.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ksante/skins/skin18/images/ksante_splash_centered_18.skins_ksante_skin18.jpg"
+    },
+    {
+      "id": "897025",
+      "skinNum": 25,
+      "name": "HEARTSTEEL Live My Life K'Sante (İnci Beyazı)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (İnci Beyazı)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Pearl)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_25.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897026",
+      "skinNum": 26,
+      "name": "HEARTSTEEL Live My Life K'Sante (Kedigözü)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Kedigözü)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Catseye)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_26.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897024",
+      "skinNum": 24,
+      "name": "HEARTSTEEL Live My Life K'Sante (Obsidiyen)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Obsidiyen)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Obsidian)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_24.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897023",
+      "skinNum": 23,
+      "name": "HEARTSTEEL Live My Life K'Sante (Pembe Kuvars)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Pembe Kuvars)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Rose Quartz)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_23.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897020",
+      "skinNum": 20,
+      "name": "HEARTSTEEL Live My Life K'Sante (Safir)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Safir)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Sapphire)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_20.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897022",
+      "skinNum": 22,
+      "name": "HEARTSTEEL Live My Life K'Sante (Tanzanit)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Tanzanit)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Tanzanite)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_22.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897021",
+      "skinNum": 21,
+      "name": "HEARTSTEEL Live My Life K'Sante (Turkuvaz)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Turkuvaz)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Turquoise)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_21.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "897019",
+      "skinNum": 19,
+      "name": "HEARTSTEEL Live My Life K'Sante (Yakut)",
+      "champion": "K'Sante",
+      "nameTr": "HEARTSTEEL Live My Life K'Sante (Yakut)",
+      "championTr": "K'Sante",
+      "nameEn": "HEARTSTEEL Live My Life K'Sante (Ruby)",
+      "championEn": "K'Sante",
+      "championId": "KSante",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KSante_19.jpg",
+      "imageFallback": "",
+      "parentSkinId": "897018"
+    },
+    {
+      "id": "141032",
+      "skinNum": 32,
+      "name": "HEARTSTEEL Live My Life Kayn",
+      "champion": "Kayn",
+      "nameTr": "HEARTSTEEL Live My Life Kayn",
+      "championTr": "Kayn",
+      "nameEn": "HEARTSTEEL Live My Life Kayn",
+      "championEn": "Kayn",
+      "championId": "Kayn",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kayn_32.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kayn/skins/skin32/images/kayn_splash_centered_32.skins_kayn_skin32.jpg"
+    },
+    {
+      "id": "141035",
+      "skinNum": 35,
+      "name": "HEARTSTEEL Live My Life Kayn (Kedigözü)",
+      "champion": "Kayn",
+      "nameTr": "HEARTSTEEL Live My Life Kayn (Kedigözü)",
+      "championTr": "Kayn",
+      "nameEn": "HEARTSTEEL Live My Life Kayn (Catseye)",
+      "championEn": "Kayn",
+      "championId": "Kayn",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kayn_35.jpg",
+      "imageFallback": "",
+      "parentSkinId": "141032"
+    },
+    {
+      "id": "141034",
+      "skinNum": 34,
+      "name": "HEARTSTEEL Live My Life Kayn (Pembe Kuvars)",
+      "champion": "Kayn",
+      "nameTr": "HEARTSTEEL Live My Life Kayn (Pembe Kuvars)",
+      "championTr": "Kayn",
+      "nameEn": "HEARTSTEEL Live My Life Kayn (Rose Quartz)",
+      "championEn": "Kayn",
+      "championId": "Kayn",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kayn_34.jpg",
+      "imageFallback": "",
+      "parentSkinId": "141032"
+    },
+    {
+      "id": "141036",
+      "skinNum": 36,
+      "name": "HEARTSTEEL Live My Life Kayn (Tanzanit)",
+      "champion": "Kayn",
+      "nameTr": "HEARTSTEEL Live My Life Kayn (Tanzanit)",
+      "championTr": "Kayn",
+      "nameEn": "HEARTSTEEL Live My Life Kayn (Tanzanite)",
+      "championEn": "Kayn",
+      "championId": "Kayn",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kayn_36.jpg",
+      "imageFallback": "",
+      "parentSkinId": "141032"
+    },
+    {
+      "id": "141033",
+      "skinNum": 33,
+      "name": "HEARTSTEEL Live My Life Kayn (Yakut)",
+      "champion": "Kayn",
+      "nameTr": "HEARTSTEEL Live My Life Kayn (Yakut)",
+      "championTr": "Kayn",
+      "nameEn": "HEARTSTEEL Live My Life Kayn (Ruby)",
+      "championEn": "Kayn",
+      "championId": "Kayn",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kayn_33.jpg",
+      "imageFallback": "",
+      "parentSkinId": "141032"
+    },
+    {
+      "id": "777077",
+      "skinNum": 77,
+      "name": "HEARTSTEEL Live My Life Yone",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_77.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yone/skins/skin77/images/yone_splash_centered_77.skins_yone_skin77.jpg"
+    },
+    {
+      "id": "777081",
+      "skinNum": 81,
+      "name": "HEARTSTEEL Live My Life Yone (İnci Beyazı)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (İnci Beyazı)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Pearl)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_81.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777080",
+      "skinNum": 80,
+      "name": "HEARTSTEEL Live My Life Yone (Kedigözü)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Kedigözü)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Catseye)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_80.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777085",
+      "skinNum": 85,
+      "name": "HEARTSTEEL Live My Life Yone (Obsidiyen)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Obsidiyen)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Obsidian)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_85.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777079",
+      "skinNum": 79,
+      "name": "HEARTSTEEL Live My Life Yone (Pembe Kuvars)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Pembe Kuvars)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Rose Quartz)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_79.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777083",
+      "skinNum": 83,
+      "name": "HEARTSTEEL Live My Life Yone (Safir)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Safir)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Sapphire)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_83.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777082",
+      "skinNum": 82,
+      "name": "HEARTSTEEL Live My Life Yone (Tanzanit)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Tanzanit)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Tanzanite)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_82.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777078",
+      "skinNum": 78,
+      "name": "HEARTSTEEL Live My Life Yone (Yakut)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Yakut)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Ruby)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_78.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
+      "id": "777084",
+      "skinNum": 84,
+      "name": "HEARTSTEEL Live My Life Yone (Zümrüt)",
+      "champion": "Yone",
+      "nameTr": "HEARTSTEEL Live My Life Yone (Zümrüt)",
+      "championTr": "Yone",
+      "nameEn": "HEARTSTEEL Live My Life Yone (Emerald)",
+      "championEn": "Yone",
+      "championId": "Yone",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yone_84.jpg",
+      "imageFallback": "",
+      "parentSkinId": "777077"
+    },
+    {
       "id": "875056",
       "skinNum": 56,
       "name": "HEARTSTEEL Sett",
@@ -43693,7 +44256,7 @@
       "championEn": "Vayne",
       "championId": "Vayne",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_67.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vayne/skins/skin67/images/vayne_splash_centered_67.skins_vayne_skin67.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vayne/skins/skin67/images/vayne_splash_centered_67.jpg"
     },
     {
       "id": "67073",
@@ -46930,10 +47493,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (İnci Beyazı)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Pearl)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin60/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_60.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -46944,10 +47507,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Obsidiyen)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Obsidian)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin62/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_62.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -46958,10 +47521,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Pembe Kuvars)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Rose Quartz)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin63/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_63.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -46972,10 +47535,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Safir)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Sapphire)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin61/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_61.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -46986,10 +47549,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Tanzanit)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Tanzanite)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin64/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_64.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -47000,10 +47563,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Turuncu)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Citrine)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin59/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_59.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -47014,10 +47577,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Yakut)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Ruby)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin57/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_57.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -47028,10 +47591,10 @@
       "champion": "Anivia",
       "nameTr": "Kadim İlah Anivia (Zümrüt)",
       "championTr": "Anivia",
-      "nameEn": "Old God Anivia",
+      "nameEn": "Old God Anivia (Emerald)",
       "championEn": "Anivia",
       "championId": "Anivia",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/anivia/skins/skin58/chromapreview.chroma_anivia_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Anivia_58.jpg",
       "imageFallback": "",
       "parentSkinId": "34056"
     },
@@ -47583,10 +48146,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (İnci Beyazı)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Pearl)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin48/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_48.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47597,10 +48160,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Kedigözü)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Catseye)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin43/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_43.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47611,10 +48174,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Obsidiyen)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Obsidian)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin49/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_49.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47625,10 +48188,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Pembe Kuvars)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Rose Quartz)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin47/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_47.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47639,10 +48202,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Safir)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Sapphire)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin45/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_45.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47653,10 +48216,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Tanzanit)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Tanzanite)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin46/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_46.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47667,10 +48230,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Yakut)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Ruby)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin42/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_42.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -47681,10 +48244,10 @@
       "champion": "Urgot",
       "nameTr": "Kadim İlah Urgot (Zümrüt)",
       "championTr": "Urgot",
-      "nameEn": "Old God Urgot",
+      "nameEn": "Old God Urgot (Emerald)",
       "championEn": "Urgot",
       "championId": "Urgot",
-      "image": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin44/chromapreview.chroma_urgot_oldgod.png",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_44.jpg",
       "imageFallback": "",
       "parentSkinId": "6041"
     },
@@ -50938,7 +51501,7 @@
       "championEn": "Annie",
       "championId": "Annie",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Annie_59.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/annie/skins/skin59/images/annie_splash_centered_59.skins_annie_skin59.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/annie/skins/skin59/images/annie_splash_centered_59.jpg"
     },
     {
       "id": "203045",
@@ -50951,7 +51514,7 @@
       "championEn": "Kindred",
       "championId": "Kindred",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kindred_45.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kindred/skins/skin45/images/kindred_splash_centered_45.skins_kindred_skin45.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kindred/skins/skin45/images/kindred_splash_centered_45.jpg"
     },
     {
       "id": "13007",
@@ -51661,7 +52224,7 @@
       "championEn": "Brand",
       "championId": "Brand",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Brand_53.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/brand/skins/skin53/images/brand_splash_centered_53.skins_brand_skin53.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/brand/skins/skin53/images/brand_splash_centered_53.jpg"
     },
     {
       "id": "910021",
@@ -51674,7 +52237,7 @@
       "championEn": "Hwei",
       "championId": "Hwei",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Hwei_21.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/hwei/skins/skin21/images/hwei_splash_centered_21.skins_hwei_skin21.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/hwei/skins/skin21/images/hwei_splash_centered_21.jpg"
     },
     {
       "id": "10000",
@@ -56421,7 +56984,7 @@
       "championEn": "Master Yi",
       "championId": "MasterYi",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MasterYi_116.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/masteryi/skins/skin116/images/masteryi_splash_centered_116.skins_masteryi_skin116.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/masteryi/skins/skin116/images/masteryi_splash_centered_116.jpg"
     },
     {
       "id": "89008",
@@ -56877,7 +57440,7 @@
       "championEn": "Quinn",
       "championId": "Quinn",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Quinn_24.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/quinn/skins/skin24/images/quinn_splash_centered_24.skins_quinn_skin24.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/quinn/skins/skin24/images/quinn_splash_centered_24.jpg"
     },
     {
       "id": "133032",
@@ -57377,7 +57940,7 @@
       "championEn": "Sivir",
       "championId": "Sivir",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sivir_72.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sivir/skins/skin72/images/sivir_splash_centered_72.skins_sivir_skin72.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sivir/skins/skin72/images/sivir_splash_centered_72.jpg"
     },
     {
       "id": "15078",
@@ -60810,9 +61373,7 @@
       "championEn": "Yasuo",
       "championId": "Yasuo",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_87.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yasuo/skins/skin87/images/yasuo_splash_centered_87.jpg",
-      "modifiedAt": "2026-08-30T09:02:06.748Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yasuo/skins/skin87/images/yasuo_splash_centered_87.jpg"
     },
     {
       "id": "19003",
@@ -64060,7 +64621,7 @@
       "championEn": "Locke",
       "championId": "Locke",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Locke_0.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/locke/skins/base/images/locke_splash_centered_0.locke.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/locke/skins/base/images/locke_splash_centered_0.jpg"
     },
     {
       "id": "78002",
@@ -64924,7 +65485,7 @@
       "championEn": "Illaoi",
       "championId": "Illaoi",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Illaoi_37.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/illaoi/skins/skin37/images/illaoi_splash_centered_37.skins_illaoi_skin37.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/illaoi/skins/skin37/images/illaoi_splash_centered_37.jpg"
     },
     {
       "id": "420040",
@@ -73778,9 +74339,7 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_80.jpg",
-      "imageFallback": "",
-      "modifiedAt": "2026-09-13T13:44:55.486Z",
-      "customFantome": true
+      "imageFallback": ""
     },
     {
       "id": "92044",
@@ -78006,7 +78565,7 @@
       "championEn": "Sion",
       "championId": "Sion",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sion_50.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sion/skins/skin50/images/sion_splash_centered_50.skins_sion_skin50.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sion/skins/skin50/images/sion_splash_centered_50.jpg"
     },
     {
       "id": "14057",
@@ -80730,6 +81289,33 @@
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vayne/skins/skin13/images/vayne_splash_centered_13.jpg"
     },
     {
+      "id": "875076",
+      "skinNum": 76,
+      "name": "Prestij HEARTSTEEL Live My Life Sett",
+      "champion": "Sett",
+      "nameTr": "Prestij HEARTSTEEL Live My Life Sett",
+      "championTr": "Sett",
+      "nameEn": "Prestige HEARTSTEEL Live My Life Sett",
+      "championEn": "Sett",
+      "championId": "Sett",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sett_76.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sett/skins/skin76/images/sett_splash_centered_76.skins_sett_skin76.jpg"
+    },
+    {
+      "id": "875077",
+      "skinNum": 77,
+      "name": "Prestij HEARTSTEEL Live My Life Sett (Kuvvetli)",
+      "champion": "Sett",
+      "nameTr": "Prestij HEARTSTEEL Live My Life Sett (Kuvvetli)",
+      "championTr": "Sett",
+      "nameEn": "Prestige HEARTSTEEL Live My Life Sett (Vivid)",
+      "championEn": "Sett",
+      "championId": "Sett",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sett_77.jpg",
+      "imageFallback": "",
+      "parentSkinId": "875076"
+    },
+    {
       "id": "777046",
       "skinNum": 46,
       "name": "Prestij HEARTSTEEL Yone",
@@ -80949,7 +81535,7 @@
       "championEn": "Shaco",
       "championId": "Shaco",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Shaco_71.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/shaco/skins/skin71/images/shaco_splash_centered_71.skins_shaco_skin71.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/shaco/skins/skin71/images/shaco_splash_centered_71.jpg"
     },
     {
       "id": "35072",
@@ -80976,7 +81562,7 @@
       "championEn": "LeBlanc",
       "championId": "Leblanc",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leblanc_59.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leblanc/skins/skin59/images/leblanc_splash_centered_59.skins_leblanc_skin59.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leblanc/skins/skin59/images/leblanc_splash_centered_59.jpg"
     },
     {
       "id": "7060",
@@ -81057,6 +81643,33 @@
       "championId": "Warwick",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Warwick_46.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/warwick/skins/skin46/images/warwick_splash_centered_46.jpg"
+    },
+    {
+      "id": "96065",
+      "skinNum": 65,
+      "name": "Prestij Klasik Baron Kog'Maw",
+      "champion": "Kog'Maw",
+      "nameTr": "Prestij Klasik Baron Kog'Maw",
+      "championTr": "Kog'Maw",
+      "nameEn": "Prestige Classic Baron Kog'Maw",
+      "championEn": "Kog'Maw",
+      "championId": "KogMaw",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KogMaw_65.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kogmaw/skins/skin65/images/kogmaw_splash_centered_65.skins_kogmaw_skin65.jpg"
+    },
+    {
+      "id": "96066",
+      "skinNum": 66,
+      "name": "Prestij Klasik Baron Kog'Maw (Kuvvetli)",
+      "champion": "Kog'Maw",
+      "nameTr": "Prestij Klasik Baron Kog'Maw (Kuvvetli)",
+      "championTr": "Kog'Maw",
+      "nameEn": "Prestige Classic Baron Kog'Maw (Vivid)",
+      "championEn": "Kog'Maw",
+      "championId": "KogMaw",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KogMaw_66.jpg",
+      "imageFallback": "",
+      "parentSkinId": "96065"
     },
     {
       "id": "39017",
@@ -81412,9 +82025,7 @@
       "championEn": "Aphelios",
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_40.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin40/images/aphelios_splash_centered_40.jpg",
-      "modifiedAt": "2026-08-28T09:31:40.649Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin40/images/aphelios_splash_centered_40.jpg"
     },
     {
       "id": "99070",
@@ -98467,6 +99078,20 @@
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/jax/skins/skin08/images/jax_splash_centered_8.jpg"
     },
     {
+      "id": "24044",
+      "skinNum": 44,
+      "name": "SKT T1 Jax (Seçkin)",
+      "champion": "Jax",
+      "nameTr": "SKT T1 Jax (Seçkin)",
+      "championTr": "Jax",
+      "nameEn": "SKT T1 Jax (Elite)",
+      "championEn": "Jax",
+      "championId": "Jax",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Jax_44.jpg",
+      "imageFallback": "",
+      "parentSkinId": "24008"
+    },
+    {
       "id": "202003",
       "skinNum": 3,
       "name": "SKT T1 Jhin",
@@ -98504,6 +99129,20 @@
       "championId": "LeeSin",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/LeeSin_6.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leesin/skins/skin06/images/leesin_splash_centered_6.jpg"
+    },
+    {
+      "id": "64082",
+      "skinNum": 82,
+      "name": "SKT T1 Lee Sin (Seçkin)",
+      "champion": "Lee Sin",
+      "nameTr": "SKT T1 Lee Sin (Seçkin)",
+      "championTr": "Lee Sin",
+      "nameEn": "SKT T1 Lee Sin (Elite)",
+      "championEn": "Lee Sin",
+      "championId": "LeeSin",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/LeeSin_82.jpg",
+      "imageFallback": "",
+      "parentSkinId": "64006"
     },
     {
       "id": "267008",
@@ -98612,6 +99251,20 @@
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vayne/skins/skin05/images/vayne_splash_centered_5.jpg"
     },
     {
+      "id": "67074",
+      "skinNum": 74,
+      "name": "SKT T1 Vayne (Seçkin)",
+      "champion": "Vayne",
+      "nameTr": "SKT T1 Vayne (Seçkin)",
+      "championTr": "Vayne",
+      "nameEn": "SKT T1 Vayne (Elite)",
+      "championEn": "Vayne",
+      "championId": "Vayne",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vayne_74.jpg",
+      "imageFallback": "",
+      "parentSkinId": "67005"
+    },
+    {
       "id": "154006",
       "skinNum": 6,
       "name": "SKT T1 Zac",
@@ -98652,6 +99305,20 @@
       "parentSkinId": "238002"
     },
     {
+      "id": "238071",
+      "skinNum": 71,
+      "name": "SKT T1 Zed (Seçkin)",
+      "champion": "Zed",
+      "nameTr": "SKT T1 Zed (Seçkin)",
+      "championTr": "Zed",
+      "nameEn": "SKT T1 Zed (Elite)",
+      "championEn": "Zed",
+      "championId": "Zed",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zed_71.jpg",
+      "imageFallback": "",
+      "parentSkinId": "238002"
+    },
+    {
       "id": "143003",
       "skinNum": 3,
       "name": "SKT T1 Zyra",
@@ -98663,6 +99330,20 @@
       "championId": "Zyra",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zyra_3.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zyra/skins/skin03/images/zyra_splash_centered_3.jpg"
+    },
+    {
+      "id": "143074",
+      "skinNum": 74,
+      "name": "SKT T1 Zyra (Seçkin)",
+      "champion": "Zyra",
+      "nameTr": "SKT T1 Zyra (Seçkin)",
+      "championTr": "Zyra",
+      "nameEn": "SKT T1 Zyra (Elite)",
+      "championEn": "Zyra",
+      "championId": "Zyra",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zyra_74.jpg",
+      "imageFallback": "",
+      "parentSkinId": "143003"
     },
     {
       "id": "901000",
@@ -100375,7 +101056,7 @@
       "championEn": "Diana",
       "championId": "Diana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Diana_76.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/diana/skins/skin76/images/diana_splash_centered_76.skins_diana_skin76.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/diana/skins/skin76/images/diana_splash_centered_76.jpg"
     },
     {
       "id": "131083",
@@ -100472,7 +101153,7 @@
       "championEn": "Leona",
       "championId": "Leona",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Leona_64.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leona/skins/skin64/images/leona_splash_centered_64.skins_leona_skin64.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/leona/skins/skin64/images/leona_splash_centered_64.jpg"
     },
     {
       "id": "89070",
@@ -100621,7 +101302,7 @@
       "championEn": "Vel'Koz",
       "championId": "Velkoz",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Velkoz_29.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/velkoz/skins/skin29/images/velkoz_splash_centered_29.skins_velkoz_skin29.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/velkoz/skins/skin29/images/velkoz_splash_centered_29.jpg"
     },
     {
       "id": "161035",
@@ -103478,7 +104159,7 @@
       "championEn": "Braum",
       "championId": "Braum",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Braum_51.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/braum/skins/skin51/images/braum_splash_centered_51.skins_braum_skin51.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/braum/skins/skin51/images/braum_splash_centered_51.jpg"
     },
     {
       "id": "201054",
@@ -109216,7 +109897,7 @@
       "championEn": "Diana",
       "championId": "Diana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Diana_77.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/diana/skins/skin77/images/diana_splash_centered_77.skins_diana_skin77.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/diana/skins/skin77/images/diana_splash_centered_77.jpg"
     },
     {
       "id": "105014",
@@ -112635,7 +113316,7 @@
       "championEn": "Zac",
       "championId": "Zac",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zac_33.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zac/skins/skin33/images/zac_splash_centered_33.skins_zac_skin33.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zac/skins/skin33/images/zac_splash_centered_33.jpg"
     },
     {
       "id": "154040",
@@ -113351,7 +114032,7 @@
       "championEn": "Akshan",
       "championId": "Akshan",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akshan_21.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/akshan/skins/skin21/images/akshan_splash_centered_21.skins_akshan_skin21.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/akshan/skins/skin21/images/akshan_splash_centered_21.jpg"
     },
     {
       "id": "166026",
@@ -114517,7 +115198,7 @@
       "championEn": "Locke",
       "championId": "Locke",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Locke_1.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/locke/skins/skin01/images/locke_splash_centered_1.locke.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/locke/skins/skin01/images/locke_splash_centered_1.jpg"
     },
     {
       "id": "805004",
@@ -117901,7 +118582,7 @@
       "championEn": "Ivern",
       "championId": "Ivern",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ivern_31.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ivern/skins/skin31/images/ivern_splash_centered_31.skins_ivern_skin31.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ivern/skins/skin31/images/ivern_splash_centered_31.jpg"
     },
     {
       "id": "427038",
@@ -119126,9 +119807,7 @@
       "championEn": "Viego",
       "championId": "Viego",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Viego_43.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/viego/skins/skin43/images/viego_splash_centered_43.jpg",
-      "modifiedAt": "2026-09-15T17:35:26.006Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/viego/skins/skin43/images/viego_splash_centered_43.jpg"
     },
     {
       "id": "69004",
@@ -121545,9 +122224,7 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_44.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin44/images/garen_splash_centered_44.jpg",
-      "modifiedAt": "2026-08-30T09:01:04.813Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin44/images/garen_splash_centered_44.jpg"
     },
     {
       "id": "21005",
@@ -121911,9 +122588,7 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Garen_13.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin13/images/garen_splash_centered_13.jpg",
-      "modifiedAt": "2026-08-30T09:01:41.057Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/garen/skins/skin13/images/garen_splash_centered_13.jpg"
     },
     {
       "id": "64052",
@@ -122879,9 +123554,7 @@
       "championEn": "Orianna",
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_40.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/orianna/skins/skin40/images/orianna_splash_centered_40.skins_orianna_skin40.jpg",
-      "modifiedAt": "2026-09-13T13:45:29.288Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/orianna/skins/skin40/images/orianna_splash_centered_40.skins_orianna_skin40.jpg"
     },
     {
       "id": "61042",
@@ -122895,9 +123568,7 @@
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_42.jpg",
       "imageFallback": "",
-      "parentSkinId": "61040",
-      "modifiedAt": "2026-09-13T13:46:06.493Z",
-      "customFantome": true
+      "parentSkinId": "61040"
     },
     {
       "id": "61041",
@@ -122911,9 +123582,7 @@
       "championId": "Orianna",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Orianna_41.jpg",
       "imageFallback": "",
-      "parentSkinId": "61040",
-      "modifiedAt": "2026-09-13T13:45:54.741Z",
-      "customFantome": true
+      "parentSkinId": "61040"
     },
     {
       "id": "18079",
@@ -122926,9 +123595,7 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_79.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/tristana/skins/skin79/images/tristana_splash_centered_79.hol_tristana.jpg",
-      "modifiedAt": "2026-09-13T13:44:31.348Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/tristana/skins/skin79/images/tristana_splash_centered_79.hol_tristana.jpg"
     },
     {
       "id": "67064",
@@ -123989,9 +124656,7 @@
       "championEn": "Nasus",
       "championId": "Nasus",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Nasus_5.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/nasus/skins/skin05/images/nasus_splash_centered_5.jpg",
-      "modifiedAt": "2026-09-26T15:08:12.331Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/nasus/skins/skin05/images/nasus_splash_centered_5.jpg"
     },
     {
       "id": "2044",
@@ -125610,7 +126275,7 @@
       "championEn": "Vladimir",
       "championId": "Vladimir",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Vladimir_49.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vladimir/skins/skin49/images/vladimir_splash_centered_49.skins_vladimir_skin49.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/vladimir/skins/skin49/images/vladimir_splash_centered_49.jpg"
     },
     {
       "id": "8057",
