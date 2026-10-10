@@ -989,6 +989,23 @@
           Veriler yükleniyor…
         </p>
 
+        <!-- Single-champion toolbar area (shown by JS when only one champion is visible) -->
+        <div id="champion-pack-toolbar" class="champion-pack-toolbar" hidden>
+          <button
+            id="champion-pack-toolbar-btn"
+            class="champion-pack-toolbar-btn btn-secondary-metal"
+            type="button"
+          ></button>
+          <label id="champion-pack-toolbar-chroma-label" class="champion-pack-toolbar-chroma-label">
+            <input
+              id="champion-pack-toolbar-chroma-checkbox"
+              type="checkbox"
+              class="champion-pack-chroma-checkbox"
+            />
+            <span data-i18n="championPackIncludeChromas">Chroma'ları dahil et</span>
+          </label>
+        </div>
+
       </div>
 
       <div
@@ -1212,6 +1229,9 @@
           </span>
 
         </button>
+
+        <!-- Champion Pack Download Block (populated by JS) -->
+        <div id="champion-pack-block" class="champion-pack-block" hidden></div>
 
       </div>
 
