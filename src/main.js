@@ -1,5 +1,6 @@
 import './style.css';
 import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders';
+import { downloadZip } from 'client-zip';
 
 const APPEARANCE_STORAGE_KEY = 'exist-lol-skin-appearance';
 const APPEARANCE_VALUES = ['mono', 'gold', 'neon'];
@@ -470,6 +471,51 @@ const TRANSLATIONS = {
   appearanceNeon: {
     tr: 'Arcane Neon',
     en: 'Arcane Neon'
+  },
+
+  championPackHeading: {
+    tr: '{champion} · tüm skinler',
+    en: '{champion} · all skins'
+  },
+
+  championPackFileCount: {
+    tr: '{count} dosya',
+    en: '{count} files'
+  },
+
+  championPackIncludeChromas: {
+    tr: "Chroma'ları dahil et",
+    en: 'Include chromas'
+  },
+
+  championPackDownloadAll: {
+    tr: 'Tüm skinleri indir',
+    en: 'Download all skins'
+  },
+
+  championPackPreparing: {
+    tr: 'Hazırlanıyor… {done}/{total}',
+    en: 'Preparing… {done}/{total}'
+  },
+
+  championPackDone: {
+    tr: 'İndirildi ✓',
+    en: 'Downloaded ✓'
+  },
+
+  championPackError: {
+    tr: 'İndirme başarısız',
+    en: 'Download failed'
+  },
+
+  championPackSkipped: {
+    tr: '{count} dosya indirilemedi',
+    en: '{count} file(s) could not be downloaded'
+  },
+
+  championPackToolbarBtn: {
+    tr: 'Tüm skinleri indir · {count} dosya',
+    en: 'Download all skins · {count} files'
   }
 };
 
@@ -2894,6 +2940,7 @@ function render() {
 
   updateFavoriteCount();
   updateFilterButtonState();
+  updatePackToolbarBtn();
 }
 
 function renderNextBatch() {
@@ -3106,6 +3153,409 @@ function getChromaColorAndImage(item, baseSkin) {
 }
 
 /* =========================================
+   CHAMPION PACK İNDİRME — İSİMLENDİRME YARDIMCISI
+========================================= */
+
+/**
+ * Windows'ta yasak karakterler ve kontrol karakterleri için temizleme
+ * kuralları, Türkçe → ASCII dönüşümü ve ~100 karakter sınırı.
+ *
+ * getFantomeDownloadName(skin) → "Skin Adı.fantome"
+ * İndirme bağlantıları ve ZIP girişleri bu fonksiyonu kullanır.
+ */
+const TR_ASCII_MAP = {
+  ı: 'i', İ: 'I', ş: 's', Ş: 'S', ğ: 'g', Ğ: 'G',
+  ç: 'c', Ç: 'C', ö: 'o', Ö: 'O', ü: 'u', Ü: 'U'
+};
+
+function sanitizeFilename(raw) {
+  // 1) Türkçe karakterleri manuel dönüştür
+  let s = raw.replace(/[ıİşŞğĞçÇöÖüÜ]/g, (ch) => TR_ASCII_MAP[ch] || ch);
+  // 2) NFD normalize → birleşik işaretleri sil
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // 3) Windows yasak karakterleri ve kontrol karakterleri
+  s = s.replace(/[<>:"/\\|?*\x00-\x1f]/g, ' ');
+  // 4) Ardışık boşlukları teke indir
+  s = s.replace(/\s{2,}/g, ' ').trim();
+  // 5) Sondaki nokta/boşluk
+  s = s.replace(/[. ]+$/, '');
+  // 6) ~100 karakter
+  if (s.length > 100) s = s.slice(0, 100).trimEnd().replace(/[. ]+$/, '');
+  return s || 'skin';
+}
+
+function getFantomeDownloadName(skin) {
+  const displayName = getLocalizedSkinName(skin);
+  return sanitizeFilename(displayName) + '.fantome';
+}
+
+/* =========================================
+   CHAMPION PACK İNDİRME — MANTIK
+========================================= */
+
+const CHAMPION_CHROMAS_KEY = 'exist-lol-pack-include-chromas';
+
+let packIncludeChromas = false;
+try {
+  packIncludeChromas = localStorage.getItem(CHAMPION_CHROMAS_KEY) === 'true';
+} catch (_) {}
+
+function savePackChromasPref(val) {
+  try { localStorage.setItem(CHAMPION_CHROMAS_KEY, val ? 'true' : 'false'); } catch (_) {}
+}
+
+/**
+ * Şampiyonun tüm mevcut fantome dosyalarını tek ZIP'e toplar.
+ * @param {string|number} championKey – normalize edilmiş şampiyon anahtarı
+ *   (skin._championKeys[0]). Arama/filtreden bağımsız.
+ * @param {{ includeChromas: boolean, onProgress: (done,total)=>void }} opts
+ * @returns {Promise<{skipped:number}>}
+ */
+async function downloadChampionPack(championKey, { includeChromas, onProgress } = {}) {
+  // 1) Şampiyona ait, dosyası olan skinleri topla
+  let championSkins = skins.filter((skin) => {
+    const keys = skin._championKeys;
+    const matches = keys
+      ? keys.some((k) => k === championKey)
+      : normalize(getLocalizedChampionName(skin, 'tr')) === championKey;
+    if (!matches) return false;
+    if (!fantomeFiles.has(String(skin.id))) return false;
+    if (!includeChromas && skin.parentSkinId) return false;
+    return true;
+  });
+
+  if (championSkins.length === 0) return { skipped: 0 };
+
+  // ZIP içindeki klasör adı: şampiyonun ASCII adı
+  const firstSkin = championSkins[0];
+  const champDisplayName = getLocalizedChampionName(firstSkin);
+  const champFolderName = sanitizeFilename(champDisplayName);
+
+  // 2) İndirme adlarındaki çakışmaları çöz
+  const usedNames = new Map(); // name → count
+  const resolvedNames = championSkins.map((skin) => {
+    const base = getFantomeDownloadName(skin); // "Name.fantome"
+    const count = (usedNames.get(base) || 0) + 1;
+    usedNames.set(base, count);
+    return { skin, baseName: base, count };
+  });
+  // İkinci geçiş: çakışanlara " - <ID>" ekle
+  const nameCount2 = new Map();
+  const entries = resolvedNames.map(({ skin, baseName }) => {
+    const total = usedNames.get(baseName);
+    const idx = (nameCount2.get(baseName) || 0) + 1;
+    nameCount2.set(baseName, idx);
+    let finalName;
+    if (total > 1 && idx > 1) {
+      // Sadece ikinci ve sonraki çakışanlar ID alır
+      const stem = baseName.slice(0, baseName.length - '.fantome'.length);
+      finalName = `${stem} - ${skin.id}.fantome`;
+    } else {
+      finalName = baseName;
+    }
+    return { skin, name: `${champFolderName}/${finalName}` };
+  });
+
+  // 3) Tüm dosyaları tam parallel fetch et — dosyalar küçük (~6.6KB ort),
+  //    tarayıcı connection pool'u zaten sınırlar (H/2 multiplexing).
+  //    Retry: başarısız olursa 1 kez daha dene, yine olmazsa atla.
+  let skipped = 0;
+  const total = entries.length;
+  let done = 0;
+
+  // Tüm dosyaları parallel fetch ET VE ArrayBuffer'a çek.
+  // client-zip'e Response değil hazır Uint8Array verince
+  // ZIP assembly aşaması saf CPU'ya dönüşür, ağ bekleme kalmaz.
+  async function fetchToBuffer(url) {
+    let res = await fetch(url);
+    if (!res.ok) res = await fetch(url);
+    if (!res.ok) return null;
+    const ab = await res.arrayBuffer();
+    return new Uint8Array(ab);
+  }
+
+  const results = await Promise.all(
+    entries.map(async ({ skin, name }) => {
+      const url = assetUrl(`fantome/${skin.id}.fantome`);
+      const buf = await fetchToBuffer(url);
+      done++;
+      if (onProgress) onProgress(done, total);
+      if (!buf) { skipped++; return null; }
+      return { name, input: buf, size: buf.byteLength };
+    })
+  );
+
+  const zipInputs = results.filter(Boolean);
+
+  // 4) ZIP oluştur — girdiler zaten bellekte, assembly anında tamamlanır
+  const blob = await downloadZip(zipInputs).blob();
+
+  // 5) İndir
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${champFolderName}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+  // 6) Analytics
+  track('champion_pack_download', {
+    champion: champDisplayName,
+    file_count: zipInputs.length,
+    include_chromas: includeChromas ? 1 : 0
+  });
+
+  return { skipped };
+}
+
+/**
+ * Şampiyona ait dosyaların sayısını döner (chroma seçimine göre).
+ */
+function getChampionPackFileCount(championKey, includeChromas) {
+  return skins.filter((skin) => {
+    const keys = skin._championKeys;
+    const matches = keys
+      ? keys.some((k) => k === championKey)
+      : normalize(getLocalizedChampionName(skin, 'tr')) === championKey;
+    if (!matches) return false;
+    if (!fantomeFiles.has(String(skin.id))) return false;
+    if (!includeChromas && skin.parentSkinId) return false;
+    return true;
+  }).length;
+}
+
+/* =========================================
+   CHAMPION PACK — MODAL BLOK & TOOLBAR
+========================================= */
+
+/**
+ * Belirli bir buton üzerindeki indir durumunu yönetir.
+ * state: 'idle' | 'progress' | 'done' | 'error'
+ */
+function setPackBtnState(btn, state, vars) {
+  btn.dataset.packState = state;
+  if (state === 'idle') {
+    const count = vars?.count ?? 0;
+    btn.textContent = count > 0
+      ? t('championPackDownloadAll')
+      : t('championPackDownloadAll');
+    btn.disabled = false;
+  } else if (state === 'progress') {
+    btn.textContent = t('championPackPreparing', { done: vars.done, total: vars.total });
+    btn.disabled = true;
+  } else if (state === 'done') {
+    btn.textContent = t('championPackDone');
+    btn.disabled = false;
+    setTimeout(() => {
+      if (btn.dataset.packState === 'done') setPackBtnState(btn, 'idle');
+    }, 2000);
+  } else if (state === 'error') {
+    btn.textContent = t('championPackError');
+    btn.disabled = false;
+    setTimeout(() => {
+      if (btn.dataset.packState === 'error') setPackBtnState(btn, 'idle');
+    }, 3000);
+  }
+}
+
+/**
+ * Şampiyon pack bloğunu modalın modal-copy içine render eder.
+ * Şampiyonun hiç dosyası yoksa blok gizli kalır.
+ */
+function renderChampionPackBlock(skin) {
+  const block = document.getElementById('champion-pack-block');
+  if (!block) return;
+
+  const championKey = skin._championKeys?.[0]
+    ?? normalize(getLocalizedChampionName(skin, 'tr'));
+
+  const countWithout = getChampionPackFileCount(championKey, false);
+  const countWith = getChampionPackFileCount(championKey, true);
+
+  if (countWithout === 0 && countWith === 0) {
+    block.hidden = true;
+    return;
+  }
+
+  block.hidden = false;
+
+  // Başlık
+  const champDisplay = getLocalizedChampionName(skin);
+
+  // Mevcut içeriği temizle
+  block.innerHTML = '';
+
+  const heading = document.createElement('p');
+  heading.className = 'champion-pack-heading';
+  heading.textContent = t('championPackHeading', { champion: champDisplay });
+  block.appendChild(heading);
+
+  const fileCountEl = document.createElement('p');
+  fileCountEl.className = 'champion-pack-filecount';
+  const currentCount = packIncludeChromas ? countWith : countWithout;
+  fileCountEl.textContent = t('championPackFileCount', { count: currentCount });
+  block.appendChild(fileCountEl);
+
+  // Chroma onay kutusu
+  const chromaLabel = document.createElement('label');
+  chromaLabel.className = 'champion-pack-chroma-label';
+  const chromaCheckbox = document.createElement('input');
+  chromaCheckbox.type = 'checkbox';
+  chromaCheckbox.className = 'champion-pack-chroma-checkbox';
+  chromaCheckbox.checked = packIncludeChromas;
+  chromaCheckbox.addEventListener('change', () => {
+    packIncludeChromas = chromaCheckbox.checked;
+    savePackChromasPref(packIncludeChromas);
+    const newCount = packIncludeChromas ? countWith : countWithout;
+    fileCountEl.textContent = t('championPackFileCount', { count: newCount });
+    // Toolbar'ı da güncelle
+    updatePackToolbarBtn();
+  });
+  const chromaText = document.createElement('span');
+  chromaText.textContent = t('championPackIncludeChromas');
+  chromaLabel.appendChild(chromaCheckbox);
+  chromaLabel.appendChild(chromaText);
+  block.appendChild(chromaLabel);
+
+  // İndir butonu
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'champion-pack-btn btn-secondary-metal';
+  setPackBtnState(btn, 'idle');
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    setPackBtnState(btn, 'progress', { done: 0, total: packIncludeChromas ? countWith : countWithout });
+    try {
+      const { skipped } = await downloadChampionPack(championKey, {
+        includeChromas: packIncludeChromas,
+        onProgress: (done, total) => setPackBtnState(btn, 'progress', { done, total })
+      });
+      setPackBtnState(btn, 'done');
+      if (skipped > 0) {
+        const notice = document.createElement('p');
+        notice.className = 'champion-pack-skipped';
+        notice.textContent = t('championPackSkipped', { count: skipped });
+        // Var olan notice'i temizle
+        block.querySelectorAll('.champion-pack-skipped').forEach(el => el.remove());
+        block.appendChild(notice);
+      }
+    } catch (err) {
+      console.error('Champion pack indirme hatası:', err);
+      setPackBtnState(btn, 'error');
+    }
+  });
+
+  block.appendChild(btn);
+}
+
+/**
+ * Sonuçlar araç çubuğundaki "tüm skinleri indir" butonunu günceller.
+ * Yalnızca tek şampiyon bağlamında (filtre veya arama) görünür.
+ */
+function updatePackToolbarBtn() {
+  const wrapper = document.getElementById('champion-pack-toolbar');
+  const btn     = document.getElementById('champion-pack-toolbar-btn');
+  const cbx     = document.getElementById('champion-pack-toolbar-chroma-checkbox');
+  if (!wrapper || !btn) return;
+
+  // Toolbar checkbox'ı packIncludeChromas ile senkronize et (ilk render)
+  if (cbx && cbx._initialized !== true) {
+    cbx._initialized = true;
+    cbx.checked = packIncludeChromas;
+    cbx.addEventListener('change', () => {
+      packIncludeChromas = cbx.checked;
+      savePackChromasPref(packIncludeChromas);
+      // Modal bloğunu da güncelle (açıksa)
+      const activeGroup = typeof activeModalGroup !== 'undefined' ? activeModalGroup : null;
+      if (activeGroup?.primary) renderChampionPackBlock(activeGroup.primary);
+      updatePackToolbarBtn();
+    });
+  }
+  if (cbx) cbx.checked = packIncludeChromas;
+
+  // Mevcut arama/filtre bağlamında tek şampiyon var mı?
+  const query = normalize(search?.value || '');
+  const favoriteActive = isFavoriteFilterActive?.() ?? false;
+  const championFilters = appliedChampionFilters;
+
+  let singleChampionKey = null;
+  if (championFilters.size === 1) {
+    singleChampionKey = [...championFilters][0];
+  } else if (championFilters.size === 0 && query) {
+    const visibleKeys = new Set();
+    for (const group of skinGroups) {
+      if (
+        (!favoriteActive || groupHasFavorite(group)) &&
+        groupMatchesChampionFilter(group) &&
+        getGroupSearchScore(group, query) > 0
+      ) {
+        const k = group.primary._championKeys?.[0]
+          ?? normalize(getLocalizedChampionName(group.primary, 'tr'));
+        visibleKeys.add(k);
+        if (visibleKeys.size > 1) break;
+      }
+    }
+    if (visibleKeys.size === 1) {
+      singleChampionKey = [...visibleKeys][0];
+    }
+  }
+
+  // Şampiyon yoksa veya değiştiyse: sıfırla ve gizle
+  if (!singleChampionKey || singleChampionKey !== btn._packChampKey) {
+    if (btn.dataset.packState !== 'progress') {
+      btn.dataset.packState = '';
+      btn.disabled = false;
+      btn.textContent = '';
+      btn._packChampKey = null;
+      btn.onclick = null;
+    }
+    if (!singleChampionKey) {
+      wrapper.hidden = true;
+      return;
+    }
+  }
+
+  const count = getChampionPackFileCount(singleChampionKey, packIncludeChromas);
+  if (count === 0) {
+    wrapper.hidden = true;
+    btn._packChampKey = null;
+    return;
+  }
+
+  // Yeni şampiyon — idle durumuna geçir ve onclick bağla
+  if (btn._packChampKey !== singleChampionKey) {
+    btn._packChampKey = singleChampionKey;
+    btn.dataset.packState = 'idle';
+    btn.disabled = false;
+    btn.textContent = t('championPackToolbarBtn', { count });
+
+    btn.onclick = async () => {
+      if (btn.disabled) return;
+      const total = getChampionPackFileCount(singleChampionKey, packIncludeChromas);
+      setPackBtnState(btn, 'progress', { done: 0, total });
+      try {
+        const { skipped } = await downloadChampionPack(singleChampionKey, {
+          includeChromas: packIncludeChromas,
+          onProgress: (done, ttl) => setPackBtnState(btn, 'progress', { done, total: ttl })
+        });
+        setPackBtnState(btn, 'done');
+        if (skipped > 0) console.info(`${skipped} dosya indirilemedi`);
+      } catch (err) {
+        console.error('Toolbar pack indirme hatası:', err);
+        setPackBtnState(btn, 'error');
+      }
+    };
+  } else if (btn.dataset.packState === 'idle' || btn.dataset.packState === '') {
+    btn.textContent = t('championPackToolbarBtn', { count });
+  }
+
+  wrapper.hidden = false;
+}
+
+/* =========================================
    SKIN MODALI
 ========================================= */
 
@@ -3308,7 +3758,7 @@ activeModalGroup = group;
         );
 
       element.download =
-        `${item.id}.fantome`;
+        getFantomeDownloadName(item);
 
       element.title =
         t(
@@ -3370,6 +3820,12 @@ activeModalGroup = group;
   downloadList.replaceChildren(
     fragment
   );
+
+  /* ---------------------------------------
+     Champion Pack bloğu
+  --------------------------------------- */
+
+  renderChampionPackBlock(skin);
 
   /* ---------------------------------------
      Modal aç (shared-element geçişi)
