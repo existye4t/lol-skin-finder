@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "@paper-design/shaders": "^0.0.80",
-    "client-zip": "2.4.6"
+    "client-zip": "2.5.1"
   }
 }
