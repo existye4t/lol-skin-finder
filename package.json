@@ -16,7 +16,7 @@
     "vite": "^7.3.6"
   },
   "dependencies": {
-    "@paper-design/shaders": "^0.0.80",
+    "@paper-design/shaders": "^0.0.82",
     "client-zip": "2.4.6"
   }
 }
