@@ -1,6 +1,6 @@
 {
-  "version": "16.20.1",
-  "updatedAt": "2026-10-07T13:15:04.216Z",
+  "version": "16.21.1",
+  "updatedAt": "2026-10-27T14:33:54.221Z",
   "skins": [
     {
       "id": "876045",
@@ -40589,9 +40589,7 @@
       "championEn": "Aphelios",
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_41.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin41/images/aphelios_splash_centered_41.skins_aphelios_skin41.jpg",
-      "modifiedAt": "2026-10-07T13:11:41.622Z",
-      "customFantome": true
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/aphelios/skins/skin41/images/aphelios_splash_centered_41.skins_aphelios_skin41.jpg"
     },
     {
       "id": "523049",
@@ -40605,9 +40603,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_49.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:14:48.567Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523046",
@@ -40621,9 +40617,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_46.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:14:37.946Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523044",
@@ -40637,9 +40631,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_44.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:15:02.509Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523045",
@@ -40653,9 +40645,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_45.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:13:13.809Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523047",
@@ -40669,9 +40659,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_47.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:13:48.039Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523048",
@@ -40685,9 +40673,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_48.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:14:00.845Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523043",
@@ -40701,9 +40687,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_43.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:13:38.035Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "523042",
@@ -40717,9 +40701,7 @@
       "championId": "Aphelios",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_42.jpg",
       "imageFallback": "",
-      "parentSkinId": "523041",
-      "modifiedAt": "2026-10-07T13:13:23.051Z",
-      "customFantome": true
+      "parentSkinId": "523041"
     },
     {
       "id": "81078",
@@ -71336,7 +71318,7 @@
       "championEn": "Miss Fortune",
       "championId": "MissFortune",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/MissFortune_69.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/missfortune/skins/skin69/images/missfortune_splash_centered_69.skins_missfortune_skin69.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/missfortune/skins/skin69/images/missfortune_splash_centered_69.jpg"
     },
     {
       "id": "21071",
@@ -82359,6 +82341,33 @@
       "championId": "Sylas",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sylas_53.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sylas/skins/skin53/images/sylas_splash_centered_53.jpg"
+    },
+    {
+      "id": "245059",
+      "skinNum": 59,
+      "name": "Prestij True Damage Know My Name Ekko",
+      "champion": "Ekko",
+      "nameTr": "Prestij True Damage Know My Name Ekko",
+      "championTr": "Ekko",
+      "nameEn": "Prestige True Damage Know My Name Ekko",
+      "championEn": "Ekko",
+      "championId": "Ekko",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ekko_59.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ekko/skins/skin59/images/ekko_splash_centered_59.skins_ekko_skin59.jpg"
+    },
+    {
+      "id": "245060",
+      "skinNum": 60,
+      "name": "Prestij True Damage Know My Name Ekko (Kuvvetli)",
+      "champion": "Ekko",
+      "nameTr": "Prestij True Damage Know My Name Ekko (Kuvvetli)",
+      "championTr": "Ekko",
+      "nameEn": "Prestige True Damage Know My Name Ekko (Vivid)",
+      "championEn": "Ekko",
+      "championId": "Ekko",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ekko_60.jpg",
+      "imageFallback": "",
+      "parentSkinId": "245059"
     },
     {
       "id": "246010",
@@ -105116,7 +105125,7 @@
       "championEn": "Rengar",
       "championId": "Rengar",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Rengar_49.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/rengar/skins/skin49/images/rengar_splash_centered_49.skins_rengar_skin49.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/rengar/skins/skin49/images/rengar_splash_centered_49.jpg"
     },
     {
       "id": "107052",
@@ -106969,7 +106978,7 @@
       "championEn": "Ambessa",
       "championId": "Ambessa",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ambessa_8.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ambessa/skins/skin08/images/ambessa_splash_centered_8.skins_ambessa_skin08.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/ambessa/skins/skin08/images/ambessa_splash_centered_8.jpg"
     },
     {
       "id": "799010",
@@ -107093,7 +107102,7 @@
       "championEn": "Galio",
       "championId": "Galio",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Galio_47.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/galio/skins/skin47/images/galio_splash_centered_47.skins_galio_skin47.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/galio/skins/skin47/images/galio_splash_centered_47.jpg"
     },
     {
       "id": "3049",
@@ -107352,7 +107361,7 @@
       "championEn": "Seraphine",
       "championId": "Seraphine",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Seraphine_68.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/seraphine/skins/skin68/images/seraphine_splash_centered_68.skins_seraphine_skin68.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/seraphine/skins/skin68/images/seraphine_splash_centered_68.jpg"
     },
     {
       "id": "147071",
@@ -107503,7 +107512,7 @@
       "championEn": "Xin Zhao",
       "championId": "XinZhao",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/XinZhao_53.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/xinzhao/skins/skin53/images/xinzhao_splash_centered_53.skins_xinzhao_skin53.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/xinzhao/skins/skin53/images/xinzhao_splash_centered_53.jpg"
     },
     {
       "id": "5055",
@@ -107627,7 +107636,7 @@
       "championEn": "Yunara",
       "championId": "Yunara",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yunara_10.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yunara/skins/skin10/images/yunara_splash_centered_10.skins_yunara_skin10.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yunara/skins/skin10/images/yunara_splash_centered_10.jpg"
     },
     {
       "id": "804012",
@@ -109642,6 +109651,436 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ekko_20.jpg",
       "imageFallback": "",
       "parentSkinId": "245019"
+    },
+    {
+      "id": "84103",
+      "skinNum": 103,
+      "name": "True Damage Know My Name Akali",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_103.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/akali/skins/skin103/images/akali_splash_centered_103.skins_akali_skin103.jpg"
+    },
+    {
+      "id": "84109",
+      "skinNum": 109,
+      "name": "True Damage Know My Name Akali (İnci Beyazı)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (İnci Beyazı)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Pearl)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_109.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "84108",
+      "skinNum": 108,
+      "name": "True Damage Know My Name Akali (Kedigözü)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (Kedigözü)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Catseye)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_108.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "84110",
+      "skinNum": 110,
+      "name": "True Damage Know My Name Akali (Obsidiyen)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (Obsidiyen)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Obsidian)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_110.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "84106",
+      "skinNum": 106,
+      "name": "True Damage Know My Name Akali (Pembe Kuvars)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (Pembe Kuvars)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Rose Quartz)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_106.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "84107",
+      "skinNum": 107,
+      "name": "True Damage Know My Name Akali (Safir)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (Safir)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Sapphire)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_107.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "84105",
+      "skinNum": 105,
+      "name": "True Damage Know My Name Akali (Yakut)",
+      "champion": "Akali",
+      "nameTr": "True Damage Know My Name Akali (Yakut)",
+      "championTr": "Akali",
+      "nameEn": "True Damage Know My Name Akali (Ruby)",
+      "championEn": "Akali",
+      "championId": "Akali",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_105.jpg",
+      "imageFallback": "",
+      "parentSkinId": "84103"
+    },
+    {
+      "id": "246051",
+      "skinNum": 51,
+      "name": "True Damage Know My Name Qiyana",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_51.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/qiyana/skins/skin51/images/qiyana_splash_centered_51.skins_qiyana_skin51.jpg"
+    },
+    {
+      "id": "246054",
+      "skinNum": 54,
+      "name": "True Damage Know My Name Qiyana (İnci Beyazı)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (İnci Beyazı)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Pearl)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_54.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246055",
+      "skinNum": 55,
+      "name": "True Damage Know My Name Qiyana (Kedigözü)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Kedigözü)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Catseye)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_55.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246057",
+      "skinNum": 57,
+      "name": "True Damage Know My Name Qiyana (Obsidiyen)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Obsidiyen)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Obsidian)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_57.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246058",
+      "skinNum": 58,
+      "name": "True Damage Know My Name Qiyana (Pembe Kuvars)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Pembe Kuvars)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Rose Quartz)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_58.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246059",
+      "skinNum": 59,
+      "name": "True Damage Know My Name Qiyana (Safir)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Safir)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Sapphire)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_59.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246053",
+      "skinNum": 53,
+      "name": "True Damage Know My Name Qiyana (Tanzanit)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Tanzanit)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Tanzanite)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_53.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246056",
+      "skinNum": 56,
+      "name": "True Damage Know My Name Qiyana (Turkuvaz)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Turkuvaz)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Turquoise)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_56.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "246052",
+      "skinNum": 52,
+      "name": "True Damage Know My Name Qiyana (Yakut)",
+      "champion": "Qiyana",
+      "nameTr": "True Damage Know My Name Qiyana (Yakut)",
+      "championTr": "Qiyana",
+      "nameEn": "True Damage Know My Name Qiyana (Ruby)",
+      "championEn": "Qiyana",
+      "championId": "Qiyana",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Qiyana_52.jpg",
+      "imageFallback": "",
+      "parentSkinId": "246051"
+    },
+    {
+      "id": "235081",
+      "skinNum": 81,
+      "name": "True Damage Know My Name Senna",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_81.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/senna/skins/skin81/images/senna_splash_centered_81.skins_senna_skin81.jpg"
+    },
+    {
+      "id": "235088",
+      "skinNum": 88,
+      "name": "True Damage Know My Name Senna (İnci Beyazı)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (İnci Beyazı)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Pearl)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_88.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235085",
+      "skinNum": 85,
+      "name": "True Damage Know My Name Senna (Kedigözü)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Kedigözü)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Catseye)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_85.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235089",
+      "skinNum": 89,
+      "name": "True Damage Know My Name Senna (Obsidiyen)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Obsidiyen)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Obsidian)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_89.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235083",
+      "skinNum": 83,
+      "name": "True Damage Know My Name Senna (Pembe Kuvars)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Pembe Kuvars)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Rose Quartz)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_83.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235084",
+      "skinNum": 84,
+      "name": "True Damage Know My Name Senna (Safir)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Safir)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Sapphire)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_84.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235087",
+      "skinNum": 87,
+      "name": "True Damage Know My Name Senna (Tanzanit)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Tanzanit)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Tanzanite)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_87.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235086",
+      "skinNum": 86,
+      "name": "True Damage Know My Name Senna (Turkuvaz)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Turkuvaz)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Turquoise)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_86.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "235082",
+      "skinNum": 82,
+      "name": "True Damage Know My Name Senna (Yakut)",
+      "champion": "Senna",
+      "nameTr": "True Damage Know My Name Senna (Yakut)",
+      "championTr": "Senna",
+      "nameEn": "True Damage Know My Name Senna (Ruby)",
+      "championEn": "Senna",
+      "championId": "Senna",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Senna_82.jpg",
+      "imageFallback": "",
+      "parentSkinId": "235081"
+    },
+    {
+      "id": "157097",
+      "skinNum": 97,
+      "name": "True Damage Know My Name Yasuo",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_97.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yasuo/skins/skin97/images/yasuo_splash_centered_97.skins_yasuo_skin97.jpg"
+    },
+    {
+      "id": "157099",
+      "skinNum": 99,
+      "name": "True Damage Know My Name Yasuo (Görkemli)",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo (Görkemli)",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo (Momentous)",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_99.jpg",
+      "imageFallback": "",
+      "parentSkinId": "157097"
+    },
+    {
+      "id": "157102",
+      "skinNum": 102,
+      "name": "True Damage Know My Name Yasuo (Obsidiyen)",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo (Obsidiyen)",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo (Obsidian)",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_102.jpg",
+      "imageFallback": "",
+      "parentSkinId": "157097"
+    },
+    {
+      "id": "157101",
+      "skinNum": 101,
+      "name": "True Damage Know My Name Yasuo (Pembe Kuvars)",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo (Pembe Kuvars)",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo (Rose Quartz)",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_101.jpg",
+      "imageFallback": "",
+      "parentSkinId": "157097"
+    },
+    {
+      "id": "157098",
+      "skinNum": 98,
+      "name": "True Damage Know My Name Yasuo (Sınırsız)",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo (Sınırsız)",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo (Unlocked)",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_98.jpg",
+      "imageFallback": "",
+      "parentSkinId": "157097"
+    },
+    {
+      "id": "157100",
+      "skinNum": 100,
+      "name": "True Damage Know My Name Yasuo (Yakut)",
+      "champion": "Yasuo",
+      "nameTr": "True Damage Know My Name Yasuo (Yakut)",
+      "championTr": "Yasuo",
+      "nameEn": "True Damage Know My Name Yasuo (Ruby)",
+      "championEn": "Yasuo",
+      "championId": "Yasuo",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_100.jpg",
+      "imageFallback": "",
+      "parentSkinId": "157097"
     },
     {
       "id": "246002",
