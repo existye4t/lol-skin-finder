@@ -20,6 +20,15 @@ async function waitForModalReady(page) {
   await page.waitForTimeout(400);
 }
 
+async function clickFirstCard(page) {
+  await page.waitForTimeout(600);
+  await page.locator('#results .skin-card').first().waitFor({ state: 'attached', timeout: 10000 });
+  await page.evaluate(() => {
+    const card = document.querySelector('#results .skin-card');
+    if (card) card.click();
+  });
+}
+
 function copyToArtifact(fileName) {
   const src = path.join(SCREENSHOTS_DIR, fileName);
   const dst = path.join(ARTIFACT_DIR, fileName);
@@ -49,6 +58,7 @@ async function run() {
   await page.goto('http://127.0.0.1:4173');
   // Verilerin yüklenmesini bekle
   await page.waitForFunction(() => document.getElementById('meta')?.textContent?.includes('16.22'));
+  await page.addStyleTag({ content: '.scroll-reveal { opacity: 1 !important; transform: none !important; }' });
   console.log('✓ Sayfa ve veriler başarıyla yüklendi.');
 
   // TEST 1: Arama İzolasyonu (Skins sekmesinde 60001022)
@@ -92,7 +102,7 @@ async function run() {
   console.log('\n[Test 3] Cafe Cuties Rumble modalı (Rainbow destekli)...');
   await page.locator('#search').fill('Cafe Cuties Rumble');
   await page.waitForTimeout(600);
-  await page.locator('#results .skin-card').first().click();
+  await clickFirstCard(page);
   await waitForModalReady(page);
 
   // Boş rozet kontrolü
@@ -162,7 +172,7 @@ async function run() {
   await page.waitForTimeout(500);
   await page.locator('#search').fill('Cafe Cuties Annie');
   await page.waitForTimeout(600);
-  await page.locator('#results .skin-card').first().click();
+  await clickFirstCard(page);
   await waitForModalReady(page);
 
   const annieClassicLinkVisible = await page.locator('#modal-classic-link').isVisible();
@@ -212,7 +222,7 @@ async function run() {
   await page.waitForTimeout(500);
   await page.locator('#search').fill('92004');
   await page.waitForTimeout(600);
-  await page.locator('#results .skin-card').first().click();
+  await clickFirstCard(page);
   await waitForModalReady(page);
 
   const plainRainbowVisible = await page.locator('#modal-rainbow-link').isVisible();
@@ -237,7 +247,7 @@ async function run() {
   console.log('\n[Test 6] PBE Skini (Cafe Cuties Zoe 142045)...');
   await page.locator('#search').fill('142045');
   await page.waitForTimeout(600);
-  await page.locator('#results .skin-card').first().click();
+  await clickFirstCard(page);
   await waitForModalReady(page);
 
   const pbeBadgeVisible = await page.locator('#modal-collection-badge').isVisible();

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { chromium, expect } from '@playwright/test';
 
-const baseURL = process.argv[2] || 'http://127.0.0.1:5173';
+const baseURL = process.argv[2] || 'http://127.0.0.1:4173';
 const browser = await chromium.launch();
 const checks = [];
 const errors = [];
