@@ -17,4 +17,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  webServer: {
+    command: 'node ./node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4173',
+    url: 'http://127.0.0.1:4173',
+    reuseExistingServer: false,
+    timeout: 30000,
+  },
 });

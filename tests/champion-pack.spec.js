@@ -154,7 +154,7 @@ test.describe('Naming helper (synthetic)', () => {
 // ── server-based tests ───────────────────────────────────────────────────────
 
 // We test against the preview server (production build)
-const PREVIEW_URL = 'http://localhost:4173';
+const PREVIEW_URL = 'http://127.0.0.1:4173';
 
 test.describe('Champion Pack — Preview (production build)', () => {
   test.beforeAll(async () => {
