@@ -595,6 +595,9 @@ async function main() {
       } else if (liveSkin) {
         nameTr = liveSkin.nameTr || liveSkin.name;
         nameEn = liveSkin.nameEn || sk.name;
+      } else if (sk.name && sk.name.startsWith('Classic ')) {
+        nameTr = sk.name.replace(/^Classic\b/, 'Klasik');
+        nameEn = sk.name;
       }
 
       // Bazı temel şampiyon chromaları (örn. Blitzcrank 60053008) parentSkinId olarak 60053000 verir,
