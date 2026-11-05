@@ -1396,10 +1396,10 @@ function syncFantomeFilesForCollection(collection = activeCollection) {
   for (const entry of Object.values(manifestData.entries)) {
     if (!entry || entry.enabled === false) continue;
     if (collection === 'skins') {
-      if (entry.collection === 'skins' || entry.collection === 'pbe') {
+      if ((entry.c || entry.collection) === 'skins' || (entry.c || entry.collection) === 'pbe') {
         fantomeFiles.add(String(entry.id));
       }
-    } else if (entry.collection === collection) {
+    } else if ((entry.c || entry.collection) === collection) {
       fantomeFiles.add(String(entry.id));
     }
   }

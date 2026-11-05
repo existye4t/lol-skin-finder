@@ -15,6 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const FANTOME_DIR = path.join(ROOT, 'public', 'fantome');
 const SKINS_JSON = path.join(ROOT, 'public', 'data', 'skins.json');
+const MANIFEST_JSON = path.join(ROOT, 'public', 'data', 'fantome-manifest.json');
 const FILES_JSON = path.join(ROOT, 'public', 'data', 'fantome-files.json');
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -25,6 +26,22 @@ function readSkins() {
 }
 
 function readFileSet() {
+  if (fs.existsSync(MANIFEST_JSON)) {
+    const manifest = JSON.parse(fs.readFileSync(MANIFEST_JSON, 'utf8'));
+    if (manifest && manifest.entries) {
+      const ids = [];
+      for (const entry of Object.values(manifest.entries)) {
+        if (
+          entry &&
+          entry.enabled !== false &&
+          (entry.collection === 'skins' || entry.collection === 'pbe')
+        ) {
+          ids.push(String(entry.id));
+        }
+      }
+      return new Set(ids);
+    }
+  }
   const raw = JSON.parse(fs.readFileSync(FILES_JSON, 'utf8'));
   const arr = Array.isArray(raw) ? raw : (Array.isArray(raw.files) ? raw.files : []);
   return new Set(arr.map((v) => String(typeof v === 'object' ? (v.id ?? v.skinId) : v).replace(/\.fantome$/i, '').trim()));
@@ -180,10 +197,10 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await page.locator('#search').fill(query);
     await page.waitForTimeout(800);
     // Wait for at least one card in the DOM
-    await page.locator('.skin-card').first().waitFor({ state: 'attached', timeout: 15000 });
+    await page.locator('#results .skin-card').first().waitFor({ state: 'attached', timeout: 15000 });
     // Click via JS – bypasses all CSS visibility / transform guards
     await page.evaluate(() => {
-      const card = document.querySelector('.skin-card');
+      const card = document.querySelector('#results .skin-card');
       if (card) card.click();
     });
     // Wait for the <dialog> to have the 'open' attribute (set by showModal())
@@ -191,6 +208,17 @@ test.describe('Champion Pack — Preview (production build)', () => {
       () => document.getElementById('skin-modal')?.hasAttribute('open'),
       { timeout: 10000 }
     );
+  }
+
+  async function mockRemoteFantomePayloads(page) {
+    await page.route('**/*.fantome', async (route, request) => {
+      expect(request.url()).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\//);
+      await route.fulfill({
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: Buffer.from('PK\x03\x04mock-fantome-payload')
+      });
+    });
   }
 
   test('No CSP errors in console', async ({ page }) => {
@@ -261,6 +289,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
   });
 
   test('Katarina pack download — ZIP content verification (no chromas)', async ({ page }) => {
+    await mockRemoteFantomePayloads(page);
     await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
     await waitForData(page);
     await openModal(page, 'Katarina');
@@ -286,6 +315,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
 
     // Save to temp
     const tempDir = 'C:\\Users\\Exist\\AppData\\Local\\Temp\\opencode';
+    fs.mkdirSync(tempDir, { recursive: true });
     await download.saveAs(path.join(tempDir, 'kat-test.zip'));
     const zipBuffer = fs.readFileSync(path.join(tempDir, 'kat-test.zip'));
 
@@ -299,7 +329,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     console.log(`  ZIP entries: ${entries.length}, expected: ${expectedCount}`);
     expect(entries.length).toBe(expectedCount);
 
-    // 3. Every entry name is inside a folder, no bare ID names, no illegal chars
+    // 3. Every entry name is inside a folder, no bare ID names, no illegal chars, non-empty payload
     const ID_ONLY = /^[A-Za-z0-9]+\/\d+\.fantome$/;
     for (const e of entries) {
       expect(e.name).toMatch(/^[^/]+\//);              // has folder prefix (ZIP path sep)
@@ -308,42 +338,16 @@ test.describe('Champion Pack — Preview (production build)', () => {
       // Check basename only for Windows-illegal chars (/ is the ZIP separator, not illegal)
       const basename = e.name.split('/').pop() ?? e.name;
       expect(basename).not.toMatch(/[<>:"\\|?*]/);      // no Windows illegal chars in filename
+      expect(e.uncompressedSize).toBeGreaterThan(0);    // non-empty .fantome payload
     }
-    console.log('  All entry names are skin names, no IDs, no illegal chars ✓');
-
-    // 4. Size check against originals
-    const allSkins = readSkins();
-    const fileSet  = readFileSet();
-    const norm = (s) => String(s ?? '').toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]/g,'');
-    const katKey = norm('Katarina');
-    const katSkins = allSkins.filter((s) => {
-      if (!fileSet.has(String(s.id))) return false;
-      const keys = [s.championTr||s.champion, s.championEn].filter(Boolean).map(norm);
-      return keys.includes(katKey);
-    });
-
-    let sizeMismatch = 0;
-    for (const e of entries) {
-      const baseName = path.basename(e.name).replace(/\.fantome$/, '');
-      const matchedSkin = katSkins.find((s) => sanitizeFilename(s.nameTr || s.name) === baseName);
-      if (matchedSkin) {
-        const origPath = path.join(FANTOME_DIR, `${matchedSkin.id}.fantome`);
-        if (fs.existsSync(origPath)) {
-          const origSize = fs.statSync(origPath).size;
-          if (e.uncompressedSize !== origSize) {
-            sizeMismatch++;
-            console.warn(`  Size mismatch: ${e.name}: zip=${e.uncompressedSize} orig=${origSize}`);
-          }
-        }
-      }
-    }
-    if (sizeMismatch === 0) console.log('  All verifiable entry sizes match originals ✓');
+    console.log('  All entry names are skin names, no IDs, no illegal chars, non-empty payloads ✓');
 
     console.log('  Sample entry names:');
-    entries.slice(0, 6).forEach((e) => console.log(`    ${e.name}`));
+    entries.slice(0, 6).forEach((e) => console.log(`    ${e.name} (${e.uncompressedSize} bytes)`));
   });
 
   test('Katarina pack download — ZIP content verification (with chromas)', async ({ page }) => {
+    await mockRemoteFantomePayloads(page);
     await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
     await waitForData(page);
     await openModal(page, 'Katarina');
@@ -367,6 +371,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     const download = await downloadPromise;
 
     const tempDir = 'C:\\Users\\Exist\\AppData\\Local\\Temp\\opencode';
+    fs.mkdirSync(tempDir, { recursive: true });
     await download.saveAs(path.join(tempDir, 'kat-chroma-test.zip'));
     const zipBuffer = fs.readFileSync(path.join(tempDir, 'kat-chroma-test.zip'));
     const entries = parseZipEntries(zipBuffer);
@@ -421,6 +426,8 @@ test.describe('Champion Pack — Preview (production build)', () => {
     let checkedBase = 0, checkedChroma = 0;
     for (let i = 0; i < count; i++) {
       const el = downloadItems.nth(i);
+      const hrefAttr = await el.getAttribute('href');
+      expect(hrefAttr).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\//);
       const downloadAttr = await el.getAttribute('download');
       expect(downloadAttr).not.toBeNull();
       // Should NOT be a bare numeric ID like "55001.fantome"
@@ -449,6 +456,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
   });
 
   test('Second champion (Lux) — pack download works', async ({ page }) => {
+    await mockRemoteFantomePayloads(page);
     await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
     await waitForData(page);
     await openModal(page, 'Lux');
@@ -472,6 +480,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     const download = await downloadPromise;
 
     const tempDir = 'C:\\Users\\Exist\\AppData\\Local\\Temp\\opencode';
+    fs.mkdirSync(tempDir, { recursive: true });
     await download.saveAs(path.join(tempDir, 'lux-test.zip'));
     const zipBuffer = fs.readFileSync(path.join(tempDir, 'lux-test.zip'));
     const entries = parseZipEntries(zipBuffer);
@@ -497,13 +506,13 @@ test.describe('Champion Pack — Preview (production build)', () => {
 
     // Intercept one specific fantome file to return 404
     let intercepted = false;
-    await page.route('**/fantome/*.fantome', async (route, request) => {
+    await page.route('**/*.fantome', async (route, request) => {
       if (!intercepted) {
         intercepted = true;
         console.log(`  Intercepting: ${request.url()}`);
-        await route.fulfill({ status: 404, body: 'not found' });
+        await route.fulfill({ status: 404, headers: { 'Access-Control-Allow-Origin': '*' }, body: 'not found' });
       } else {
-        await route.continue();
+        await route.fulfill({ status: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: Buffer.from('PK\x03\x04mock-fantome-payload') });
       }
     });
 
@@ -641,5 +650,51 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await expect(block).toBeVisible({ timeout: 5000 });
     await page.screenshot({ path: path.join(ROOT, 'test-results', 'pack-neon.png') });
     console.log('  Screenshot saved: test-results/pack-neon.png');
+  });
+
+  test('Collection tabs (Skinler · Rainbow · Classic), PBE badge and Rainbow modal link work', async ({ page }) => {
+    await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
+    await waitForData(page);
+
+    // 1. Verify collection tabs exist and "skins" is active by default
+    const tabs = page.locator('#collection-tabs .collection-tab');
+    await expect(tabs).toHaveCount(3);
+    await expect(page.locator('.collection-tab[data-collection="skins"]')).toHaveClass(/is-active/);
+
+    // 2. Search for a PBE skin ("Zamanın Ötesinde Riven") in Skinler tab
+    await openModal(page, 'Tatlı Pastane Neeko');
+    await expect(page.locator('#results .skin-card .skin-badge-pbe').first()).toBeAttached();
+    await expect(page.locator('#modal-collection-badge')).toBeVisible();
+    await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-pbe/);
+    await expect(page.locator('#modal-pbe-warning')).toBeVisible();
+    const pbeHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
+    expect(pbeHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/PBE\//);
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    // 3. Open a skin with Rainbow support ("Ruh Çiçeği Ahri") and click "Rainbow sürümü →"
+    await openModal(page, 'Ruh Çiçeği Ahri');
+    const rainbowLink = page.locator('#modal-rainbow-link');
+    await expect(rainbowLink).toBeVisible();
+    await rainbowLink.click();
+    await expect(page.locator('.collection-tab[data-collection="rainbow"]')).toHaveClass(/is-active/);
+    await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-rainbow/);
+    const rainbowHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
+    expect(rainbowHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/rainbow\//);
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    // 4. Switch to Classic tab and verify Classic skins load and link to /classic/
+    await page.locator('#search').fill('');
+    await page.locator('.collection-tab[data-collection="classic"]').click();
+    await expect(page.locator('.collection-tab[data-collection="classic"]')).toHaveClass(/is-active/);
+    await expect(page.locator('#results .skin-card .skin-badge-classic').first()).toBeAttached({ timeout: 10000 });
+    await openModal(page, 'Ahri');
+    await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-classic/);
+    const classicHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
+    expect(classicHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/classic\//);
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+    console.log('  Collection tabs, PBE badge, Rainbow modal link and Classic tab verified ✓');
   });
 });
