@@ -29,50 +29,63 @@ function getGithubHeaders(accept = 'application/vnd.github+json') {
   return headers;
 }
 
-async function fetchJson(url, useGithubAuth = false) {
-  const res = await fetch(url, {
-    headers: useGithubAuth ? getGithubHeaders() : { 'User-Agent': 'lol-skin-finder-sync' }
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} (${res.statusText}) -> ${url}`);
+async function fetchJson(url, useGithubAuth = false, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: useGithubAuth ? getGithubHeaders() : { 'User-Agent': 'lol-skin-finder-sync' }
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} (${res.statusText}) -> ${url}`);
+      }
+      return await res.json();
+    } catch (err) {
+      if (attempt >= maxRetries) throw err;
+      const delay = 500 * Math.pow(2, attempt);
+      await new Promise(r => setTimeout(r, delay));
+    }
   }
-  return res.json();
 }
 
 /**
  * Kaynak reponun Git ağacını klonlamadan çeker.
- * Eğer recursive=1 yanıtı truncated=true dönerse üst klasörleri ayrı ayrı çeker.
+ * Çok büyük repolarda root recursive=1 isteği 500 veya truncated verebileceğinden,
+ * hata/truncated durumunda hedef alt klasörleri (skins, PBE, rainbow, classic) ayrı ayrı çeker.
  */
 export async function fetchSourceTree() {
-  const rootTree = await fetchJson(GITHUB_TREE_API_URL, true);
-  if (!rootTree || !Array.isArray(rootTree.tree)) {
-    throw new Error('GitHub Trees API geçersiz veya boş yanıt döndürdü.');
-  }
-
-  if (!rootTree.truncated) {
-    return rootTree.tree;
-  }
-
-  console.warn('[prepare-fantome] Uyarı: Ana Git ağacı truncated döndü, alt klasörler ayrı çekiliyor...');
-  const nonRecursiveUrl = `https://api.github.com/repos/${SOURCE_REPO}/git/trees/${SOURCE_BRANCH}`;
-  const topLevel = await fetchJson(nonRecursiveUrl, true);
   const targetDirs = new Set(['skins', 'PBE', 'rainbow', 'classic']);
-  const combined = [];
+  const nonRecursiveUrl = `https://api.github.com/repos/${SOURCE_REPO}/git/trees/${SOURCE_BRANCH}`;
 
-  for (const item of topLevel.tree || []) {
-    if (item.type === 'blob') {
-      combined.push(item);
-    } else if (item.type === 'tree' && targetDirs.has(item.path)) {
-      const subTree = await fetchJson(`${item.url}?recursive=1`, true);
-      for (const subItem of subTree.tree || []) {
-        combined.push({
-          ...subItem,
-          path: `${item.path}/${subItem.path}`
-        });
+  async function fetchSubtrees() {
+    console.log('[prepare-fantome] Alt klasör ağaçları ayrı ayrı çekiliyor (skins, PBE, rainbow, classic)...');
+    const topLevel = await fetchJson(nonRecursiveUrl, true);
+    const combined = [];
+    for (const item of topLevel.tree || []) {
+      if (item.type === 'blob') {
+        combined.push(item);
+      } else if (item.type === 'tree' && targetDirs.has(item.path)) {
+        const subTree = await fetchJson(`${item.url}?recursive=1`, true);
+        for (const subItem of subTree.tree || []) {
+          combined.push({
+            ...subItem,
+            path: `${item.path}/${subItem.path}`
+          });
+        }
       }
     }
+    return combined;
   }
-  return combined;
+
+  try {
+    const rootTree = await fetchJson(GITHUB_TREE_API_URL, true);
+    if (!rootTree || !Array.isArray(rootTree.tree) || rootTree.truncated) {
+      return await fetchSubtrees();
+    }
+    return rootTree.tree;
+  } catch (err) {
+    console.warn('[prepare-fantome] Root recursive trees isteği başarısız oldu, alt klasörlere geçiliyor:', err.message);
+    return await fetchSubtrees();
+  }
 }
 
 async function fetchChampionMap() {

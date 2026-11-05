@@ -218,13 +218,19 @@ async function main() {
     fetchJson(`${RAW_BASE_URL}classic/index.json`)
   ]);
 
-  // Manifest bayraklarını topla (URL gömmeden sadece hasRainbow ve forms)
+  // Manifest bayraklarını topla (URL gömmeden sadece hasRainbow, hasClassic ve forms)
   const rainbowSkinIds = new Set();
+  const classicSkinIds = new Set();
   const formsByParentId = new Map();
   for (const entry of Object.values(manifest.entries)) {
     if (!entry.enabled) continue;
     if (entry.c === 'rainbow') {
       rainbowSkinIds.add(String(entry.id));
+    } else if (entry.c === 'classic') {
+      const num = Number(entry.id);
+      if (num >= 60000000) {
+        classicSkinIds.add(String(num - 60000000));
+      }
     } else if (entry.type === 'form' && entry.pId) {
       const pIdStr = String(entry.pId);
       if (!formsByParentId.has(pIdStr)) formsByParentId.set(pIdStr, []);
@@ -319,6 +325,9 @@ async function main() {
       if (rainbowSkinIds.has(id)) {
         entry.hasRainbow = true;
       }
+      if (classicSkinIds.has(id)) {
+        entry.hasClassic = true;
+      }
       if (formsByParentId.has(id)) {
         entry.forms = formsByParentId.get(id);
       }
@@ -357,7 +366,7 @@ async function main() {
         const fullChromaTr = formatChromaDisplayName(baseNameTr, ch.name);
         const fullChromaEn = formatChromaDisplayName(baseNameEn, chEn?.name || ch.name);
 
-        allSkins.push({
+        const chromaEntry = {
           id: chId,
           skinNum: chNum,
           name: fullChromaTr,
@@ -370,7 +379,13 @@ async function main() {
           image: `${DDRAGON_BASE}/cdn/img/champion/splash/${champion.id}_${chNum}.jpg`,
           imageFallback: imageUrlFromSplashPath(ch.chromaPath || chEn?.chromaPath, 'latest'),
           parentSkinId: id
-        });
+        };
+
+        if (classicSkinIds.has(chId)) {
+          chromaEntry.hasClassic = true;
+        }
+
+        allSkins.push(chromaEntry);
         existingIds.add(chId);
       }
     });
@@ -522,6 +537,8 @@ async function main() {
     if (!champ) continue;
     const skinIdNum = champ.key * 1000 + Number(cycle.skin);
     const idStr = String(skinIdNum);
+    const manifestEntry = manifest.entries[`rainbow:${idStr}`];
+    if (!manifestEntry || !manifestEntry.enabled) continue;
     const liveSkin = skinByIdMap.get(idStr);
     const fallbackName = cycle.path.split('/').pop().replace(/\.fantome$/, '');
     const nameTr = liveSkin?.nameTr || liveSkin?.name || fallbackName;
@@ -565,6 +582,8 @@ async function main() {
 
     for (const sk of cChamp.skins || []) {
       const classicIdStr = String(sk.id);
+      const manifestEntry = manifest.entries[`classic:${classicIdStr}`];
+      if (!manifestEntry || !manifestEntry.enabled) continue;
       const liveSkinIdStr = String(champKey * 1000 + Number(sk.num));
       const liveSkin = skinByIdMap.get(liveSkinIdStr);
 
