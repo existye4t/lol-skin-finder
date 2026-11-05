@@ -30,6 +30,9 @@ jobs:
   sync:
     name: Manifest ve Skin Verilerini Güncelle
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       should_deploy: ${{ steps.commit_or_pr.outputs.should_deploy }}
     steps:
