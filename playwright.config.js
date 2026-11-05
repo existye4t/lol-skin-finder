@@ -5,6 +5,7 @@ export default defineConfig({
   testDir: './tests',
   timeout: 180000,
   retries: 0,
+  workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     headless: true,
