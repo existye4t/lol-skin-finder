@@ -628,6 +628,11 @@ const TRANSLATIONS = {
     en: 'FORMS / VARIANTS'
   },
 
+  manifestLoading: {
+    tr: 'İndirme seçenekleri yükleniyor…',
+    en: 'Loading download options…'
+  },
+
   legacyDisabledNote: {
     tr: 'Bu skin yeni kaynakta bulunmadığı için indirmeye kapalıdır.',
     en: 'This skin is disabled because it is not available in the new source.'
@@ -1458,6 +1463,52 @@ function syncFantomeFilesForCollection(collection = activeCollection) {
       fantomeFiles.add(String(entry.id));
     }
   }
+}
+
+let manifestLoadingPromise = null;
+
+function ensureManifestLoaded() {
+  if (manifestData) {
+    return Promise.resolve(manifestData);
+  }
+  if (manifestLoadingPromise) {
+    return manifestLoadingPromise;
+  }
+  manifestLoadingPromise = (async () => {
+    try {
+      const manifestResponse = await fetch(assetUrl('data/fantome-manifest.json'), { cache: 'no-cache' });
+      if (manifestResponse.ok) {
+        manifestData = await manifestResponse.json();
+        useLegacyLocalFantome = Boolean(manifestData?.legacyEnabled);
+        syncFantomeFilesForCollection(activeCollection);
+        if (typeof updatePackToolbarBtn === 'function') {
+          updatePackToolbarBtn();
+        }
+        return manifestData;
+      }
+    } catch (e) {
+      console.warn('fantome-manifest.json yüklenemedi:', e);
+    }
+    // Fallback to fantome-files.json
+    try {
+      const filesResponse = await fetch(assetUrl('data/fantome-files.json'), { cache: 'no-cache' });
+      if (filesResponse && filesResponse.ok) {
+        useLegacyLocalFantome = true;
+        const files = await filesResponse.json();
+        if (Array.isArray(files)) {
+          files.forEach(addFantomeFile);
+        } else if (files && Array.isArray(files.files)) {
+          files.files.forEach(addFantomeFile);
+        }
+        syncFantomeFilesForCollection(activeCollection);
+        if (typeof updatePackToolbarBtn === 'function') {
+          updatePackToolbarBtn();
+        }
+      }
+    } catch (e) {}
+    return manifestData;
+  })();
+  return manifestLoadingPromise;
 }
 
 const SEARCH_EXAMPLES_DATA = {
@@ -3581,6 +3632,7 @@ function savePackChromasPref(val) {
  * @returns {Promise<{skipped:number}>}
  */
 async function downloadChampionPack(championKey, { includeChromas, onProgress } = {}) {
+  await ensureManifestLoaded();
   // 1) Şampiyona ait, dosyası olan skinleri topla
   let championSkins = skins.filter((skin) => {
     const keys = skin._championKeys;
@@ -3921,6 +3973,9 @@ function updatePackToolbarBtn() {
 
   const count = getChampionPackFileCount(singleChampionKey, packIncludeChromas);
   if (count === 0) {
+    if (!manifestData) {
+      ensureManifestLoaded().then(() => updatePackToolbarBtn());
+    }
     wrapper.hidden = true;
     btn._packChampKey = null;
     return;
@@ -4166,9 +4221,28 @@ activeModalGroup = group;
   /* ---------------------------------------
      Fantome dosyaları
   --------------------------------------- */
+  if (!manifestData) {
+    if (downloadList) {
+      downloadList.innerHTML = `<div class="manifest-loading-state" id="manifest-loading-state"><span class="manifest-spinner" aria-hidden="true"></span><span>${t('manifestLoading')}</span></div>`;
+    }
+    const specialPackagesContainer = document.querySelector('#modal-special-packages');
+    if (specialPackagesContainer) {
+      specialPackagesContainer.hidden = true;
+      specialPackagesContainer.style.display = 'none';
+    }
+    const packBlock = document.getElementById('champion-pack-block');
+    if (packBlock) {
+      packBlock.hidden = true;
+    }
 
-  const fragment =
-    document.createDocumentFragment();
+    ensureManifestLoaded().then(() => {
+      if (modal?.open && activeModalGroup === group) {
+        refreshOpenModal(group);
+      }
+    });
+  } else {
+    const fragment =
+      document.createDocumentFragment();
 
   group.skins.forEach((item) => {
     const downloadUrl =
@@ -4509,6 +4583,7 @@ activeModalGroup = group;
   --------------------------------------- */
 
   renderChampionPackBlock(skin);
+  }
 
   /* ---------------------------------------
      Modal aç (shared-element geçişi)
@@ -6185,30 +6260,12 @@ async function loadData() {
   renderSkeletonCards(results, 12);
 
   try {
-    const [
-      dataResponse,
-      manifestResponse
-    ] = await Promise.all([
-      fetch(
-        assetUrl(
-          'data/skins.json'
-        ),
-        {
-          cache:
-            'no-cache'
-        }
-      ),
-
-      fetch(
-        assetUrl(
-          'data/fantome-manifest.json'
-        ),
-        {
-          cache:
-            'no-cache'
-        }
-      ).catch(() => ({ ok: false, status: 0 }))
-    ]);
+    const dataResponse = await fetch(
+      assetUrl('data/skins.json'),
+      {
+        cache: 'no-cache'
+      }
+    );
 
     /* ---------------------------------------
        skins.json
@@ -6222,33 +6279,6 @@ async function loadData() {
 
     const data =
       await dataResponse.json();
-
-    /* ---------------------------------------
-       Fantome manifest (veya legacy fallback)
-    --------------------------------------- */
-
-    if (manifestResponse && manifestResponse.ok) {
-      manifestData = await manifestResponse.json();
-      useLegacyLocalFantome = Boolean(manifestData?.legacyEnabled);
-    } else {
-      console.warn(
-        `fantome-manifest.json yüklenemedi (${manifestResponse?.status}). fantome-files.json yedeği deneniyor.`
-      );
-      const filesResponse = await fetch(
-        assetUrl('data/fantome-files.json'),
-        { cache: 'no-cache' }
-      ).catch(() => ({ ok: false }));
-
-      if (filesResponse && filesResponse.ok) {
-        useLegacyLocalFantome = true;
-        const files = await filesResponse.json();
-        if (Array.isArray(files)) {
-          files.forEach(addFantomeFile);
-        } else if (files && Array.isArray(files.files)) {
-          files.files.forEach(addFantomeFile);
-        }
-      }
-    }
 
     /* ---------------------------------------
        Skin listesi
@@ -6307,6 +6337,13 @@ async function loadData() {
 
     renderPopular();
     render();
+
+    // Manifest ilk açılışı bloke etmemesi için ilk çizimden sonra boşta (idle) yüklenir
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(() => { ensureManifestLoaded(); }, { timeout: 1500 });
+    } else {
+      window.setTimeout(() => { ensureManifestLoaded(); }, 150);
+    }
 
     track(
       'skin_data_loaded',
