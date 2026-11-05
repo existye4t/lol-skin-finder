@@ -868,6 +868,11 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await expect(specialLoadingBtn).toBeVisible();
     await expect(specialLoadingBtn).toBeDisabled();
 
+    const specialLoadingRow = specialBox.locator('.download-item-special.is-loading');
+    await expect(specialLoadingRow).toBeVisible();
+    const specialPointerEvents = await specialLoadingRow.evaluate(el => window.getComputedStyle(el).pointerEvents);
+    expect(specialPointerEvents).toBe('none');
+
     const modalPackBtn = page.locator('#champion-pack-block .champion-pack-btn');
     await expect(modalPackBtn).toBeVisible();
     await expect(modalPackBtn).toBeDisabled();
