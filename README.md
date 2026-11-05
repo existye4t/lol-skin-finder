@@ -86,7 +86,7 @@ lol-skin-finder/
 
 ## 🔄 Veri Güncelleme ve Manifest Sistemi
 
-Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez (ENABLE_LEGACY_FANTOME bayrağı yalnızca manifest üretiminde kaynakta olmayan sahipsiz girdileri kontrol eder).
+Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez (ENABLE_LEGACY_FANTOME bayrağı yalnızca manifest üretiminde kaynak repoda karşılığı bulunmayan 6 sahipsiz girdiyi [ID: 234994–234999] kontrol eder).
 
 Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
 
@@ -126,7 +126,7 @@ Herhangi bir beklenmeyen durumda sistemi hızla önceki kararlı duruma döndür
    GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
 
 3. **Manifest Üretimi Legacy Bayrağı:**
-   `scripts/config.mjs` içerisindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca manifest üretim scriptini (`prepare-fantome.mjs`) etkiler; kaynak repoda karşılığı bulunmayan eski yerel dosya girdilerinin manifest'te `enabled` işaretlenmesini belirler. Frontend çalışma zamanında eski yerel servise anında dönüş sağlamaz.
+   `scripts/config.mjs` içerisindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca manifest üretim scriptini (`prepare-fantome.mjs`) etkiler; kaynak repoda karşılığı bulunmayan 6 adet eski yerel dosya girdisinin (ID: 234994–234999) manifest'te `enabled` işaretlenmesini belirler (depodaki 9.096 eski yerel dosyadan 9.090'ı yeni kaynakta birebir mevcuttur; yalnızca bu 6 dosya kaynakta yer almamaktadır). Frontend çalışma zamanında eski yerel servise anında dönüş sağlamaz.
 
 ---
 
