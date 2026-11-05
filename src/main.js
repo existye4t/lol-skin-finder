@@ -1469,7 +1469,7 @@ const SEARCH_EXAMPLES_DATA = {
   rainbow: [
     { qTr: 'Tatlı Pastane Rumble', qEn: 'Cafe Cuties Rumble', lTr: 'Tatlı Pastane Rumble', lEn: 'Cafe Cuties Rumble' },
     { qTr: 'Ruh Çiçeği Ahri', qEn: 'Spirit Blossom Ahri', lTr: 'Ruh Çiçeği Ahri', lEn: 'Spirit Blossom Ahri' },
-    { qTr: 'Ctrl+5', qEn: 'Ctrl+5', lTr: 'Ctrl+5', lEn: 'Ctrl+5' }
+    { qTr: 'Bölüm Sonu Canavarı Veigar', qEn: 'Final Boss Veigar', lTr: 'Bölüm Sonu Canavarı Veigar', lEn: 'Final Boss Veigar' }
   ],
   classic: [
     { qTr: 'Klasik Annie', qEn: 'Classic Annie', lTr: 'Klasik Annie', lEn: 'Classic Annie' },
@@ -1488,6 +1488,7 @@ function renderSearchExamples() {
   list.forEach(item => {
     const btn = document.createElement('button');
     btn.type = 'button';
+    btn.className = 'search-example-chip';
     const query = currentLang === 'en' ? item.qEn : item.qTr;
     const label = currentLang === 'en' ? item.lEn : item.lTr;
     btn.dataset.query = query;
@@ -1506,7 +1507,10 @@ function renderSearchExamples() {
 }
 
 async function navigateToCollectionSkin(targetCollection, targetSkinId, skinFallbackName) {
-  closeSkinModal(true);
+  const isModalCurrentlyOpen = Boolean(modal && (modal.open || modal.hasAttribute('open')));
+  if (!isModalCurrentlyOpen) {
+    closeSkinModal(true);
+  }
   await switchCollection(targetCollection);
 
   const store = collectionStore[targetCollection];
@@ -1533,8 +1537,11 @@ async function navigateToCollectionSkin(targetCollection, targetSkinId, skinFall
     if (cardEl) {
       cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    openModal(targetGroup, cardEl || null, true);
+    openModal(targetGroup, isModalCurrentlyOpen ? null : (cardEl || null), true);
   } else if (search) {
+    if (isModalCurrentlyOpen) {
+      closeSkinModal(true);
+    }
     search.value = skinFallbackName || '';
     clearSearchCache();
     render();
@@ -4380,20 +4387,8 @@ activeModalGroup = group;
   const specialPackagesContainer = document.querySelector('#modal-special-packages');
   if (specialPackagesContainer) {
     specialPackagesContainer.replaceChildren();
+    const specialItems = [];
     if (activeCollection === 'skins' && (skin.hasRainbow || skin.hasClassic) && manifestData?.entries) {
-      specialPackagesContainer.hidden = false;
-      specialPackagesContainer.style.display = '';
-
-      const heading = document.createElement('p');
-      heading.className = 'special-packages-heading';
-      heading.textContent = t('specialPackagesHeading');
-      specialPackagesContainer.appendChild(heading);
-
-      const notice = document.createElement('p');
-      notice.className = 'special-package-notice';
-      notice.textContent = t('specialPackageNotice');
-      specialPackagesContainer.appendChild(notice);
-
       const skinDisplayName = getLocalizedSkinName(skin);
 
       // 1. Rainbow Paketi
@@ -4436,7 +4431,7 @@ activeModalGroup = group;
             });
           });
 
-          specialPackagesContainer.appendChild(itemEl);
+          specialItems.push(itemEl);
         }
       }
 
@@ -4481,8 +4476,27 @@ activeModalGroup = group;
             });
           });
 
-          specialPackagesContainer.appendChild(itemEl);
+          specialItems.push(itemEl);
         }
+      }
+    }
+
+    if (specialItems.length > 0) {
+      specialPackagesContainer.hidden = false;
+      specialPackagesContainer.style.display = '';
+
+      const heading = document.createElement('p');
+      heading.className = 'special-packages-heading';
+      heading.textContent = t('specialPackagesHeading');
+      specialPackagesContainer.appendChild(heading);
+
+      const notice = document.createElement('p');
+      notice.className = 'special-package-notice';
+      notice.textContent = t('specialPackageNotice');
+      specialPackagesContainer.appendChild(notice);
+
+      for (const itemEl of specialItems) {
+        specialPackagesContainer.appendChild(itemEl);
       }
     } else {
       specialPackagesContainer.hidden = true;
@@ -4528,6 +4542,9 @@ const MODAL_TRANSITION_MS = 400;
 const MODAL_TRANSITION_EASE = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
 function applySkinModalOpenState() {
+  if (modal.open || modal.hasAttribute('open')) {
+    return;
+  }
   if (typeof modal.showModal === 'function') {
     modal.showModal();
   } else {
@@ -4577,7 +4594,7 @@ function playModalFlip(cardRect, modalRect, isClosing, onDone) {
     modal.style.transform = '';
     modal.style.opacity = '';
     modal.style.transformOrigin = '';
-    if (isClosing && onDone) onDone();
+    if (onDone) onDone();
   }, MODAL_TRANSITION_MS);
 }
 
@@ -4585,7 +4602,9 @@ function animateModalOpenFallback(sourceEl) {
   const cardRect = sourceEl.getBoundingClientRect();
   applySkinModalOpenState();
   const modalRect = modal.getBoundingClientRect();
-  playModalFlip(cardRect, modalRect, false);
+  playModalFlip(cardRect, modalRect, false, () => {
+    modal.dataset.animationState = 'ready';
+  });
 }
 
 function animateModalCloseFallback(sourceEl, onDone) {
@@ -4602,8 +4621,11 @@ function performModalOpenTransition(sourceEl, skipAnimation) {
 
   if (skipAnimation || isReducedMotion()) {
     applySkinModalOpenState();
+    modal.dataset.animationState = 'ready';
     return;
   }
+
+  modal.dataset.animationState = 'opening';
 
   if (typeof document.startViewTransition === 'function') {
     if (sourceEl) {
@@ -4623,6 +4645,7 @@ function performModalOpenTransition(sourceEl, skipAnimation) {
     transition.finished.finally(() => {
       if (sourceEl) sourceEl.style.viewTransitionName = '';
       modal.style.viewTransitionName = '';
+      modal.dataset.animationState = 'ready';
     });
     return;
   }
@@ -4631,6 +4654,7 @@ function performModalOpenTransition(sourceEl, skipAnimation) {
     animateModalOpenFallback(sourceEl);
   } else {
     applySkinModalOpenState();
+    modal.dataset.animationState = 'ready';
   }
 }
 
@@ -4650,9 +4674,11 @@ function closeSkinModal(skipAnimation) {
       : null;
   lastModalSourceEl = null;
 
+  modal.dataset.animationState = 'closing';
   if (skipAnimation || isReducedMotion()) {
     modal.classList.remove('closing');
     applySkinModalCloseState();
+    modal.dataset.animationState = 'closed';
     return;
   }
 

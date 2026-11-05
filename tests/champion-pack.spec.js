@@ -697,4 +697,101 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
     console.log('  Collection tabs, PBE badge, Rainbow modal link and Classic tab verified ✓');
   });
+
+  test('Special Packages row: shows when present, hides when absent, points to raw repo with HEAD 200', async ({ page }) => {
+    await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
+    await waitForData(page);
+
+    // 1. Cafe Cuties Rumble (68023) has Rainbow package in raw repo
+    await openModal(page, 'Cafe Cuties Rumble');
+    const rumbleSpecialBox = page.locator('#modal-special-packages');
+    await expect(rumbleSpecialBox).toBeVisible({ timeout: 5000 });
+    const rumbleRows = rumbleSpecialBox.locator('.download-item-special');
+    await expect(rumbleRows).toHaveCount(1);
+    const rumbleBadge = rumbleRows.first().locator('.skin-badge-rainbow');
+    await expect(rumbleBadge).toHaveText('RAINBOW');
+    const rumbleDownloadAttr = await rumbleRows.first().getAttribute('download');
+    expect(rumbleDownloadAttr).toMatch(/\(Rainbow\)\.fantome$/);
+    const rumbleHref = await rumbleRows.first().getAttribute('href');
+    expect(rumbleHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/rainbow\//);
+    const rumbleHeadResp = await page.request.head(rumbleHref);
+    expect(rumbleHeadResp.status()).toBe(200);
+    const rumbleNote = rumbleSpecialBox.locator('.special-package-notice');
+    await expect(rumbleNote).toBeVisible();
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    // 2. Cafe Cuties Annie (1022) has Classic package in raw repo
+    await openModal(page, 'Cafe Cuties Annie');
+    const annieSpecialBox = page.locator('#modal-special-packages');
+    await expect(annieSpecialBox).toBeVisible({ timeout: 5000 });
+    const annieRows = annieSpecialBox.locator('.download-item-special');
+    await expect(annieRows).toHaveCount(1);
+    const annieBadge = annieRows.first().locator('.skin-badge-classic');
+    await expect(annieBadge).toHaveText('CLASSIC');
+    const annieDownloadAttr = await annieRows.first().getAttribute('download');
+    expect(annieDownloadAttr).toMatch(/\(Classic\)\.fantome$/);
+    const annieHref = await annieRows.first().getAttribute('href');
+    expect(annieHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/classic\//);
+    const annieHeadResp = await page.request.head(annieHref);
+    expect(annieHeadResp.status()).toBe(200);
+    const annieNote = annieSpecialBox.locator('.special-package-notice');
+    await expect(annieNote).toBeVisible();
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    // 3. Skin without Rainbow or Classic (Worlds 2012 Riven 92004)
+    await openModal(page, '92004');
+    const plainSpecialBox = page.locator('#modal-special-packages');
+    await expect(plainSpecialBox).toBeHidden();
+    const plainRows = page.locator('#modal-special-packages .download-item-special');
+    await expect(plainRows).toHaveCount(0);
+    const plainNote = page.locator('#modal-special-packages .special-package-notice');
+    await expect(plainNote).toBeHidden();
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+  });
+
+  test('Sample chips in all tabs (Skins, Rainbow, Classic) yield at least 1 result in TR and EN', async ({ page }) => {
+    await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
+    await waitForData(page);
+
+    const tabs = ['skins', 'rainbow', 'classic'];
+    const langs = ['tr', 'en'];
+
+    for (const lang of langs) {
+      const currentLang = await page.evaluate(() => document.documentElement.lang || 'tr');
+      if (currentLang !== lang) {
+        await page.evaluate((targetLang) => {
+          const opt = document.querySelector(`.lang-menu-option[data-lang="${targetLang}"]`);
+          if (opt) opt.click();
+        }, lang);
+        await page.waitForTimeout(600);
+      }
+
+      for (const tabName of tabs) {
+        await page.locator(`.collection-tab[data-collection="${tabName}"]`).click();
+        await page.waitForTimeout(400);
+
+        const chips = page.locator('#search-examples button');
+        const chipCount = await chips.count();
+        expect(chipCount).toBeGreaterThan(0);
+
+        for (let i = 0; i < chipCount; i++) {
+          const chip = chips.nth(i);
+          const chipText = (await chip.textContent())?.trim();
+          await chip.click();
+          await page.waitForTimeout(600);
+
+          const resultCards = page.locator('#results .skin-card');
+          const resultsCount = await resultCards.count();
+          console.log(`    Lang [${lang}] Tab [${tabName}] Chip "${chipText}" -> ${resultsCount} results`);
+          expect(resultsCount).toBeGreaterThanOrEqual(1);
+
+          await page.locator('#search').fill('');
+          await page.waitForTimeout(300);
+        }
+      }
+    }
+  });
 });
