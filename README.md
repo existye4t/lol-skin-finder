@@ -86,7 +86,7 @@ lol-skin-finder/
 
 ## 🔄 Veri Güncelleme ve Manifest Sistemi
 
-Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez ancak varsayılan olarak devre dışıdır (`ENABLE_LEGACY_FANTOME = false` — `scripts/config.mjs` içinden tek bayrakla yönetilir).
+Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez (ENABLE_LEGACY_FANTOME bayrağı yalnızca manifest üretiminde kaynakta olmayan sahipsiz girdileri kontrol eder).
 
 Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
 
@@ -115,18 +115,18 @@ npm run check-links
 
 Herhangi bir beklenmeyen durumda sistemi hızla önceki kararlı duruma döndürmek için:
 
-1. **Eski Yerel Fantome Dosyalarına Dönüş:**
-   `scripts/config.mjs` dosyası içerisindeki `ENABLE_LEGACY_FANTOME = false` bayrağını `true` yaparak yerel `public/fantome/*.fantome` dosyalarından servis edilmesini anında sağlayabilirsiniz. Yerel fantome arşivi depoda korunmaktadır.
-
-2. **Otomatik Senkronizasyonu Durdurma:**
-   GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
-
-3. **Merge'i Geri Alma (Git Revert):**
-   Gerekirse ana branch'te merge commit'ini geri almak için:
+1. **Merge'i Geri Alma (Gerçek Rollback):**
+   Frontend ve manifest sistemini tek adımda eski yerel `public/fantome/*.fantome` yapısına döndürmenin kesin ve doğrudan yolu merge commit'ini geri almaktır (yerel fantome arşivi depoda eksiksiz korunmaktadır):
    ```bash
    git revert -m 1 <merge-commit-hash>
    git push origin main
    ```
+
+2. **Otomatik Senkronizasyonu Durdurma:**
+   GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
+
+3. **Manifest Üretimi Legacy Bayrağı:**
+   `scripts/config.mjs` içerisindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca manifest üretim scriptini (`prepare-fantome.mjs`) etkiler; kaynak repoda karşılığı bulunmayan eski yerel dosya girdilerinin manifest'te `enabled` işaretlenmesini belirler. Frontend çalışma zamanında eski yerel servise anında dönüş sağlamaz.
 
 ---
 

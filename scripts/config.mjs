@@ -13,7 +13,7 @@ export const SOURCE_BRANCH = process.env.YIMIKAMI_BRANCH || 'main';
 export const RAW_BASE_URL = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_BRANCH}/`;
 export const GITHUB_TREE_API_URL = `https://api.github.com/repos/${SOURCE_REPO}/git/trees/${SOURCE_BRANCH}?recursive=1`;
 
-// Tek bayrakla eski (ID tabanlı yerel) fantome dosyalarını açıp kapatma
+// Yalnızca manifest üretiminde (prepare-fantome) kaynak repoda olmayan eski yerel dosya girdilerini etkinleştiren bayrak
 export const ENABLE_LEGACY_FANTOME = process.env.ENABLE_LEGACY_FANTOME === 'true';
 export const LEGACY_BASE_PATH = '/fantome/';
 export const LEGACY_EXTERNAL_DIR = process.env.LOL_SKINS_LEGACY_DIR || '';
