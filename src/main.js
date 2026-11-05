@@ -4700,6 +4700,7 @@ function closeSkinModal(skipAnimation) {
     transition.finished.finally(() => {
       if (sourceEl) sourceEl.style.viewTransitionName = '';
       modal.style.viewTransitionName = '';
+      modal.dataset.animationState = 'closed';
     });
     return;
   }
@@ -4708,11 +4709,13 @@ function closeSkinModal(skipAnimation) {
     animateModalCloseFallback(sourceEl, () => {
       applySkinModalCloseState();
       modal.classList.remove('closing');
+      modal.dataset.animationState = 'closed';
     });
   } else {
     window.setTimeout(() => {
       applySkinModalCloseState();
       modal.classList.remove('closing');
+      modal.dataset.animationState = 'closed';
     }, MODAL_TRANSITION_MS);
   }
 }

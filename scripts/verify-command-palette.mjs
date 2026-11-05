@@ -118,10 +118,9 @@ try {
     await expect(page.locator('#skin-modal')).toBeVisible();
     await expect(page.locator('#modal-skin-name')).toHaveText(name);
     assert.ok(await page.evaluate(() => document.querySelector('#skin-modal').contains(document.activeElement)));
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => document.getElementById('skin-modal')?.dataset.animationState === 'ready');
     await page.locator('#skin-modal .modal-close').click();
-    await expect.poll(() => page.locator('#skin-modal').evaluate(el => el.open)).toBe(false);
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => document.getElementById('skin-modal')?.dataset.animationState === 'closed');
   });
 
   await check('Empty/no-match input, accents, spaces, click selection, backdrop and shortcut close', async () => {
@@ -139,10 +138,9 @@ try {
     await items.first().click();
     await expectClosed();
     await expect(page.locator('#modal-skin-name')).toHaveText('Başkumandan Katarina');
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => document.getElementById('skin-modal')?.dataset.animationState === 'ready');
     await page.locator('#skin-modal .modal-close').click();
-    await expect.poll(() => page.locator('#skin-modal').evaluate(el => el.open)).toBe(false);
-    await page.waitForTimeout(500);
+    await page.waitForFunction(() => document.getElementById('skin-modal')?.dataset.animationState === 'closed');
     await openShortcut();
     await page.mouse.click(8, 8);
     await expectClosed();
@@ -171,12 +169,22 @@ try {
     await search.fill('Ahri');
     await expect(page.locator('#results .skin-card h3').first()).toHaveText('Ağaç Ata Ahri');
     const names = await page.locator('#results .skin-card h3').allTextContents();
-    // Existing search deliberately includes fuzzy matches after exact champion matches.
+    // Existing search deliberately includes exact matches before any fuzzy matches.
     assert.ok(names.includes('Ahri') && names.includes('K/DA Ahri'));
-    const nonAhriIdx = names.findIndex(n => !n.toLowerCase().includes('ahri'));
-    if (nonAhriIdx !== -1) {
-      assert.ok(names.indexOf('Ahri') < nonAhriIdx);
-    }
+    assert.ok(names.slice(0, 10).every(n => n.toLowerCase().includes('ahri')), 'Top 10 results for Ahri are all Ahri skins');
+
+    // Regression check: Exact champion matches rank strictly before fuzzy typo matches
+    await search.fill('Ashe');
+    await expect(page.locator('#results .skin-card h3').first()).toHaveText('2017 Dünya Şampiyonası Ashe');
+    const asheNames = await page.locator('#results .skin-card h3').allTextContents();
+    assert.ok(asheNames.includes('Ashe'));
+    const nonAsheIdx = asheNames.findIndex(n => !n.toLowerCase().includes('ashe'));
+    assert.ok(nonAsheIdx !== -1, 'Fuzzy matches exist in results for Ashe');
+    assert.ok(asheNames.indexOf('Ashe') < nonAsheIdx, 'Exact match Ashe ranks strictly before fuzzy matches');
+
+    // Return to Ahri for palette independence verification
+    await search.fill('Ahri');
+    await expect(page.locator('#results .skin-card h3').first()).toHaveText('Ağaç Ata Ahri');
     await openShortcut();
     await input.fill('Katarina');
     await page.keyboard.press('Escape');
@@ -201,6 +209,8 @@ try {
     await expect(page.locator('.gradient-mesh-bg')).toHaveCSS('pointer-events', 'none');
     await expect(page.locator('.noise-overlay')).toHaveCSS('pointer-events', 'none');
     const blob = page.locator('.mesh-blob-1');
+    // Note: commit 310d706f intentionally set .gradient-mesh-bg { display: none } in favor of Apple shaders.
+    // Elements remain attached in DOM; when mesh is hidden, computed transform is 'none'.
     await expect(blob).toBeAttached();
   });
 
