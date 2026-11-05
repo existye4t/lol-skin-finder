@@ -5,6 +5,12 @@ on:
     branches: [main]
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: 'Derlenecek Git ref / branch / commit (boşsa tetikleyen commit kullanılır)'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -21,6 +27,8 @@ jobs:
     steps:
       - name: Kaynak kodu al
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || '' }}
       - name: Node.js kur
         uses: actions/setup-node@v6
         with:

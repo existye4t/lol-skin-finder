@@ -107,7 +107,7 @@ npm run update-data
 npm run check-links
 ```
 
-> **GitHub Actions Ayarı Gereksinimi:** `.github/workflows/sync-skins.yml` iş akışının büyük değişikliklerde veya yama geçişlerinde otomatik Pull Request açabilmesi için depo ayarlarında **Settings → Actions → General → Workflow permissions** altında **"Allow GitHub Actions to create and approve pull requests"** seçeneği işaretlenmelidir. `workflow_dispatch` üzerinden `dry_run: true` seçildiğinde ise repo üzerinde hiçbir commit/PR oluşturulmaz, yalnızca özet loglanır.
+> **GitHub Actions Ayarı Gereksinimi:** `.github/workflows/sync-skins.yml` iş akışının büyük değişikliklerde veya yama geçişlerinde otomatik Pull Request açabilmesi için depo ayarlarında **Settings → Actions → General → Workflow permissions** altında **"Allow GitHub Actions to create and approve pull requests"** seçeneği işaretlenmelidir. `workflow_dispatch` üzerinden `dry_run: true` seçildiğinde ise repo üzerinde hiçbir commit/PR oluşturulmaz, yalnızca özet loglanır. `force_deploy: true` seçildiğinde ise veri değişikliği olmasa dahi GitHub Pages deploy akışı canlı olarak tetiklenir (`dry_run: true` önceliklidir).
 
 ---
 

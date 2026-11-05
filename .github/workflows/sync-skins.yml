@@ -13,6 +13,11 @@ on:
         type: boolean
         required: false
         default: false
+      force_deploy:
+        description: 'Veri değişmese bile Pages deploy tetikle (dry_run=true ise yok sayılır)'
+        type: boolean
+        required: false
+        default: false
 
 # ÖNEMLİ YAPILANDIRMA:
 # Bu iş akışının otomatik Pull Request açabilmesi için GitHub depo ayarlarında:
@@ -78,6 +83,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CURRENT_BRANCH: ${{ github.ref_name }}
           DRY_RUN: ${{ inputs.dry_run || false }}
+          FORCE_DEPLOY: ${{ inputs.force_deploy || false }}
         run: |
           set -e
 
@@ -131,19 +137,25 @@ jobs:
           # Geçici rapor dosyasını temizle (git'e girmesin)
           rm -f public/data/sync-report.json
 
-          CHANGED=$(git status --porcelain public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json)
-          if [ -z "$CHANGED" ]; then
-            echo "Veri dosyalarında değişiklik yok, işlem tamamlandı."
+          # Dry run kontrolü (öncelikli: hiçbir commit, PR veya deploy yapılmaz)
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "DRY RUN MODU: Commit, PR ve deploy adımları atlandı. Depoya hiçbir şey yazılmadı."
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "> ℹ️ **DRY RUN:** \`dry_run\` girdisi aktif olduğu için commit, PR ve deploy atlandı; sadece özet raporlandı." >> "$GITHUB_STEP_SUMMARY"
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Dry run kontrolü
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "DRY RUN MODU: Commit ve PR adımları atlandı. Depoya hiçbir şey yazılmadı."
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "> ℹ️ **DRY RUN:** \`dry_run\` girdisi aktif olduğu için commit veya PR açılmadı; sadece özet raporlandı." >> "$GITHUB_STEP_SUMMARY"
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          CHANGED=$(git status --porcelain public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json)
+          if [ -z "$CHANGED" ]; then
+            echo "Veri dosyalarında değişiklik yok."
+            if [ "$FORCE_DEPLOY" = "true" ]; then
+              echo "force_deploy=true aktif: Veri değişikliği olmasa bile deploy çıktısı veriliyor."
+              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "İşlem tamamlandı, deploy yapılmayacak."
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            fi
             exit 0
           fi
 
@@ -186,6 +198,8 @@ jobs:
     needs: sync
     if: needs.sync.outputs.should_deploy == 'true' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy-pages.yml
+    with:
+      ref: main
     permissions:
       contents: read
       pages: write
