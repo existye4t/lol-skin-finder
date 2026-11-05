@@ -1,0 +1,176 @@
+name: Kaynak Repodan Skin Senkronizasyonu
+
+on:
+  # NOT: GitHub Actions 'schedule' tetikleyicisi yalnızca varsayılan branch (main)
+  # üzerinde çalışır. Bu branch main'e merge edildiğinde otomatik devreye girer.
+  schedule:
+    - cron: '0 6,18 * * *'
+
+  workflow_dispatch:
+
+  # GEÇİCİ TEST TETİKLEYİCİSİ: feat/yimikami-source branch'inde test edebilmek için eklendi.
+  # main branch'ine merge edilirken bu 'push' bloğu kaldırılabilir.
+  push:
+    branches:
+      - feat/yimikami-source
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/sync-skins.yml'
+
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sync-skins-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Manifest ve Skin Verilerini Güncelle
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.commit_or_pr.outputs.should_deploy }}
+    steps:
+      - name: Kaynak kodu al
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Node.js kur
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Bağımlılıkları yükle
+        run: npm ci
+
+      - name: Manifest oluştur (Git Trees API + Güvenlik Koruması)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/prepare-fantome.mjs --enforce-safety --write-report
+
+      - name: Skin, PBE, Rainbow ve Classic verilerini güncelle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/update-skins.mjs
+
+      - name: Şema ve İndirme Linklerini Doğrula (Trees API + 20 Örneklem HEAD)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/check-links.mjs --new-only --sample=20
+
+      - name: Production Build Doğrulaması
+        run: npm run build
+
+      - name: Değişiklikleri Değerlendir ve Commit / PR Uygula
+        id: commit_or_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -e
+
+          MODE="direct"
+          PATCH="unknown"
+          DELTA="0"
+
+          # Rapor dosyasından özet metrikleri oku ve GITHUB_STEP_SUMMARY'ye yaz
+          if [ -f "public/data/sync-report.json" ]; then
+            MODE=$(node -e '
+              const fs = require("fs");
+              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
+              process.stdout.write(r.patchChanged || r.totalDeltaCount > 100 ? "pr" : "direct");
+            ')
+            PATCH=$(node -e '
+              const fs = require("fs");
+              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
+              process.stdout.write(String(r.patch || "unknown").replace(/[^a-zA-Z0-9._-]/g, "-"));
+            ')
+            DELTA=$(node -e '
+              const fs = require("fs");
+              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
+              process.stdout.write(String(r.totalDeltaCount || 0));
+            ')
+            node -e '
+              const fs = require("fs");
+              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
+              const lines = [
+                "## 🔄 Skin Senkronizasyon Özeti",
+                "",
+                `- **Yama:** \`${r.patch}\` (Önceki: \`${r.previousPatch || "yok"}\`, Değişti mi: \`${r.patchChanged}\`)`,
+                `- **Aktif Paket Sayısı:** \`${r.currentActiveCount}\` (Önceki: \`${r.previousActiveCount}\`)`,
+                `- **Yeni Eklenen:** \`${r.addedCount}\``,
+                `- **Güncellenen:** \`${r.updatedCount}\``,
+                `- **PBE → Canlıya Geçen:** \`${r.promotedCount}\``,
+                `- **Kaybolan (Grace Period):** \`${r.missingCount}\``,
+                `- **Devre Dışı Bırakılan:** \`${r.disabledCount}\``,
+                `- **Pending (Data Dragon Bekleyen):** \`${r.pendingCount}\``,
+                `- **Toplam Değişim (Delta):** \`${r.totalDeltaCount}\``
+              ];
+              if (r.addedSample && r.addedSample.length) {
+                lines.push("", "### Yeni Eklenen Örnekler", ...r.addedSample.slice(0, 15).map(x => `- \`${x}\``));
+              }
+              if (r.promoted && r.promoted.length) {
+                lines.push("", "### PBE → Canlıya Geçenler", ...r.promoted.slice(0, 15).map(x => `- \`${x}\``));
+              }
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+            '
+          fi
+
+          # Geçici rapor dosyasını temizle (git'e girmesin)
+          rm -f public/data/sync-report.json
+
+          CHANGED=$(git status --porcelain public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json)
+          if [ -z "$CHANGED" ]; then
+            echo "Veri dosyalarında değişiklik yok, işlem tamamlandı."
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json
+
+          if [ "$MODE" = "direct" ]; then
+            echo "Küçük değişim (delta=$DELTA <= 100 ve yama aynı). Doğrudan commit atılıyor..."
+            git commit -m "chore(data): sync skins from Yimikami/LeagueSkins-Experimental"
+            git push origin "HEAD:${CURRENT_BRANCH}"
+            if [ "$CURRENT_BRANCH" = "main" ]; then
+              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            PR_BRANCH="chore/sync-skins-${PATCH}"
+            echo "Büyük değişim veya yeni yama (delta=$DELTA, patch=$PATCH). PR açılıyor: $PR_BRANCH"
+            git checkout -B "$PR_BRANCH"
+            git commit -m "chore(data): sync skins from Yimikami/LeagueSkins-Experimental (patch ${PATCH})"
+            git push --force-with-lease origin "$PR_BRANCH"
+
+            EXISTING_PR=$(gh pr list --head "$PR_BRANCH" --base "$CURRENT_BRANCH" --json number --jq '.[0].number' || true)
+            if [ -z "$EXISTING_PR" ]; then
+              gh pr create \
+                --base "$CURRENT_BRANCH" \
+                --head "$PR_BRANCH" \
+                --title "chore(data): sync skins from Yimikami/LeagueSkins-Experimental (${PATCH})" \
+                --body "Otomatik skin senkronizasyonu büyük bir güncelleme veya yama değişimi tespit etti (\`delta=${DELTA}\`, \`patch=${PATCH}\`). Build ve link kontrolleri başarıyla geçti; onayınız bekleniyor."
+            else
+              echo "Mevcut PR #$EXISTING_PR güncellendi."
+            fi
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: GitHub Pages Yayınla (Doğrudan Güncelleme)
+    needs: sync
+    if: needs.sync.outputs.should_deploy == 'true' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy-pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
