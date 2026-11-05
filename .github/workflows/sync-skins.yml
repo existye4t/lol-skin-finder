@@ -63,6 +63,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/check-links.mjs --new-only --sample=20
 
+      - name: Koleksiyon Veri Bütünlüğünü Doğrula (A-C Bölümleri ve Trees API)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run verify-collections
+
       - name: Production Build Doğrulaması
         run: npm run build
 

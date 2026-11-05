@@ -6,5 +6,7 @@ work/
 vite-out.txt
 vite-err.txt
 test-results/.last-run.json
+test-results/
+playwright-report/
 dev.log
 test-results/csp-test-CSP-violations-check-chromium/error-context.md
