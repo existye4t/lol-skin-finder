@@ -12,7 +12,8 @@
     "dev": "vite --host 127.0.0.1",
     "admin-server": "node scripts/admin-server.mjs",
     "build": "vite build --base=./ --configLoader runner",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npm run build && playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
