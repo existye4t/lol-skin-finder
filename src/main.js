@@ -3657,7 +3657,7 @@ async function downloadChampionPack(championKey, { includeChromas, onProgress } 
   await ensureManifestLoaded();
   if (!manifestData) {
     console.warn('Manifest yüklenemediği için champion pack indirilemiyor.');
-    return { skipped: 0 };
+    throw new Error(t('manifestLoadError'));
   }
   // 1) Şampiyona ait, dosyası olan skinleri topla
   let championSkins = skins.filter((skin) => {
