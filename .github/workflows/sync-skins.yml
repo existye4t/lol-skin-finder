@@ -19,8 +19,7 @@ on:
 # Settings -> Actions -> General -> Workflow permissions bölümünde
 # "Allow GitHub Actions to create and approve pull requests" seçeneği MUTLAKA işaretli olmalıdır.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: sync-skins-${{ github.ref }}
