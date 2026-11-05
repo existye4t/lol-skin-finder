@@ -107,7 +107,26 @@ npm run update-data
 npm run check-links
 ```
 
-> İsteğe bağlı olarak GitHub API rate-limit sınırını yükseltmek için `GITHUB_TOKEN` ortam değişkeni tanımlanabilir. Canlı depoda `.github/workflows/sync-skins.yml` iş akışı günde iki kez kaynak repoyu kontrol eder; küçük güncellemeleri doğrudan uygular, büyük değişiklik veya yeni yama tespit ettiğinde Pull Request açar.
+> **GitHub Actions Ayarı Gereksinimi:** `.github/workflows/sync-skins.yml` iş akışının büyük değişikliklerde veya yama geçişlerinde otomatik Pull Request açabilmesi için depo ayarlarında **Settings → Actions → General → Workflow permissions** altında **"Allow GitHub Actions to create and approve pull requests"** seçeneği işaretlenmelidir. `workflow_dispatch` üzerinden `dry_run: true` seçildiğinde ise repo üzerinde hiçbir commit/PR oluşturulmaz, yalnızca özet loglanır.
+
+---
+
+## 🛑 Geri Alma (Rollback) Prosedürü
+
+Herhangi bir beklenmeyen durumda sistemi hızla önceki kararlı duruma döndürmek için:
+
+1. **Eski Yerel Fantome Dosyalarına Dönüş:**
+   `scripts/config.mjs` dosyası içerisindeki `ENABLE_LEGACY_FANTOME = false` bayrağını `true` yaparak yerel `public/fantome/*.fantome` dosyalarından servis edilmesini anında sağlayabilirsiniz. Yerel fantome arşivi depoda korunmaktadır.
+
+2. **Otomatik Senkronizasyonu Durdurma:**
+   GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
+
+3. **Merge'i Geri Alma (Git Revert):**
+   Gerekirse ana branch'te merge commit'ini geri almak için:
+   ```bash
+   git revert -m 1 <merge-commit-hash>
+   git push origin main
+   ```
 
 ---
 
