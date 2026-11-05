@@ -27,22 +27,22 @@ https://existye4t.github.io/lol-skin-finder/
 
 ---
 
-## 🧩 Veri Kaynağı
+## 🧩 Veri Kaynağı ve Koleksiyonlar (16.22+)
 
-Skin verileri Riot Games'in resmi **Data Dragon** yayınlarından oluşturulur.
+Skin verileri ve `.fantome` paket bağlantıları iki ana kaynaktan senkronize edilir:
 
-`npm run update-data` komutu güncel sürümü tespit eder, şampiyonların skin bilgilerini indirir ve uygulamanın hızlı arama yapabilmesi için `public/data/skins.json` dosyasını oluşturur.
+1. **Riot Games Data Dragon & CommunityDragon** — Canlı sunucu ve PBE skin/chroma meta verileri, Türkçe ve İngilizce yerelleştirmeler.
+2. **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)** — `.fantome` paketlerinin tamamı doğrudan bu kaynak repodan indirilir (bu repoya yeni `.fantome` ikili dosyaları kopyalanmaz).
 
-Riot Skin ID sistemi, şampiyon anahtarı ve üç haneli skin numarasının birleştirilmesiyle oluşturulur.
+### Koleksiyonlar
+* **Skinler (`skins/` + `PBE/`)** — Canlı sunucudaki tüm şampiyon skinleri, chromalar, form/varyant paketleri ve `PBE` etiketli önizleme skinleri aynı sekmede listelenir. Bir PBE skini canlı sunucuya çıktığında `PBE` rozeti otomatik olarak kalkar.
+* **Rainbow (`rainbow/`)** — Oyun içinde `Ctrl + 5` kısayoluyla chroma değiştirmeyi sağlayan Rainbow paketleri (yalnızca Rainbow sekmesinde aranır; ayrıca desteklenen skinlerin detay penceresinde `Rainbow sürümü →` bağlantısıyla erişilir).
+* **Classic (`classic/`)** — League Classic modu için hazırlanmış özel şampiyon skin ve chroma paketleri (yalnızca Classic sekmesinde aranır).
 
-Örneğin:
-
-```text
-Twitch = 29
-Omega Squad = 004
-
-Riot Skin ID = 29004
-```
+> **Önemli Uyarılar:**
+> * Kaynak repodaki paketler otomatik olarak üretilmektedir ve tek tek test edilmemiştir; bazı skinlerde veya formlarda oyun içi görsel/ses sorunları yaşanabilir.
+> * **PBE** etiketli içerikler önizleme sürümüdür; canlı sunucuya çıkmadan önce değişebilir veya kararsız çalışabilir.
+> * Kaynak paket altyapısı ve araçları için [Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental), [bettie9/Sunshine](https://github.com/bettie9/Sunshine) ve [CommunityDragon](https://www.communitydragon.org/) projelerine teşekkürler.
 
 ---
 
@@ -84,31 +84,30 @@ lol-skin-finder/
 
 ---
 
-## 🔄 Veri Güncelleme
+## 🔄 Veri Güncelleme ve Manifest Sistemi
 
-Yeni League of Legends skinleri yayınlandığında veri dosyasını yeniden oluşturmak için:
+Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez ancak varsayılan olarak devre dışıdır (`ENABLE_LEGACY_FANTOME = false` — `scripts/config.mjs` içinden tek bayrakla yönetilir).
+
+Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
 
 ```bash
-npm run update-data
+npm run sync-data
 ```
 
-komutunu çalıştırman yeterlidir.
-
-Bu işlem Riot Data Dragon üzerinden güncel skin verilerini alarak uygulamanın kullandığı `skins.json` dosyasını yeniler.
-
----
-
-## 📥 Fantome Dosyaları
-
-Uygulama desteklenen skinler için `.fantome` dosyalarını da gösterebilir.
+Komutları ayrı ayrı çalıştırmak için:
 
 ```bash
+# 1. Kaynak repodan Git Trees API + indekslerle fantome-manifest.json üret
 npm run prepare-fantome
+
+# 2. Data Dragon + CommunityDragon + manifest ile skins.json, rainbow.json, classic.json üret
+npm run update-data
+
+# 3. Şema, Trees API varlık kontrolü, URL encode ve örneklem HEAD doğrulaması
+npm run check-links
 ```
 
-komutu, belirtilen skin arşivindeki Fantome dosyalarını uygulamanın kullandığı yapıya hazırlar.
-
-Bir skin için ilgili Fantome dosyası mevcutsa detay ekranındaki indirme seçeneği aktif hale gelir.
+> İsteğe bağlı olarak GitHub API rate-limit sınırını yükseltmek için `GITHUB_TOKEN` ortam değişkeni tanımlanabilir. Canlı depoda `.github/workflows/sync-skins.yml` iş akışı günde iki kez kaynak repoyu kontrol eder; küçük güncellemeleri doğrudan uygular, büyük değişiklik veya yeni yama tespit ettiğinde Pull Request açar.
 
 ---
 

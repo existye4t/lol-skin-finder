@@ -516,6 +516,76 @@ const TRANSLATIONS = {
   championPackToolbarBtn: {
     tr: 'Tüm skinleri indir · {count} dosya',
     en: 'Download all skins · {count} files'
+  },
+
+  collectionTabsAria: {
+    tr: 'Koleksiyonlar',
+    en: 'Collections'
+  },
+
+  tabSkins: {
+    tr: 'Skinler',
+    en: 'Skins'
+  },
+
+  tabRainbow: {
+    tr: 'Rainbow',
+    en: 'Rainbow'
+  },
+
+  tabClassic: {
+    tr: 'Classic',
+    en: 'Classic'
+  },
+
+  badgePbe: {
+    tr: 'PBE',
+    en: 'PBE'
+  },
+
+  badgeRainbow: {
+    tr: 'RAINBOW',
+    en: 'RAINBOW'
+  },
+
+  badgeClassic: {
+    tr: 'CLASSIC',
+    en: 'CLASSIC'
+  },
+
+  pbeWarningNotice: {
+    tr: 'PBE içeriği — önizleme sürümüdür; canlı sunucuya çıkmadan önce değişebilir veya kararsız çalışabilir.',
+    en: 'PBE content — preview build; may change before live release or behave unstably.'
+  },
+
+  rainbowVersionLink: {
+    tr: 'Rainbow sürümü →',
+    en: 'Rainbow version →'
+  },
+
+  rainbowCycleInfo: {
+    tr: '{count} Chroma • Ctrl+5',
+    en: '{count} Chromas • Ctrl+5'
+  },
+
+  formsHeading: {
+    tr: 'FORMLAR / VARYANTLAR',
+    en: 'FORMS / VARIANTS'
+  },
+
+  legacyDisabledNote: {
+    tr: 'Bu skin yeni kaynakta bulunmadığı için indirmeye kapalıdır.',
+    en: 'This skin is disabled because it is not available in the new source.'
+  },
+
+  metaRainbow: {
+    tr: '{count} Rainbow paketi • Yama {version}',
+    en: '{count} Rainbow packages • Patch {version}'
+  },
+
+  metaClassic: {
+    tr: '{count} Classic skin • Yama {version}',
+    en: '{count} Classic skins • Patch {version}'
   }
 };
 
@@ -924,6 +994,7 @@ function setLang(lang) {
     updateFilterButtonState();
     renderChampionFilterOptions();
 
+    updateCollectionMeta();
     renderPopular();
     render();
     syncAllFavoriteButtons();
@@ -1242,8 +1313,21 @@ function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
 }
 
 /* =========================================
-   VERİLER
+   VERİLER & KOLEKSİYONLAR
 ========================================= */
+
+const DEFAULT_RAW_BASE_URL =
+  'https://raw.githubusercontent.com/Yimikami/LeagueSkins-Experimental/main/';
+
+let manifestData = null;
+let useLegacyLocalFantome = false;
+let activeCollection = 'skins';
+
+const collectionStore = {
+  skins: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null },
+  rainbow: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null },
+  classic: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null }
+};
 
 let skins = [];
 let skinGroups = [];
@@ -1253,6 +1337,102 @@ let lastModalSourceEl = null;
 let searchTrackingTimer = null;
 let lastTrackedSearch = '';
 
+function buildManifestPathUrl(relativePath) {
+  if (!relativePath || typeof relativePath !== 'string') {
+    return '';
+  }
+  const base = String(manifestData?.baseUrl || DEFAULT_RAW_BASE_URL).replace(/\/+$/, '');
+  const encodedSegments = relativePath
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment));
+  return `${base}/${encodedSegments.join('/')}`;
+}
+
+function getManifestEntryForSkin(item, collection = activeCollection) {
+  if (!manifestData?.entries || !item?.id) {
+    return null;
+  }
+  const id = String(item.id);
+  const itemCol = item.collection || collection;
+  if (itemCol === 'rainbow') {
+    return manifestData.entries[`rainbow:${id}`] || null;
+  }
+  if (itemCol === 'classic') {
+    return manifestData.entries[`classic:${id}`] || null;
+  }
+  return (
+    manifestData.entries[`skins:${id}`] ||
+    manifestData.entries[`pbe:${id}`] ||
+    null
+  );
+}
+
+function getFantomeDownloadUrl(item, collection = activeCollection) {
+  if (!item?.id) {
+    return '';
+  }
+  if (manifestData?.entries) {
+    const entry = getManifestEntryForSkin(item, collection);
+    if (entry && entry.enabled !== false && entry.path) {
+      return buildManifestPathUrl(entry.path);
+    }
+    if (manifestData.legacyEnabled && entry && entry.legacy) {
+      return assetUrl(`fantome/${item.id}.fantome`);
+    }
+    return '';
+  }
+  if (useLegacyLocalFantome && fantomeFiles.has(String(item.id))) {
+    return assetUrl(`fantome/${item.id}.fantome`);
+  }
+  return '';
+}
+
+function syncFantomeFilesForCollection(collection = activeCollection) {
+  if (!manifestData?.entries) {
+    return;
+  }
+  fantomeFiles.clear();
+  for (const entry of Object.values(manifestData.entries)) {
+    if (!entry || entry.enabled === false) continue;
+    if (collection === 'skins') {
+      if (entry.collection === 'skins' || entry.collection === 'pbe') {
+        fantomeFiles.add(String(entry.id));
+      }
+    } else if (entry.collection === collection) {
+      fantomeFiles.add(String(entry.id));
+    }
+  }
+}
+
+function updateCollectionMeta() {
+  if (!meta) return;
+  const store = collectionStore[activeCollection];
+  if (!store?.groups?.length) return;
+
+  const query = normalize(search?.value || '');
+  const favoriteActive = isFavoriteFilterActive();
+  if (query || favoriteActive) return;
+
+  const version =
+    store.version ||
+    collectionStore.skins.version ||
+    manifestData?.patch ||
+    (currentLang === 'en' ? 'Unknown' : 'Bilinmiyor');
+
+  const metaKey =
+    activeCollection === 'rainbow'
+      ? 'metaRainbow'
+      : activeCollection === 'classic'
+        ? 'metaClassic'
+        : 'metaVersion';
+
+  meta.textContent = t(metaKey, {
+    count: formatNumber(store.groups.length),
+    version
+  });
+}
+
 /* =========================================
    SEARCH CACHE (LRU)
 ========================================= */
@@ -1260,12 +1440,12 @@ let lastTrackedSearch = '';
 const SEARCH_CACHE_MAX_SIZE = 20;
 const searchCache = new Map();
 
-// Cache key includes query, favorite filter state, and champion filter state
+// Cache key includes active collection, query, favorite filter state, and champion filter state
 function getSearchCacheKey(query, favoriteFilterActive, championFilters) {
   const filterKey = championFilters.size > 0
     ? [...championFilters].sort().join(',')
     : '';
-  return `${query}|${favoriteFilterActive ? '1' : '0'}|${filterKey}`;
+  return `${activeCollection}|${query}|${favoriteFilterActive ? '1' : '0'}|${filterKey}`;
 }
 
 function getCachedSearchResult(cacheKey) {
@@ -2353,8 +2533,42 @@ function createSkinCard(group) {
   }
 
   if (idElement) {
-    idElement.textContent =
-      `ID: ${skin.id}`;
+    if (
+      (skin.collection === 'rainbow' || activeCollection === 'rainbow') &&
+      skin.cycleCount
+    ) {
+      idElement.textContent = t('rainbowCycleInfo', {
+        count: skin.cycleCount
+      });
+    } else {
+      idElement.textContent = `ID: ${skin.id}`;
+    }
+  }
+
+  /* ---------------------------------------
+     Koleksiyon / PBE rozeti
+  --------------------------------------- */
+
+  article.querySelectorAll('.skin-badge').forEach((el) => el.remove());
+
+  if (skin.isPbe) {
+    const badge = document.createElement('span');
+    badge.className = 'skin-badge skin-badge-pbe lang-switch-text';
+    badge.dataset.i18n = 'badgePbe';
+    badge.textContent = t('badgePbe');
+    article.appendChild(badge);
+  } else if (skin.collection === 'rainbow' || activeCollection === 'rainbow') {
+    const badge = document.createElement('span');
+    badge.className = 'skin-badge skin-badge-rainbow lang-switch-text';
+    badge.dataset.i18n = 'badgeRainbow';
+    badge.textContent = t('badgeRainbow');
+    article.appendChild(badge);
+  } else if (skin.collection === 'classic' || activeCollection === 'classic') {
+    const badge = document.createElement('span');
+    badge.className = 'skin-badge skin-badge-classic lang-switch-text';
+    badge.dataset.i18n = 'badgeClassic';
+    badge.textContent = t('badgeClassic');
+    article.appendChild(badge);
   }
 
   /* ---------------------------------------
@@ -2757,6 +2971,7 @@ function render() {
 
   if (popularSection) {
     popularSection.hidden =
+      activeCollection !== 'skins' ||
       Boolean(query) ||
       favoriteActive ||
       championFilters.size > 0;
@@ -2888,6 +3103,8 @@ function render() {
               found.length
             )
         });
+    } else {
+      updateCollectionMeta();
     }
   }
 
@@ -3256,36 +3473,68 @@ async function downloadChampionPack(championKey, { includeChromas, onProgress } 
     return { skin, name: `${champFolderName}/${finalName}` };
   });
 
-  // 3) Tüm dosyaları tam parallel fetch et — dosyalar küçük (~6.6KB ort),
-  //    tarayıcı connection pool'u zaten sınırlar (H/2 multiplexing).
-  //    Retry: başarısız olursa 1 kez daha dene, yine olmazsa atla.
+  // 3) raw.githubusercontent.com için eşzamanlılık sınırı (5) ve 429/5xx/ağ hatası için geri çekilmeli yeniden deneme
+  const PACK_FETCH_CONCURRENCY = 5;
+  const PACK_MAX_RETRIES = 3;
   let skipped = 0;
   const total = entries.length;
   let done = 0;
 
-  // Tüm dosyaları parallel fetch ET VE ArrayBuffer'a çek.
-  // client-zip'e Response değil hazır Uint8Array verince
-  // ZIP assembly aşaması saf CPU'ya dönüşür, ağ bekleme kalmaz.
   async function fetchToBuffer(url) {
-    let res = await fetch(url);
-    if (!res.ok) res = await fetch(url);
-    if (!res.ok) return null;
-    const ab = await res.arrayBuffer();
-    return new Uint8Array(ab);
+    if (!url) return null;
+    for (let attempt = 0; attempt < PACK_MAX_RETRIES; attempt++) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const ab = await res.arrayBuffer();
+          return new Uint8Array(ab);
+        }
+        if (res.status === 404) {
+          return null;
+        }
+        if (res.status === 429 || res.status >= 500) {
+          const retryAfter = Number(res.headers?.get?.('retry-after')) || 0;
+          const backoffMs = retryAfter > 0 ? retryAfter * 1000 : 350 * Math.pow(2, attempt);
+          await new Promise((r) => setTimeout(r, backoffMs));
+          continue;
+        }
+        return null;
+      } catch (_) {
+        if (attempt + 1 < PACK_MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 350 * Math.pow(2, attempt)));
+        }
+      }
+    }
+    return null;
   }
 
-  const results = await Promise.all(
-    entries.map(async ({ skin, name }) => {
-      const url = assetUrl(`fantome/${skin.id}.fantome`);
+  const results = new Array(entries.length).fill(null);
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < entries.length) {
+      const index = cursor++;
+      const { skin, name } = entries[index];
+      const url = getFantomeDownloadUrl(skin);
       const buf = await fetchToBuffer(url);
       done++;
       if (onProgress) onProgress(done, total);
-      if (!buf) { skipped++; return null; }
-      return { name, input: buf, size: buf.byteLength };
-    })
-  );
+      if (!buf) {
+        skipped++;
+        results[index] = null;
+      } else {
+        results[index] = { name, input: buf, size: buf.byteLength };
+      }
+    }
+  }
+
+  const workerCount = Math.min(PACK_FETCH_CONCURRENCY, entries.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   const zipInputs = results.filter(Boolean);
+  if (zipInputs.length === 0) {
+    return { skipped };
+  }
 
   // 4) ZIP oluştur — girdiler zaten bellekte, assembly anında tamamlanır
   const blob = await downloadZip(zipInputs).blob();
@@ -3645,10 +3894,82 @@ activeModalGroup = group;
 
   if (modalSkinId) {
     modalSkinId.classList.add('lang-switch-text');
-    modalSkinId.textContent =
-      t('riotSkinId', {
-        id: skin.id
-      });
+    if (
+      (skin.collection === 'rainbow' || activeCollection === 'rainbow') &&
+      skin.cycleCount
+    ) {
+      modalSkinId.textContent = `${t('riotSkinId', { id: skin.id })} • ${t('rainbowCycleInfo', { count: skin.cycleCount })}`;
+    } else {
+      modalSkinId.textContent =
+        t('riotSkinId', {
+          id: skin.id
+        });
+    }
+  }
+
+  /* ---------------------------------------
+     Koleksiyon / PBE rozeti, uyarı ve Rainbow bağlantısı
+  --------------------------------------- */
+
+  const modalCollectionBadge = document.querySelector('#modal-collection-badge');
+  if (modalCollectionBadge) {
+    if (skin.isPbe) {
+      modalCollectionBadge.hidden = false;
+      modalCollectionBadge.className = 'skin-badge skin-badge-pbe lang-switch-text';
+      modalCollectionBadge.dataset.i18n = 'badgePbe';
+      modalCollectionBadge.textContent = t('badgePbe');
+    } else if (skin.collection === 'rainbow' || activeCollection === 'rainbow') {
+      modalCollectionBadge.hidden = false;
+      modalCollectionBadge.className = 'skin-badge skin-badge-rainbow lang-switch-text';
+      modalCollectionBadge.dataset.i18n = 'badgeRainbow';
+      modalCollectionBadge.textContent = t('badgeRainbow');
+    } else if (skin.collection === 'classic' || activeCollection === 'classic') {
+      modalCollectionBadge.hidden = false;
+      modalCollectionBadge.className = 'skin-badge skin-badge-classic lang-switch-text';
+      modalCollectionBadge.dataset.i18n = 'badgeClassic';
+      modalCollectionBadge.textContent = t('badgeClassic');
+    } else {
+      modalCollectionBadge.hidden = true;
+      modalCollectionBadge.textContent = '';
+    }
+  }
+
+  const modalPbeWarning = document.querySelector('#modal-pbe-warning');
+  if (modalPbeWarning) {
+    if (skin.isPbe) {
+      modalPbeWarning.hidden = false;
+      modalPbeWarning.textContent = t('pbeWarningNotice');
+    } else {
+      modalPbeWarning.hidden = true;
+    }
+  }
+
+  const modalRainbowLink = document.querySelector('#modal-rainbow-link');
+  if (modalRainbowLink) {
+    if (skin.hasRainbow && activeCollection === 'skins') {
+      modalRainbowLink.hidden = false;
+      const linkSpan = modalRainbowLink.querySelector('[data-i18n="rainbowVersionLink"]');
+      if (linkSpan) linkSpan.textContent = t('rainbowVersionLink');
+      modalRainbowLink.onclick = async () => {
+        await switchCollection('rainbow');
+        const targetGroup =
+          collectionStore.rainbow.groups.find((g) => String(g.primary.id) === String(skin.id)) ||
+          collectionStore.rainbow.groups.find((g) =>
+            g.skins.some((s) => String(s.id) === String(skin.id))
+          );
+        if (targetGroup) {
+          refreshOpenModal(targetGroup);
+        } else if (search) {
+          closeSkinModal(true);
+          search.value = getLocalizedSkinName(skin);
+          clearSearchCache();
+          render();
+        }
+      };
+    } else {
+      modalRainbowLink.hidden = true;
+      modalRainbowLink.onclick = null;
+    }
   }
 
   /* ---------------------------------------
@@ -3686,10 +4007,10 @@ activeModalGroup = group;
     document.createDocumentFragment();
 
   group.skins.forEach((item) => {
+    const downloadUrl =
+      getFantomeDownloadUrl(item);
     const hasFile =
-      fantomeFiles.has(
-        String(item.id)
-      );
+      Boolean(downloadUrl);
 
     const element =
       document.createElement(
@@ -3752,10 +4073,7 @@ activeModalGroup = group;
     }
 
     if (hasFile) {
-      element.href =
-        assetUrl(
-          `fantome/${item.id}.fantome`
-        );
+      element.href = downloadUrl;
 
       element.download =
         getFantomeDownloadName(item);
@@ -3797,14 +4115,21 @@ activeModalGroup = group;
               is_chroma:
                 item !== skin
                   ? 1
-                  : 0
+                  : 0,
+
+              collection:
+                item.collection ||
+                (item.isPbe ? 'pbe' : activeCollection)
             }
           );
         }
       );
     } else {
+      const manifestEntry = getManifestEntryForSkin(item);
       element.title =
-        t('fileNotFound');
+        manifestEntry?.legacy
+          ? t('legacyDisabledNote')
+          : t('fileNotFound');
 
       element.setAttribute(
         'aria-disabled',
@@ -3816,6 +4141,58 @@ activeModalGroup = group;
       element
     );
   });
+
+  if (Array.isArray(skin.forms) && skin.forms.length > 0) {
+    const subheading = document.createElement('p');
+    subheading.className = 'download-section-subheading';
+    subheading.textContent = t('formsHeading');
+    fragment.appendChild(subheading);
+
+    skin.forms.forEach((form) => {
+      const formUrl = buildManifestPathUrl(form.path);
+      if (!formUrl) return;
+
+      const element = document.createElement('a');
+      element.className = 'download-item chroma-card';
+      element.href = formUrl;
+      element.download = `${sanitizeFilename(form.name || String(form.id))}.fantome`;
+      element.title = t('downloadFantomeTitle', { id: form.id });
+      element.setAttribute(
+        'aria-label',
+        t('downloadFantomeAriaLabel', { name: form.name || String(form.id) })
+      );
+
+      const dot = document.createElement('div');
+      dot.className = 'download-dot chroma-preview';
+      const previewUrl = skin.imageFallback || skin.image || '';
+      if (previewUrl) {
+        dot.style.backgroundImage = `url("${previewUrl}")`;
+      }
+      element.appendChild(dot);
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'download-item-text chroma-name';
+      textSpan.textContent = form.name || String(form.id);
+      element.appendChild(textSpan);
+
+      const idSpan = document.createElement('span');
+      idSpan.className = 'chroma-id';
+      idSpan.textContent = form.id;
+      element.appendChild(idSpan);
+
+      element.addEventListener('click', () => {
+        track('fantome_download', {
+          skin_id: form.id,
+          skin_name: form.name || skin.name,
+          champion: skin.champion,
+          is_chroma: 0,
+          collection: skin.isPbe ? 'pbe' : activeCollection
+        });
+      });
+
+      fragment.appendChild(element);
+    });
+  }
 
   downloadList.replaceChildren(
     fragment
@@ -5369,6 +5746,96 @@ function clearSkeletonCards(container) {
     .forEach((card) => card.remove());
 }
 
+async function ensureCollectionLoaded(collection) {
+  const store = collectionStore[collection];
+  if (!store) return;
+  if (store.loaded) return;
+  if (store.loadingPromise) {
+    await store.loadingPromise;
+    return;
+  }
+
+  const fileMap = {
+    skins: 'data/skins.json',
+    rainbow: 'data/rainbow.json',
+    classic: 'data/classic.json'
+  };
+
+  const targetPath = fileMap[collection];
+  if (!targetPath) return;
+
+  store.loadingPromise = (async () => {
+    const response = await fetch(assetUrl(targetPath), { cache: 'no-cache' });
+    if (!response.ok) {
+      throw new Error(`${targetPath} yüklenemedi (${response.status})`);
+    }
+    const data = await response.json();
+    const rawItems = Array.isArray(data?.skins) ? data.skins : [];
+    const normalizedItems = rawItems.map(normalizeSkin).filter(Boolean);
+    store.skins = normalizedItems;
+    store.groups = buildSkinGroups(normalizedItems);
+    store.version = data?.version || collectionStore.skins.version || '';
+    store.loaded = true;
+  })();
+
+  try {
+    await store.loadingPromise;
+  } finally {
+    store.loadingPromise = null;
+  }
+}
+
+async function switchCollection(targetCollection) {
+  if (!['skins', 'rainbow', 'classic'].includes(targetCollection)) {
+    return;
+  }
+
+  document.querySelectorAll('.collection-tab').forEach((tab) => {
+    const isActive = tab.dataset.collection === targetCollection;
+    tab.classList.toggle('is-active', isActive);
+    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+
+  if (activeCollection === targetCollection && collectionStore[targetCollection].loaded) {
+    return;
+  }
+
+  activeCollection = targetCollection;
+
+  if (!collectionStore[targetCollection].loaded) {
+    renderSkeletonCards(results, 12);
+    try {
+      await ensureCollectionLoaded(targetCollection);
+    } catch (error) {
+      console.error(`${targetCollection} koleksiyonu yüklenemedi:`, error);
+      clearSkeletonCards(results);
+      return;
+    }
+    clearSkeletonCards(results);
+  }
+
+  skins = collectionStore[targetCollection].skins;
+  skinGroups = collectionStore[targetCollection].groups;
+  syncFantomeFilesForCollection(targetCollection);
+  clearSearchCache();
+  renderChampionFilterOptions();
+  updateCollectionMeta();
+  render();
+
+  track('collection_change', {
+    collection: targetCollection
+  });
+}
+
+document.querySelectorAll('.collection-tab').forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.collection;
+    if (target) {
+      switchCollection(target);
+    }
+  });
+});
+
 async function loadData() {
   if (
     !search ||
@@ -5390,7 +5857,7 @@ async function loadData() {
   try {
     const [
       dataResponse,
-      filesResponse
+      manifestResponse
     ] = await Promise.all([
       fetch(
         assetUrl(
@@ -5404,13 +5871,13 @@ async function loadData() {
 
       fetch(
         assetUrl(
-          'data/fantome-files.json'
+          'data/fantome-manifest.json'
         ),
         {
           cache:
             'no-cache'
         }
-      )
+      ).catch(() => ({ ok: false, status: 0 }))
     ]);
 
     /* ---------------------------------------
@@ -5427,33 +5894,30 @@ async function loadData() {
       await dataResponse.json();
 
     /* ---------------------------------------
-       Fantome listesi
+       Fantome manifest (veya legacy fallback)
     --------------------------------------- */
 
-    if (filesResponse.ok) {
-      const files =
-        await filesResponse.json();
-
-      if (
-        Array.isArray(files)
-      ) {
-        files.forEach(
-          addFantomeFile
-        );
-      } else if (
-        files &&
-        Array.isArray(
-          files.files
-        )
-      ) {
-        files.files.forEach(
-          addFantomeFile
-        );
-      }
+    if (manifestResponse && manifestResponse.ok) {
+      manifestData = await manifestResponse.json();
+      useLegacyLocalFantome = Boolean(manifestData?.legacyEnabled);
     } else {
       console.warn(
-        `fantome-files.json yüklenemedi (${filesResponse.status}).`
+        `fantome-manifest.json yüklenemedi (${manifestResponse?.status}). fantome-files.json yedeği deneniyor.`
       );
+      const filesResponse = await fetch(
+        assetUrl('data/fantome-files.json'),
+        { cache: 'no-cache' }
+      ).catch(() => ({ ok: false }));
+
+      if (filesResponse && filesResponse.ok) {
+        useLegacyLocalFantome = true;
+        const files = await filesResponse.json();
+        if (Array.isArray(files)) {
+          files.forEach(addFantomeFile);
+        } else if (files && Array.isArray(files.files)) {
+          files.files.forEach(addFantomeFile);
+        }
+      }
     }
 
     /* ---------------------------------------
@@ -5483,7 +5947,7 @@ async function loadData() {
     }
 
     /* ---------------------------------------
-       Gruplar
+       Gruplar & Koleksiyon deposu
     --------------------------------------- */
 
     skinGroups =
@@ -5491,28 +5955,18 @@ async function loadData() {
         skins
       );
 
+    collectionStore.skins.skins = skins;
+    collectionStore.skins.groups = skinGroups;
+    collectionStore.skins.version = data?.version || '';
+    collectionStore.skins.loaded = true;
+
+    syncFantomeFilesForCollection(activeCollection);
+
     /* ---------------------------------------
        Meta
     --------------------------------------- */
 
-    if (meta) {
-      const version =
-        data?.version ||
-        (
-          currentLang === 'en'
-            ? 'Unknown'
-            : 'Bilinmiyor'
-        );
-
-      meta.textContent =
-        t('metaVersion', {
-          count:
-            formatNumber(
-              skinGroups.length
-            ),
-          version
-        });
-    }
+    updateCollectionMeta();
 
     updateFavoriteCount();
 

@@ -1109,8 +1109,44 @@ h1 em {
 }
 
 /* =========================================
-   8. SEARCH BOX & FILTER CONTROLS
+   8. SEARCH BOX, COLLECTION TABS & FILTER CONTROLS
    ========================================= */
+
+.collection-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 4px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: rgba(8, 12, 19, 0.9);
+}
+
+.collection-tab {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  padding: 7px 16px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 0.85rem -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.collection-tab:hover {
+  color: var(--text-primary);
+}
+
+.collection-tab.is-active {
+  color: var(--text-primary);
+  background: var(--surface-elevated);
+  border-color: var(--border);
+}
 
 .search-row {
   display: flex;
@@ -1609,6 +1645,49 @@ kbd {
   border: 1px solid #1a2232;
 }
 
+/* Collection & PBE Badges (no glow, no gradient, no animation) */
+.skin-badge,
+.skin-badge-pbe,
+.skin-badge-rainbow,
+.skin-badge-classic {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 5px;
+  font: 600 10px/1.1 "DM Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(11, 15, 24, 0.88);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.skin-badge-pbe {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.32);
+  background: rgba(11, 15, 24, 0.9);
+}
+
+.skin-badge-rainbow {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.skin-badge-classic {
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+.skin-card .skin-badge,
+.skin-card .skin-badge-pbe,
+.skin-card .skin-badge-rainbow,
+.skin-card .skin-badge-classic {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  pointer-events: none;
+}
+
 /* Card Favorite Button */
 .favorite-button {
   position: absolute;
@@ -1979,11 +2058,63 @@ dialog::backdrop {
   padding: 24px;
 }
 
-.modal-copy h2 {
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin: 0 0 12px;
+}
+
+.modal-copy h2 {
+  margin: 0;
   font-size: 1.65rem;
   letter-spacing: -0.04em;
   color: var(--text-primary);
+}
+
+.modal-pbe-notice {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(11, 15, 24, 0.7);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.modal-rainbow-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  margin-right: 8px;
+  padding: 7px 13px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
+  font: 600 0.78rem "DM Mono", monospace;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.modal-rainbow-link:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.download-section-subheading {
+  width: 100%;
+  margin: 12px 0 4px;
+  color: var(--text-muted);
+  font: 600 10px "DM Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .modal-close {

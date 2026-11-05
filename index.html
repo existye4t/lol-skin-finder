@@ -6,7 +6,7 @@
   <!-- Content-Security-Policy -->
   <!-- NOTE: Worker deploy edildiğinde, worker URL'ini connect-src'ye ekleyin.
        Örnek: connect-src 'self' https://your-worker.workers.dev ... -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google data:; connect-src 'self' https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google data:; connect-src 'self' https://raw.githubusercontent.com https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com; frame-ancestors 'none';">
   <!-- Worker API URL - Production'da Cloudflare Worker URL'si ile güncellenmeli (CSP connect-src'ye de eklenmeli) -->
   <meta name="worker-api-url" content="https://lol-skin-finder-admin.existskins.workers.dev" />
 
@@ -589,6 +589,42 @@
             <span aria-hidden="true">❓</span><span data-i18n="howToUseButton">Nasıl kullanılır?</span>
           </button>
             </div>
+
+      <div
+        id="collection-tabs"
+        class="collection-tabs"
+        role="tablist"
+        data-i18n-aria-label="collectionTabsAria"
+        aria-label="Koleksiyonlar"
+      >
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab is-active"
+          data-collection="skins"
+          aria-selected="true"
+        >
+          <span data-i18n="tabSkins">Skinler</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab"
+          data-collection="rainbow"
+          aria-selected="false"
+        >
+          <span data-i18n="tabRainbow">Rainbow</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab"
+          data-collection="classic"
+          aria-selected="false"
+        >
+          <span data-i18n="tabClassic">Classic</span>
+        </button>
+      </div>
 
       <div class="search-row">
 
@@ -1200,12 +1236,35 @@
           class="champion"
         ></p>
 
-        <h2 id="modal-skin-name"></h2>
+        <div class="modal-title-row">
+          <h2 id="modal-skin-name"></h2>
+          <span
+            id="modal-collection-badge"
+            class="skin-badge"
+            hidden
+          ></span>
+        </div>
 
         <p
           id="modal-skin-id"
           class="modal-id"
         ></p>
+
+        <p
+          id="modal-pbe-warning"
+          class="modal-pbe-notice"
+          data-i18n="pbeWarningNotice"
+          hidden
+        ></p>
+
+        <button
+          id="modal-rainbow-link"
+          class="modal-rainbow-link"
+          type="button"
+          hidden
+        >
+          <span data-i18n="rainbowVersionLink">Rainbow sürümü →</span>
+        </button>
 
         <button
           id="modal-favorite"
