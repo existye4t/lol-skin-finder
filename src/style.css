@@ -3185,12 +3185,16 @@ dialog::backdrop {
   }
 
   .modal-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
   }
 
   .download-list-wrap {
     border-left: none;
     border-top: 1px solid var(--border);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }
 
@@ -3286,6 +3290,29 @@ dialog::backdrop {
   .favorite-filter,
   .filter-button {
     flex: 1 1 100%;
+  }
+
+  .download-list-wrap {
+    padding: 16px 12px;
+  }
+
+  .download-item-special {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .download-item-special-info {
+    gap: 8px;
+  }
+
+  .download-item-special-desc {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+  .download-item-special-btn {
+    padding: 6px 8px;
+    font-size: 10px;
   }
 }
 
@@ -4496,6 +4523,9 @@ html[data-appearance="gold"] .appearance-option:has(input:checked) {
   text-decoration: none;
   color: var(--text-primary, #fff);
   transition: border-color 0.15s ease, background 0.15s ease;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .download-item-special:hover {
@@ -4512,11 +4542,11 @@ html[data-appearance="gold"] .appearance-option:has(input:checked) {
 }
 
 .download-item-special-desc {
-  font: 500 12px/1.3 "Inter", system-ui, sans-serif;
+  font: 500 12px/1.35 "Inter", system-ui, sans-serif;
   color: #e2e8f0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .download-item-special-btn {
