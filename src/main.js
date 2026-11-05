@@ -1055,6 +1055,7 @@ function setLang(lang) {
     renderChampionFilterOptions();
 
     updateCollectionMeta();
+    renderSearchExamples();
     renderPopular();
     render();
     syncAllFavoriteButtons();
@@ -6205,6 +6206,7 @@ async function switchCollection(targetCollection) {
   }
 
   activeCollection = targetCollection;
+  renderSearchExamples();
 
   if (!collectionStore[targetCollection].loaded) {
     renderSkeletonCards(results, 12);
