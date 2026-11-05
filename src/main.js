@@ -633,6 +633,16 @@ const TRANSLATIONS = {
     en: 'Loading download options…'
   },
 
+  manifestLoadError: {
+    tr: 'İndirme seçenekleri yüklenemedi.',
+    en: 'Failed to load download options.'
+  },
+
+  retry: {
+    tr: 'Tekrar dene',
+    en: 'Retry'
+  },
+
   legacyDisabledNote: {
     tr: 'Bu skin yeni kaynakta bulunmadığı için indirmeye kapalıdır.',
     en: 'This skin is disabled because it is not available in the new source.'
@@ -1467,8 +1477,13 @@ function syncFantomeFilesForCollection(collection = activeCollection) {
 }
 
 let manifestLoadingPromise = null;
+let manifestLoadError = false;
 
-function ensureManifestLoaded() {
+function ensureManifestLoaded(forceRetry = false) {
+  if (forceRetry) {
+    manifestLoadingPromise = null;
+    manifestLoadError = false;
+  }
   if (manifestData) {
     return Promise.resolve(manifestData);
   }
@@ -1480,6 +1495,7 @@ function ensureManifestLoaded() {
       const manifestResponse = await fetch(assetUrl('data/fantome-manifest.json'), { cache: 'no-cache' });
       if (manifestResponse.ok) {
         manifestData = await manifestResponse.json();
+        manifestLoadError = false;
         useLegacyLocalFantome = Boolean(manifestData?.legacyEnabled);
         syncFantomeFilesForCollection(activeCollection);
         if (typeof updatePackToolbarBtn === 'function') {
@@ -1495,6 +1511,7 @@ function ensureManifestLoaded() {
       const filesResponse = await fetch(assetUrl('data/fantome-files.json'), { cache: 'no-cache' });
       if (filesResponse && filesResponse.ok) {
         useLegacyLocalFantome = true;
+        manifestLoadError = false;
         const files = await filesResponse.json();
         if (Array.isArray(files)) {
           files.forEach(addFantomeFile);
@@ -1505,9 +1522,13 @@ function ensureManifestLoaded() {
         if (typeof updatePackToolbarBtn === 'function') {
           updatePackToolbarBtn();
         }
+        return manifestData;
       }
     } catch (e) {}
-    return manifestData;
+
+    manifestLoadError = true;
+    manifestLoadingPromise = null;
+    return null;
   })();
   return manifestLoadingPromise;
 }
@@ -3634,6 +3655,10 @@ function savePackChromasPref(val) {
  */
 async function downloadChampionPack(championKey, { includeChromas, onProgress } = {}) {
   await ensureManifestLoaded();
+  if (!manifestData) {
+    console.warn('Manifest yüklenemediği için champion pack indirilemiyor.');
+    return { skipped: 0 };
+  }
   // 1) Şampiyona ait, dosyası olan skinleri topla
   let championSkins = skins.filter((skin) => {
     const keys = skin._championKeys;
@@ -3876,6 +3901,7 @@ function renderChampionPackBlock(skin) {
   // İndir butonu
   const btn = document.createElement('button');
   btn.type = 'button';
+  btn.id = 'champion-pack-btn';
   btn.className = 'champion-pack-btn btn-secondary-metal';
   setPackBtnState(btn, 'idle');
 
@@ -3972,9 +3998,21 @@ function updatePackToolbarBtn() {
     }
   }
 
+  if (!manifestData) {
+    if (singleChampionKey && !manifestLoadError) {
+      btn._packChampKey = singleChampionKey;
+      btn.dataset.packState = 'loading';
+      btn.disabled = true;
+      btn.innerHTML = `<span class="manifest-spinner" aria-hidden="true"></span> ${t('manifestLoading')}`;
+      wrapper.hidden = false;
+      ensureManifestLoaded().then(() => updatePackToolbarBtn());
+      return;
+    }
+  }
+
   const count = getChampionPackFileCount(singleChampionKey, packIncludeChromas);
   if (count === 0) {
-    if (!manifestData) {
+    if (!manifestData && !manifestLoadError) {
       ensureManifestLoaded().then(() => updatePackToolbarBtn());
     }
     wrapper.hidden = true;
@@ -3982,8 +4020,8 @@ function updatePackToolbarBtn() {
     return;
   }
 
-  // Yeni şampiyon — idle durumuna geçir ve onclick bağla
-  if (btn._packChampKey !== singleChampionKey) {
+  // Yeni şampiyon veya loading'den idle'a geçiş — idle durumuna geçir ve onclick bağla
+  if (btn._packChampKey !== singleChampionKey || btn.dataset.packState === 'loading') {
     btn._packChampKey = singleChampionKey;
     btn.dataset.packState = 'idle';
     btn.disabled = false;
@@ -4224,23 +4262,79 @@ activeModalGroup = group;
   --------------------------------------- */
   if (!manifestData) {
     if (downloadList) {
-      downloadList.innerHTML = `<div class="manifest-loading-state" id="manifest-loading-state"><span class="manifest-spinner" aria-hidden="true"></span><span>${t('manifestLoading')}</span></div>`;
-    }
-    const specialPackagesContainer = document.querySelector('#modal-special-packages');
-    if (specialPackagesContainer) {
-      specialPackagesContainer.hidden = true;
-      specialPackagesContainer.style.display = 'none';
-    }
-    const packBlock = document.getElementById('champion-pack-block');
-    if (packBlock) {
-      packBlock.hidden = true;
+      if (manifestLoadError) {
+        downloadList.innerHTML = `<div class="manifest-error-state" id="manifest-error-state"><span class="manifest-error-text">${t('manifestLoadError')}</span><button type="button" class="manifest-retry-btn" id="manifest-retry-btn">${t('retry')}</button></div>`;
+        const retryBtn = downloadList.querySelector('#manifest-retry-btn');
+        if (retryBtn) {
+          retryBtn.onclick = () => {
+            manifestLoadError = false;
+            manifestLoadingPromise = null;
+            refreshOpenModal(group);
+            ensureManifestLoaded(true).then(() => {
+              if (modal?.open && activeModalGroup === group) {
+                refreshOpenModal(group);
+              }
+            });
+          };
+        }
+      } else {
+        downloadList.innerHTML = `<div class="manifest-loading-state" id="manifest-loading-state"><span class="manifest-spinner" aria-hidden="true"></span><span>${t('manifestLoading')}</span></div>`;
+      }
     }
 
-    ensureManifestLoaded().then(() => {
-      if (modal?.open && activeModalGroup === group) {
-        refreshOpenModal(group);
+    const specialPackagesContainer = document.querySelector('#modal-special-packages');
+    if (specialPackagesContainer) {
+      if (!manifestLoadError && activeCollection === 'skins' && (skin.hasRainbow || skin.hasClassic)) {
+        specialPackagesContainer.hidden = false;
+        specialPackagesContainer.style.display = '';
+        specialPackagesContainer.replaceChildren();
+        const heading = document.createElement('p');
+        heading.className = 'special-packages-heading';
+        heading.textContent = t('specialPackagesHeading');
+        specialPackagesContainer.appendChild(heading);
+
+        if (skin.hasRainbow) {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'download-item-special is-loading';
+          itemEl.innerHTML = `<div class="download-item-special-info"><span class="skin-badge skin-badge-rainbow">RAINBOW</span><span class="download-item-special-desc">${t('rainbowPackageDesc')}</span></div><button type="button" class="download-item-special-btn" disabled><span class="manifest-spinner" aria-hidden="true"></span> ${t('manifestLoading')}</button>`;
+          specialPackagesContainer.appendChild(itemEl);
+        }
+        if (skin.hasClassic) {
+          const itemEl = document.createElement('div');
+          itemEl.className = 'download-item-special is-loading';
+          itemEl.innerHTML = `<div class="download-item-special-info"><span class="skin-badge skin-badge-classic">CLASSIC</span><span class="download-item-special-desc">${t('classicPackageDesc')}</span></div><button type="button" class="download-item-special-btn" disabled><span class="manifest-spinner" aria-hidden="true"></span> ${t('manifestLoading')}</button>`;
+          specialPackagesContainer.appendChild(itemEl);
+        }
+      } else {
+        specialPackagesContainer.hidden = true;
+        specialPackagesContainer.style.display = 'none';
       }
-    });
+    }
+
+    const packBlock = document.getElementById('champion-pack-block');
+    if (packBlock) {
+      if (!manifestLoadError) {
+        packBlock.hidden = false;
+        const btn = document.getElementById('champion-pack-btn') || document.createElement('button');
+        btn.id = 'champion-pack-btn';
+        btn.className = 'champion-pack-btn';
+        btn.dataset.packState = 'loading';
+        btn.disabled = true;
+        btn.innerHTML = `<span class="manifest-spinner" aria-hidden="true"></span> ${t('manifestLoading')}`;
+        btn.onclick = null;
+        packBlock.replaceChildren(btn);
+      } else {
+        packBlock.hidden = true;
+      }
+    }
+
+    if (!manifestLoadError) {
+      ensureManifestLoaded().then(() => {
+        if (modal?.open && activeModalGroup === group) {
+          refreshOpenModal(group);
+        }
+      });
+    }
   } else {
     const fragment =
       document.createDocumentFragment();

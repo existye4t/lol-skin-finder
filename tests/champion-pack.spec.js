@@ -794,4 +794,105 @@ test.describe('Champion Pack — Preview (production build)', () => {
       }
     }
   });
+
+  test('Manifest failure (404/network error): modal shows clean error with retry button, no infinite spinner, and retries successfully', async ({ page }) => {
+    let allowManifest = false;
+    await page.route('**/data/fantome-manifest.json', async (route) => {
+      if (!allowManifest) {
+        await route.fulfill({ status: 404, contentType: 'application/json', body: '{"error":"Not Found"}' });
+      } else {
+        await route.continue();
+      }
+    });
+    await page.route('**/data/fantome-files.json', async (route) => {
+      if (!allowManifest) {
+        await route.fulfill({ status: 404, contentType: 'application/json', body: '[]' });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await page.goto(PREVIEW_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await waitForData(page);
+
+    await openModal(page, 'Goth Annie');
+
+    const errorState = page.locator('#manifest-error-state');
+    await expect(errorState).toBeVisible({ timeout: 5000 });
+    const spinner = page.locator('#manifest-loading-state');
+    await expect(spinner).toHaveCount(0);
+    const retryBtn = page.locator('#manifest-retry-btn');
+    await expect(retryBtn).toBeVisible();
+
+    allowManifest = true;
+    await retryBtn.click();
+
+    await expect(errorState).toBeHidden({ timeout: 5000 });
+    const downloadItem = page.locator('#download-list .download-item').first();
+    await expect(downloadItem).toBeVisible({ timeout: 5000 });
+
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+  });
+
+  test('Manifest delayed: rows/buttons show disabled loading state, no broken link or empty download generated, then activate when resolved', async ({ page }) => {
+    let resolveManifest;
+    const manifestHoldPromise = new Promise((resolve) => {
+      resolveManifest = resolve;
+    });
+
+    await page.route('**/data/fantome-manifest.json', async (route) => {
+      await manifestHoldPromise;
+      await route.continue();
+    });
+
+    await page.goto(PREVIEW_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await waitForData(page);
+
+    await page.locator('#search').fill('Annie');
+    await page.waitForTimeout(400);
+
+    const toolbarBtn = page.locator('#champion-pack-toolbar-btn');
+    await expect(toolbarBtn).toBeVisible({ timeout: 5000 });
+    await expect(toolbarBtn).toBeDisabled();
+    expect(await toolbarBtn.getAttribute('data-pack-state')).toBe('loading');
+
+    await openModal(page, 'Cafe Cuties Annie');
+
+    const loadingState = page.locator('#manifest-loading-state');
+    await expect(loadingState).toBeVisible();
+
+    const specialBox = page.locator('#modal-special-packages');
+    await expect(specialBox).toBeVisible();
+    const specialLoadingBtn = specialBox.locator('.download-item-special.is-loading .download-item-special-btn');
+    await expect(specialLoadingBtn).toBeVisible();
+    await expect(specialLoadingBtn).toBeDisabled();
+
+    const modalPackBtn = page.locator('#champion-pack-block .champion-pack-btn');
+    await expect(modalPackBtn).toBeVisible();
+    await expect(modalPackBtn).toBeDisabled();
+    expect(await modalPackBtn.getAttribute('data-pack-state')).toBe('loading');
+
+    const links = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll('a[href*="fantome/"]')).map(a => a.href);
+    });
+    expect(links.length).toBe(0);
+
+    resolveManifest();
+
+    await expect(loadingState).toBeHidden({ timeout: 5000 });
+    const normalSpecialLink = specialBox.locator('a.download-item-special');
+    await expect(normalSpecialLink).toBeVisible({ timeout: 5000 });
+    const href = await normalSpecialLink.getAttribute('href');
+    expect(href).toMatch(/^https:\/\/raw\.githubusercontent\.com\//);
+
+    await expect(modalPackBtn).toBeEnabled({ timeout: 5000 });
+    expect(await modalPackBtn.getAttribute('data-pack-state')).toBe('idle');
+
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    await expect(toolbarBtn).toBeEnabled({ timeout: 5000 });
+    expect(await toolbarBtn.getAttribute('data-pack-state')).toBe('idle');
+  });
 });
