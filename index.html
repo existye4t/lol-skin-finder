@@ -842,7 +842,7 @@
       </div>
 
       <div
-        class="quick-searches"
+        id="search-examples" class="quick-searches"
         data-i18n-aria-label="quickSearchesAriaLabel"
         aria-label="Örnek aramalar"
       >
@@ -1257,14 +1257,24 @@
           hidden
         ></p>
 
-        <button
-          id="modal-rainbow-link"
-          class="modal-rainbow-link"
-          type="button"
-          hidden
-        >
-          <span data-i18n="rainbowVersionLink">Rainbow sürümü →</span>
-        </button>
+        <div class="modal-collection-links">
+          <button
+            id="modal-rainbow-link"
+            class="modal-rainbow-link"
+            type="button"
+            hidden
+          >
+            <span data-i18n="rainbowVersionLink">Rainbow sürümü →</span>
+          </button>
+          <button
+            id="modal-classic-link"
+            class="modal-rainbow-link modal-classic-link"
+            type="button"
+            hidden
+          >
+            <span data-i18n="classicVersionLink">Classic sürümü →</span>
+          </button>
+        </div>
 
         <button
           id="modal-favorite"
@@ -1310,6 +1320,11 @@
         <div
           id="download-list"
           class="download-list"
+        ></div>
+        <div
+          id="modal-special-packages"
+          class="modal-special-packages"
+          hidden
         ></div>
 
       </section>

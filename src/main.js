@@ -563,6 +563,61 @@ const TRANSLATIONS = {
     en: 'Rainbow version →'
   },
 
+  classicVersionLink: {
+    tr: 'Classic sürümü →',
+    en: 'Classic version →'
+  },
+
+  specialPackagesHeading: {
+    tr: 'ÖZEL PAKETLER',
+    en: 'SPECIAL PACKAGES'
+  },
+
+  specialPackageNotice: {
+    tr: 'Not: Şampiyon başına aynı anda tek paket etkinleştirilmelidir (normal skin ile Rainbow/Classic paketini birlikte kurmayın).',
+    en: 'Notice: Only one package should be enabled per champion at a time (do not install Rainbow/Classic alongside normal skin).'
+  },
+
+  rainbowPackageDesc: {
+    tr: 'Rainbow paketi · oyunda chroma değiştirir (Ctrl+5)',
+    en: 'Rainbow package · switches chromas in-game (Ctrl+5)'
+  },
+
+  classicPackageDesc: {
+    tr: 'Classic paketi · League Classic modu için',
+    en: 'Classic package · for League Classic mode'
+  },
+
+  itemTypeBase: {
+    tr: 'Base skin',
+    en: 'Base skin'
+  },
+
+  itemTypeChroma: {
+    tr: 'Chroma',
+    en: 'Chroma'
+  },
+
+  itemTypeForm: {
+    tr: 'Form',
+    en: 'Form'
+  },
+
+  itemTypeRainbow: {
+    tr: 'Rainbow (Ctrl+5)',
+    en: 'Rainbow (Ctrl+5)'
+  },
+
+  itemTypeClassic: {
+    tr: 'Classic',
+    en: 'Classic'
+  },
+
+  downloadBtnText: {
+    tr: 'İndir',
+    en: 'Download'
+  },
+
   rainbowCycleInfo: {
     tr: '{count} Chroma • Ctrl+5',
     en: '{count} Chromas • Ctrl+5'
@@ -1402,6 +1457,87 @@ function syncFantomeFilesForCollection(collection = activeCollection) {
     } else if ((entry.c || entry.collection) === collection) {
       fantomeFiles.add(String(entry.id));
     }
+  }
+}
+
+const SEARCH_EXAMPLES_DATA = {
+  skins: [
+    { qTr: 'Omega Timi Twitch', qEn: 'Omega Squad Twitch', lTr: 'Omega Timi Twitch', lEn: 'Omega Squad Twitch' },
+    { qTr: 'Ahri', qEn: 'Ahri', lTr: 'Ahri', lEn: 'Ahri' },
+    { qTr: '29004', qEn: '29004', lTr: 'ID: 29004', lEn: 'ID: 29004' }
+  ],
+  rainbow: [
+    { qTr: 'Tatlı Pastane Rumble', qEn: 'Cafe Cuties Rumble', lTr: 'Tatlı Pastane Rumble', lEn: 'Cafe Cuties Rumble' },
+    { qTr: 'Ruh Çiçeği Ahri', qEn: 'Spirit Blossom Ahri', lTr: 'Ruh Çiçeği Ahri', lEn: 'Spirit Blossom Ahri' },
+    { qTr: 'Ctrl+5', qEn: 'Ctrl+5', lTr: 'Ctrl+5', lEn: 'Ctrl+5' }
+  ],
+  classic: [
+    { qTr: 'Klasik Annie', qEn: 'Classic Annie', lTr: 'Klasik Annie', lEn: 'Classic Annie' },
+    { qTr: 'Klasik Ahri', qEn: 'Classic Ahri', lTr: 'Klasik Ahri', lEn: 'Classic Ahri' },
+    { qTr: '60001022', qEn: '60001022', lTr: 'ID: 60001022', lEn: 'ID: 60001022' }
+  ]
+};
+
+function renderSearchExamples() {
+  const container = document.getElementById('search-examples');
+  if (!container) return;
+
+  const list = SEARCH_EXAMPLES_DATA[activeCollection] || SEARCH_EXAMPLES_DATA.skins;
+  container.replaceChildren();
+
+  list.forEach(item => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    const query = currentLang === 'en' ? item.qEn : item.qTr;
+    const label = currentLang === 'en' ? item.lEn : item.lTr;
+    btn.dataset.query = query;
+    btn.textContent = label;
+    btn.addEventListener('click', () => {
+      if (search) {
+        search.value = query;
+        if (typeof setFavoriteFilter === 'function') setFavoriteFilter(false);
+        clearSearchCache();
+        render();
+        search.focus();
+      }
+    });
+    container.appendChild(btn);
+  });
+}
+
+async function navigateToCollectionSkin(targetCollection, targetSkinId, skinFallbackName) {
+  closeSkinModal(true);
+  await switchCollection(targetCollection);
+
+  const store = collectionStore[targetCollection];
+  let targetGroup = null;
+
+  if (targetCollection === 'classic') {
+    const classicId = String(60000000 + Number(targetSkinId));
+    targetGroup =
+      store.groups.find(g => String(g.primary.id) === classicId || String(g.primary.liveSkinId) === String(targetSkinId)) ||
+      store.groups.find(g => g.skins.some(s => String(s.id) === classicId || String(s.liveSkinId) === String(targetSkinId)));
+  } else {
+    targetGroup =
+      store.groups.find(g => String(g.primary.id) === String(targetSkinId)) ||
+      store.groups.find(g => g.skins.some(s => String(s.id) === String(targetSkinId)));
+  }
+
+  if (targetGroup) {
+    if (search && search.value) {
+      search.value = '';
+      clearSearchCache();
+      render();
+    }
+    const cardEl = results ? results.querySelector(`.skin-card[data-skin-id="${targetGroup.primary.id}"]`) : null;
+    if (cardEl) {
+      cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    openModal(targetGroup, cardEl || null, true);
+  } else if (search) {
+    search.value = skinFallbackName || '';
+    clearSearchCache();
+    render();
   }
 }
 
@@ -3017,6 +3153,15 @@ function render() {
       );
     }
 
+    // Koleksiyon izolasyonu: Sadece seçili aktif koleksiyona ait girdiler
+    found = found.filter((group) => {
+      const primary = group.primary;
+      if (activeCollection === 'skins') {
+        return !primary.collection || primary.collection === 'skins';
+      }
+      return primary.collection === activeCollection;
+    });
+
     // Cache the full sorted/filtered results
     setCachedSearchResult(cacheKey, found);
   }
@@ -3915,21 +4060,25 @@ activeModalGroup = group;
   if (modalCollectionBadge) {
     if (skin.isPbe) {
       modalCollectionBadge.hidden = false;
+      modalCollectionBadge.style.display = '';
       modalCollectionBadge.className = 'skin-badge skin-badge-pbe lang-switch-text';
       modalCollectionBadge.dataset.i18n = 'badgePbe';
       modalCollectionBadge.textContent = t('badgePbe');
     } else if (skin.collection === 'rainbow' || activeCollection === 'rainbow') {
       modalCollectionBadge.hidden = false;
+      modalCollectionBadge.style.display = '';
       modalCollectionBadge.className = 'skin-badge skin-badge-rainbow lang-switch-text';
       modalCollectionBadge.dataset.i18n = 'badgeRainbow';
       modalCollectionBadge.textContent = t('badgeRainbow');
     } else if (skin.collection === 'classic' || activeCollection === 'classic') {
       modalCollectionBadge.hidden = false;
+      modalCollectionBadge.style.display = '';
       modalCollectionBadge.className = 'skin-badge skin-badge-classic lang-switch-text';
       modalCollectionBadge.dataset.i18n = 'badgeClassic';
       modalCollectionBadge.textContent = t('badgeClassic');
     } else {
       modalCollectionBadge.hidden = true;
+      modalCollectionBadge.style.display = 'none';
       modalCollectionBadge.textContent = '';
     }
   }
@@ -3948,27 +4097,35 @@ activeModalGroup = group;
   if (modalRainbowLink) {
     if (skin.hasRainbow && activeCollection === 'skins') {
       modalRainbowLink.hidden = false;
+      modalRainbowLink.style.display = '';
       const linkSpan = modalRainbowLink.querySelector('[data-i18n="rainbowVersionLink"]');
       if (linkSpan) linkSpan.textContent = t('rainbowVersionLink');
-      modalRainbowLink.onclick = async () => {
-        await switchCollection('rainbow');
-        const targetGroup =
-          collectionStore.rainbow.groups.find((g) => String(g.primary.id) === String(skin.id)) ||
-          collectionStore.rainbow.groups.find((g) =>
-            g.skins.some((s) => String(s.id) === String(skin.id))
-          );
-        if (targetGroup) {
-          refreshOpenModal(targetGroup);
-        } else if (search) {
-          closeSkinModal(true);
-          search.value = getLocalizedSkinName(skin);
-          clearSearchCache();
-          render();
-        }
+      modalRainbowLink.onclick = (e) => {
+        e.preventDefault();
+        navigateToCollectionSkin('rainbow', skin.id, getLocalizedSkinName(skin));
       };
     } else {
       modalRainbowLink.hidden = true;
+      modalRainbowLink.style.display = 'none';
       modalRainbowLink.onclick = null;
+    }
+  }
+
+  const modalClassicLink = document.querySelector('#modal-classic-link');
+  if (modalClassicLink) {
+    if (skin.hasClassic && activeCollection === 'skins') {
+      modalClassicLink.hidden = false;
+      modalClassicLink.style.display = '';
+      const linkSpan = modalClassicLink.querySelector('[data-i18n="classicVersionLink"]');
+      if (linkSpan) linkSpan.textContent = t('classicVersionLink');
+      modalClassicLink.onclick = (e) => {
+        e.preventDefault();
+        navigateToCollectionSkin('classic', skin.id, getLocalizedSkinName(skin));
+      };
+    } else {
+      modalClassicLink.hidden = true;
+      modalClassicLink.style.display = 'none';
+      modalClassicLink.onclick = null;
     }
   }
 
@@ -4054,10 +4211,24 @@ activeModalGroup = group;
 
     const textSpan = document.createElement('span');
     textSpan.className = 'download-item-text chroma-name';
-    textSpan.textContent =
-      item === skin
-        ? t('mainSkin')
-        : (chromaName || itemDisplayName);
+    const isChromaItem = item !== skin;
+    const isRainbowActive = activeCollection === 'rainbow' || skin.collection === 'rainbow';
+    const isClassicActive = activeCollection === 'classic' || skin.collection === 'classic';
+
+    const typeBadge = document.createElement('span');
+    typeBadge.className = 'download-item-type-badge';
+    if (isRainbowActive) {
+      typeBadge.textContent = 'Rainbow';
+    } else if (isClassicActive) {
+      typeBadge.textContent = 'Classic';
+    } else if (isChromaItem) {
+      typeBadge.textContent = t('itemTypeChroma');
+    } else {
+      typeBadge.textContent = t('itemTypeBase');
+    }
+    element.appendChild(typeBadge);
+
+    textSpan.textContent = isChromaItem ? (chromaName || itemDisplayName) : itemDisplayName;
     element.appendChild(textSpan);
 
     const idSpan = document.createElement('span');
@@ -4170,6 +4341,11 @@ activeModalGroup = group;
       }
       element.appendChild(dot);
 
+      const formBadge = document.createElement('span');
+      formBadge.className = 'download-item-type-badge';
+      formBadge.textContent = t('itemTypeForm');
+      element.appendChild(formBadge);
+
       const textSpan = document.createElement('span');
       textSpan.className = 'download-item-text chroma-name';
       textSpan.textContent = form.name || String(form.id);
@@ -4197,6 +4373,122 @@ activeModalGroup = group;
   downloadList.replaceChildren(
     fragment
   );
+
+  /* ---------------------------------------
+     Özel Koleksiyon Paketleri (Rainbow & Classic)
+  --------------------------------------- */
+  const specialPackagesContainer = document.querySelector('#modal-special-packages');
+  if (specialPackagesContainer) {
+    specialPackagesContainer.replaceChildren();
+    if (activeCollection === 'skins' && (skin.hasRainbow || skin.hasClassic) && manifestData?.entries) {
+      specialPackagesContainer.hidden = false;
+      specialPackagesContainer.style.display = '';
+
+      const heading = document.createElement('p');
+      heading.className = 'special-packages-heading';
+      heading.textContent = t('specialPackagesHeading');
+      specialPackagesContainer.appendChild(heading);
+
+      const notice = document.createElement('p');
+      notice.className = 'special-package-notice';
+      notice.textContent = t('specialPackageNotice');
+      specialPackagesContainer.appendChild(notice);
+
+      const skinDisplayName = getLocalizedSkinName(skin);
+
+      // 1. Rainbow Paketi
+      if (skin.hasRainbow) {
+        const rainbowEntry = manifestData.entries['rainbow:' + skin.id];
+        if (rainbowEntry && rainbowEntry.path && rainbowEntry.enabled !== false) {
+          const itemEl = document.createElement('a');
+          itemEl.className = 'download-item-special';
+          itemEl.href = buildManifestPathUrl(rainbowEntry.path);
+          itemEl.download = `${sanitizeFilename(skinDisplayName)} (Rainbow).fantome`;
+          itemEl.setAttribute('aria-label', `${skinDisplayName} Rainbow paketi indir`);
+
+          const infoEl = document.createElement('div');
+          infoEl.className = 'download-item-special-info';
+
+          const badge = document.createElement('span');
+          badge.className = 'skin-badge skin-badge-rainbow';
+          badge.textContent = 'RAINBOW';
+          infoEl.appendChild(badge);
+
+          const desc = document.createElement('span');
+          desc.className = 'download-item-special-desc';
+          desc.textContent = t('rainbowPackageDesc');
+          infoEl.appendChild(desc);
+
+          itemEl.appendChild(infoEl);
+
+          const btnSpan = document.createElement('span');
+          btnSpan.className = 'download-item-special-btn';
+          btnSpan.textContent = t('downloadBtnText');
+          itemEl.appendChild(btnSpan);
+
+          itemEl.addEventListener('click', () => {
+            track('fantome_download', {
+              skin_id: skin.id,
+              skin_name: skin.name,
+              champion: skin.champion,
+              is_chroma: 0,
+              collection: 'rainbow'
+            });
+          });
+
+          specialPackagesContainer.appendChild(itemEl);
+        }
+      }
+
+      // 2. Classic Paketi
+      if (skin.hasClassic) {
+        const classicId = 60000000 + Number(skin.id);
+        const classicEntry = manifestData.entries['classic:' + classicId];
+        if (classicEntry && classicEntry.path && classicEntry.enabled !== false) {
+          const itemEl = document.createElement('a');
+          itemEl.className = 'download-item-special';
+          itemEl.href = buildManifestPathUrl(classicEntry.path);
+          itemEl.download = `${sanitizeFilename(skinDisplayName)} (Classic).fantome`;
+          itemEl.setAttribute('aria-label', `${skinDisplayName} Classic paketi indir`);
+
+          const infoEl = document.createElement('div');
+          infoEl.className = 'download-item-special-info';
+
+          const badge = document.createElement('span');
+          badge.className = 'skin-badge skin-badge-classic';
+          badge.textContent = 'CLASSIC';
+          infoEl.appendChild(badge);
+
+          const desc = document.createElement('span');
+          desc.className = 'download-item-special-desc';
+          desc.textContent = t('classicPackageDesc');
+          infoEl.appendChild(desc);
+
+          itemEl.appendChild(infoEl);
+
+          const btnSpan = document.createElement('span');
+          btnSpan.className = 'download-item-special-btn';
+          btnSpan.textContent = t('downloadBtnText');
+          itemEl.appendChild(btnSpan);
+
+          itemEl.addEventListener('click', () => {
+            track('fantome_download', {
+              skin_id: skin.id,
+              skin_name: skin.name,
+              champion: skin.champion,
+              is_chroma: 0,
+              collection: 'classic'
+            });
+          });
+
+          specialPackagesContainer.appendChild(itemEl);
+        }
+      }
+    } else {
+      specialPackagesContainer.hidden = true;
+      specialPackagesContainer.style.display = 'none';
+    }
+  }
 
   /* ---------------------------------------
      Champion Pack bloğu
@@ -4314,10 +4606,17 @@ function performModalOpenTransition(sourceEl, skipAnimation) {
   }
 
   if (typeof document.startViewTransition === 'function') {
-    if (sourceEl) sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
-    modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
+    if (sourceEl) {
+      sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
+    } else {
+      modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
+    }
 
     const transition = document.startViewTransition(() => {
+      if (sourceEl) {
+        sourceEl.style.viewTransitionName = '';
+        modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
+      }
       applySkinModalOpenState();
     });
 
@@ -4363,10 +4662,11 @@ function closeSkinModal(skipAnimation) {
   modal.classList.add('closing');
 
   if (typeof document.startViewTransition === 'function') {
-    if (sourceEl) sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
     modal.style.viewTransitionName = MODAL_TRANSITION_NAME;
 
     const transition = document.startViewTransition(() => {
+      modal.style.viewTransitionName = '';
+      if (sourceEl) sourceEl.style.viewTransitionName = MODAL_TRANSITION_NAME;
       applySkinModalCloseState();
       modal.classList.remove('closing');
     });
@@ -5819,6 +6119,7 @@ async function switchCollection(targetCollection) {
   syncFantomeFilesForCollection(targetCollection);
   clearSearchCache();
   renderChampionFilterOptions();
+  renderSearchExamples();
   updateCollectionMeta();
   render();
 
@@ -5967,6 +6268,7 @@ async function loadData() {
     --------------------------------------- */
 
     updateCollectionMeta();
+    renderSearchExamples();
 
     updateFavoriteCount();
 
