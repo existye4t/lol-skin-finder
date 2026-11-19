@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { publishedSkinDownload } from './skin-downloads.js';
 
 dotenv.config();
 
@@ -35,7 +36,9 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // Load skins data from repo working copy if available, fallback to GitHub raw
 let skins = [];
+let downloadManifest;
 const localSkinsPath = path.resolve(__dirname, '..', '..', GITHUB_SKINS_PATH, 'skins.json');
+const remoteData = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_SKINS_PATH}`;
 
 function loadLocalSkins() {
   try {
@@ -56,8 +59,7 @@ function loadLocalSkins() {
 
 async function loadSkinsFromGitHub() {
   try {
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_SKINS_PATH}/skins.json`;
-    const res = await fetch(rawUrl);
+    const res = await fetch(`${remoteData}/skins.json`, { signal: AbortSignal.timeout(15_000) });
     if (!res.ok) {
       console.error('Failed to fetch skins.json from GitHub:', res.status, res.statusText);
       return false;
@@ -118,9 +120,18 @@ function findSkinById(id) {
   return skins.find(s => String(s.id) === String(id));
 }
 
-function githubRawFantomeUrl(id) {
-  // uses GITHUB_REPO, GITHUB_BRANCH, GITHUB_SKINS_PATH
-  return `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_SKINS_PATH}/fantome/${id}.fantome`;
+function skinActionRow(skin, locale) {
+  const turkish = locale.startsWith('tr');
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setLabel(turkish ? 'Sitede Görüntüle' : 'View on site')
+      .setStyle(ButtonStyle.Link).setURL(websiteSkinUrl(skin.id))
+  );
+  const download = publishedSkinDownload(downloadManifest, skin);
+  if (download) {
+    row.addComponents(new ButtonBuilder().setLabel(turkish ? 'İndir' : 'Download')
+      .setStyle(ButtonStyle.Link).setURL(download));
+  }
+  return row;
 }
 
 function websiteSkinUrl(id) {
@@ -157,8 +168,21 @@ function buildSkinEmbed(skin, locale='en') {
 }
 
 async function ensureSkinsLoaded() {
-  if (loadLocalSkins()) return;
-  await loadSkinsFromGitHub();
+  const usesLocalCatalog = loadLocalSkins();
+  if (!usesLocalCatalog) await loadSkinsFromGitHub();
+  try {
+    if (usesLocalCatalog) {
+      const file = path.join(path.dirname(localSkinsPath), 'fantome-manifest.json');
+      downloadManifest = JSON.parse(await fs.promises.readFile(file, 'utf8'));
+    } else {
+      const response = await fetch(`${remoteData}/fantome-manifest.json`, { signal: AbortSignal.timeout(15_000) });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      downloadManifest = await response.json();
+    }
+  } catch (error) {
+    downloadManifest = undefined;
+    console.warn('Download mappings unavailable:', error.message);
+  }
 }
 
 // Localization strings
@@ -236,8 +260,10 @@ async function fetchBufferWithLimit(url, limit) {
   return buf;
 }
 
-async function tryAttachFantome(interaction, id, locale) {
-  const url = githubRawFantomeUrl(id);
+async function tryAttachFantome(interaction, skin, locale) {
+  const { id } = skin;
+  const url = publishedSkinDownload(downloadManifest, skin);
+  if (!url) return;
   // check content-length
   const cl = await headContentLength(url);
   if (cl && cl > MAX_UPLOAD_BYTES) {
@@ -352,13 +378,10 @@ client.on('interactionCreate', async (interaction) => {
       }
       const first = results[0];
       const embed = buildSkinEmbed(first, locale);
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "Sitede Görüntüle" : 'View on site').setStyle(ButtonStyle.Link).setURL(websiteSkinUrl(first.id)),
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(first.id))
-      );
+      const row = skinActionRow(first, locale);
       await interaction.reply({ embeds: [embed], components: [row] });
       // Attempt to attach the fantome file if it is small enough; otherwise provide the raw link
-      tryAttachFantome(interaction, first.id, locale).catch(err => console.warn('attach error', err));
+      tryAttachFantome(interaction, first, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'skinid') {
       const id = interaction.options.getString('id');
       const found = findSkinById(id);
@@ -367,22 +390,16 @@ client.on('interactionCreate', async (interaction) => {
         return;
       }
       const embed = buildSkinEmbed(found, locale);
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "Sitede Görüntüle" : 'View on site').setStyle(ButtonStyle.Link).setURL(websiteSkinUrl(found.id)),
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(found.id))
-      );
+      const row = skinActionRow(found, locale);
       await interaction.reply({ embeds: [embed], components: [row] });
-      tryAttachFantome(interaction, found.id, locale).catch(err => console.warn('attach error', err));
+      tryAttachFantome(interaction, found, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'randomskin') {
       if (!skins.length) await ensureSkinsLoaded();
       const skin = skins[Math.floor(Math.random() * skins.length)];
       const embed = buildSkinEmbed(skin, locale);
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "Sitede Görüntüle" : 'View on site').setStyle(ButtonStyle.Link).setURL(websiteSkinUrl(skin.id)),
-        new ButtonBuilder().setLabel(locale.startsWith('tr') ? "İndir" : 'Download').setStyle(ButtonStyle.Link).setURL(githubRawFantomeUrl(skin.id))
-      );
+      const row = skinActionRow(skin, locale);
       await interaction.reply({ embeds: [embed], components: [row] });
-      tryAttachFantome(interaction, skin.id, locale).catch(err => console.warn('attach error', err));
+      tryAttachFantome(interaction, skin, locale).catch(err => console.warn('attach error', err));
     } else if (interaction.commandName === 'report') {
       const skinId = interaction.options.getString('skin_id');
       const message = interaction.options.getString('message');

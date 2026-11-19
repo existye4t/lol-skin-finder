@@ -5,9 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   DATA_DIR,
-  RAW_BASE_URL,
   PATHS
 } from './config.mjs';
+import { fetchJson, latestDataDragonVersion, sourceSnapshot } from './sync-source.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,16 +15,6 @@ const __dirname = path.dirname(__filename);
 const DDRAGON_BASE = 'https://ddragon.leagueoflegends.com';
 const CDRAGON_LIVE_BASE = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data';
 const CDRAGON_PBE_BASE = 'https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data';
-
-async function fetchJson(url) {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'lol-skin-finder-updater' }
-  });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status} -> ${url}`);
-  }
-  return response.json();
-}
 
 async function loadJsonIfExists(filePath, fallback = null) {
   if (!existsSync(filePath)) return fallback;
@@ -186,7 +176,7 @@ function applyAdminOverrides(skins, overridesData) {
   return { skins: result, conflicts };
 }
 
-async function main() {
+export async function updateSkins({ snapshot } = {}) {
   const args = process.argv.slice(2);
   if (!existsSync(PATHS.manifest) || args.includes('--refresh-manifest')) {
     console.log('[update-data] fantome-manifest.json hazırlanıyor...');
@@ -201,75 +191,65 @@ async function main() {
   }
 
   const adminOverrides = await loadAdminOverrides();
+  snapshot ??= await sourceSnapshot(manifest.sourceRevision);
+  const prevSkinsJson = await loadJsonIfExists(PATHS.skins);
 
   console.log('[update-data] Data Dragon sürümü kontrol ediliyor...');
-  const versions = await fetchJson(`${DDRAGON_BASE}/api/versions.json`);
-  const latestVersion = versions[0];
+  const latestVersion = manifest.ddragonVersion || await latestDataDragonVersion();
   console.log(`[update-data] Güncel Data Dragon sürümü: ${latestVersion}`);
 
-  const [champListTr, champListEn, trSkins, enSkins, pbeTrSkins, pbeEnSkins, rainbowCycles, classicIndex] = await Promise.all([
-    fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/tr_TR/champion.json`),
-    fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/en_US/champion.json`),
+  const [champListTr, champListEn, trSkins, enSkins, pbeTrSkins, pbeEnSkins, pbeChampions, rainbowCycles, classicIndex] = await Promise.all([
+    fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/tr_TR/championFull.json`),
+    fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/en_US/championFull.json`),
     fetchJson(`${CDRAGON_LIVE_BASE}/global/tr_tr/v1/skins.json`),
     fetchJson(`${CDRAGON_LIVE_BASE}/global/default/v1/skins.json`),
-    fetchJson(`${CDRAGON_PBE_BASE}/global/tr_tr/v1/skins.json`).catch(() => ({})),
-    fetchJson(`${CDRAGON_PBE_BASE}/global/default/v1/skins.json`).catch(() => ({})),
-    fetchJson(`${RAW_BASE_URL}rainbow/chroma-cycles.json`),
-    fetchJson(`${RAW_BASE_URL}classic/index.json`)
+    fetchJson(`${CDRAGON_PBE_BASE}/global/tr_tr/v1/skins.json`),
+    fetchJson(`${CDRAGON_PBE_BASE}/global/default/v1/skins.json`),
+    fetchJson(`${CDRAGON_PBE_BASE}/global/default/v1/champion-summary.json`),
+    snapshot.index('rainbow/chroma-cycles.json'),
+    snapshot.index('classic/index.json')
   ]);
+  for (const [name, records] of Object.entries({ trSkins, enSkins, pbeTrSkins, pbeEnSkins })) {
+    if (!records || Array.isArray(records) || Object.keys(records).length < 1000) {
+      throw new Error(`Incomplete CommunityDragon dataset: ${name}`);
+    }
+  }
+  if (!Array.isArray(pbeChampions) || !Object.keys(champListTr?.data || {}).length ||
+      !Object.keys(champListEn?.data || {}).length) throw new Error('Incomplete champion metadata');
 
   // Manifest bayraklarını topla (URL gömmeden sadece hasRainbow, hasClassic ve forms)
   const rainbowSkinIds = new Set();
   const classicSkinIds = new Set();
   const formsByParentId = new Map();
+  const liveFormParents = new Map();
   for (const entry of Object.values(manifest.entries)) {
-    if (!entry.enabled) continue;
     if (entry.c === 'rainbow') {
-      rainbowSkinIds.add(String(entry.id));
+      if (entry.enabled) rainbowSkinIds.add(String(entry.id));
     } else if (entry.c === 'classic') {
       const num = Number(entry.id);
-      if (num >= 60000000) {
+      if (entry.enabled && num >= 60000000) {
         classicSkinIds.add(String(num - 60000000));
       }
     } else if (entry.type === 'form' && entry.pId) {
+      if (entry.c === 'skins') liveFormParents.set(String(entry.id), String(entry.pId));
       const pIdStr = String(entry.pId);
       if (!formsByParentId.has(pIdStr)) formsByParentId.set(pIdStr, []);
       formsByParentId.get(pIdStr).push({
         id: String(entry.id),
         name: entry.name,
         nameEn: entry.name,
-        ...(entry.c === 'pbe' ? { isPbe: true } : {})
+        ...(entry.c === 'pbe' ? { isPbe: true } : {}),
+        ...(!entry.enabled ? { downloadUnavailable: true } : {})
       });
     }
   }
 
   const parentSkinById = new Map();
-  Object.values(trSkins).forEach(skin => {
+  Object.values({ ...enSkins, ...trSkins }).forEach(skin => {
     skin.chromas?.forEach(chroma => {
       parentSkinById.set(String(chroma.id), String(skin.id));
     });
   });
-
-  const entries = Object.values(champListTr.data);
-  console.log(`[update-data] ${entries.length} şampiyon detayı indiriliyor...`);
-
-  const details = [];
-  const batchSize = 20;
-  for (let i = 0; i < entries.length; i += batchSize) {
-    const batch = entries.slice(i, i + batchSize);
-    const batchDetails = await Promise.all(
-      batch.map(async ({ id }) => {
-        const [trDetail, enDetail] = await Promise.all([
-          fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/tr_TR/champion/${id}.json`).catch(() =>
-            fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/en_US/champion/${id}.json`)
-          ),
-          fetchJson(`${DDRAGON_BASE}/cdn/${latestVersion}/data/en_US/champion/${id}.json`).catch(() => null)
-        ]);
-        return { trDetail, enDetail };
-      })
-    );
-    details.push(...batchDetails);
-  }
 
   const allSkins = [];
   const existingIds = new Set();
@@ -277,26 +257,37 @@ async function main() {
   const champByKeyMap = new Map();
 
   // 1. CANLI SKİNLER VE CHROMALAR
-  for (const { trDetail, enDetail } of details) {
-    const champion = Object.values(trDetail.data)[0];
-    const championEn = enDetail ? Object.values(enDetail.data)[0] : null;
+  const liveSkinsByChampion = Map.groupBy(Object.values(enSkins), skin => Math.floor(Number(skin.id) / 1000));
+  for (const champion of Object.values(champListEn.data)) {
+    const championEn = champion;
+    const localized = champListTr.data[champion.id] || championEn;
     const champMeta = {
       id: champion.id,
       key: Number(champion.key),
-      nameTr: champion.name,
+      nameTr: localized.name,
       nameEn: championEn?.name || champion.name
     };
     champByIdMap.set(champMeta.id, champMeta);
     champByKeyMap.set(champMeta.key, champMeta);
 
-    champion.skins.forEach((skin, index) => {
-      const skinEn = championEn?.skins?.[index];
+    const englishByNumber = new Map((championEn?.skins || []).map(skin => [skin.num, skin]));
+    const byNumber = new Map(localized.skins.map(skin => [skin.num, skin]));
+    for (const skin of championEn.skins) {
+      if (!byNumber.has(skin.num)) byNumber.set(skin.num, skin);
+    }
+    for (const liveSkin of liveSkinsByChampion.get(champMeta.key) || []) {
+      const liveId = Number(liveSkin.id);
+      if (byNumber.has(liveId % 1000)) continue;
+      byNumber.set(liveId % 1000, { num: liveId % 1000, name: liveSkin.name });
+    }
+    for (const skin of byNumber.values()) {
+      const skinEn = englishByNumber.get(skin.num);
       const id = `${champion.key}${String(skin.num).padStart(3, '0')}`;
       const trSkin = trSkins[id];
       const enSkin = enSkins[id];
       const parentId = parentSkinById.get(id);
 
-      const baseNameTr = trSkin?.name || (skin.name === 'default' ? champion.name : skin.name);
+      const baseNameTr = trSkin?.name || (skin.name === 'default' ? localized.name : skin.name);
       const baseNameEn =
         enSkin?.name ||
         (skinEn
@@ -311,15 +302,16 @@ async function main() {
         id,
         skinNum: skin.num,
         name: baseNameTr,
-        champion: champion.name,
+        champion: localized.name,
         nameTr: baseNameTr,
-        championTr: champion.name,
+        championTr: localized.name,
         nameEn: baseNameEn,
         championEn: championEn?.name || champion.name,
         championId: champion.id,
         image: `${DDRAGON_BASE}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`,
         imageFallback: imageUrlFromSplashPath(trSkin?.splashPath || enSkin?.splashPath, 'latest'),
-        ...(parentId ? { parentSkinId: parentId } : {})
+        ...(parentId ? { parentSkinId: parentId } : {}),
+        ...(liveFormParents.has(id) ? { formOf: liveFormParents.get(id) } : {})
       };
 
       if (rainbowSkinIds.has(id)) {
@@ -334,17 +326,17 @@ async function main() {
 
       allSkins.push(entry);
       existingIds.add(id);
-    });
+    }
 
     // Data Dragon champion.skins listesinde olmayıp yalnızca CommunityDragon'da yer alan chromaları ekle
-    champion.skins.forEach((skin, index) => {
-      const skinEn = championEn?.skins?.[index];
+    for (const skin of byNumber.values()) {
+      const skinEn = englishByNumber.get(skin.num);
       const id = `${champion.key}${String(skin.num).padStart(3, '0')}`;
       const trSkin = trSkins[id];
       const enSkin = enSkins[id];
-      if (!trSkin?.chromas?.length) return;
+      if (!trSkin?.chromas?.length && !enSkin?.chromas?.length) continue;
 
-      const baseNameTr = trSkin?.name || (skin.name === 'default' ? champion.name : skin.name);
+      const baseNameTr = trSkin?.name || (skin.name === 'default' ? localized.name : skin.name);
       const baseNameEn =
         enSkin?.name ||
         (skinEn
@@ -355,10 +347,11 @@ async function main() {
             ? champion.name
             : skin.name);
 
-      const cdChromasTr = trSkin.chromas || [];
       const cdChromasEnMap = new Map((enSkin?.chromas || []).map(c => [String(c.id), c]));
+      const cdChromasTr = new Map(cdChromasEnMap);
+      for (const chroma of trSkin?.chromas || []) cdChromasTr.set(String(chroma.id), chroma);
 
-      for (const ch of cdChromasTr) {
+      for (const ch of cdChromasTr.values()) {
         const chId = String(ch.id);
         if (existingIds.has(chId)) continue;
         const chEn = cdChromasEnMap.get(chId);
@@ -370,9 +363,9 @@ async function main() {
           id: chId,
           skinNum: chNum,
           name: fullChromaTr,
-          champion: champion.name,
+          champion: localized.name,
           nameTr: fullChromaTr,
-          championTr: champion.name,
+          championTr: localized.name,
           nameEn: fullChromaEn,
           championEn: championEn?.name || champion.name,
           championId: champion.id,
@@ -388,16 +381,44 @@ async function main() {
         allSkins.push(chromaEntry);
         existingIds.add(chId);
       }
-    });
+    }
   }
 
   // 2. PBE SKİNLERİ VE CHROMALARI (Canlıda zaten varsa eklenmez, canlı sürüm kazanır)
   let pbeBaseAdded = 0;
   let pbeChromaAdded = 0;
 
-  const pbeEntries = Object.values(manifest.entries).filter(
-    e => e.c === 'pbe' && e.enabled && (e.type === 'base' || e.type === 'chroma')
-  );
+  for (const champion of pbeChampions) {
+    if (champion.id <= 0 || champion.id >= 60_000 || !champion.alias || !champion.name ||
+        champByKeyMap.has(champion.id)) continue;
+    const meta = { id: champion.alias, key: champion.id, nameTr: champion.name, nameEn: champion.name };
+    champByKeyMap.set(meta.key, meta);
+    champByIdMap.set(meta.id, meta);
+  }
+  // The metadata feed owns release classification, even when the file is absent.
+  const knownPbe = new Map();
+  for (const skin of Object.values(pbeEnSkins)) {
+    // Project Jade items use the separate Classic namespace.
+    if (Number(skin.id) >= 60_000_000) continue;
+    if (!existingIds.has(String(skin.id))) {
+      knownPbe.set(String(skin.id), { id: skin.id, name: skin.name, type: 'base' });
+    }
+    for (const chroma of skin.chromas || []) {
+      if (!existingIds.has(String(chroma.id))) {
+        knownPbe.set(String(chroma.id), { id: chroma.id, name: chroma.name, type: 'chroma', pId: skin.id });
+      }
+    }
+  }
+  for (const entry of Object.values(manifest.entries)) {
+    if (entry.c !== 'pbe' || !['base', 'chroma'].includes(entry.type)) continue;
+    const id = String(entry.id);
+    const fromMetadata = knownPbe.get(id);
+    if (fromMetadata && (fromMetadata.type !== entry.type || fromMetadata.pId !== entry.pId)) {
+      throw new Error(`PBE variant identity mismatch for ${id}`);
+    }
+    if (!fromMetadata && entry.enabled) knownPbe.set(id, entry);
+  }
+  const pbeEntries = [...knownPbe.values()];
 
   // Önce PBE ana skinlerini, sonra PBE chromalarını işle
   pbeEntries.sort((a, b) => (a.type === 'base' ? -1 : 1) - (b.type === 'base' ? -1 : 1));
@@ -487,32 +508,13 @@ async function main() {
     }
   }
 
-  // 3. PENDING GİRDİLERİ (Henüz Data Dragon/CommunityDragon'da olmayan ama Yimikami'de bulunanlar)
-  const pendingEntries = Object.values(manifest.entries).filter(
-    e => e.status === 'pending' && e.enabled && (e.c === 'skins' || e.c === 'pbe')
-  );
-  for (const pend of pendingEntries) {
-    const idStr = String(pend.id);
-    if (existingIds.has(idStr)) continue;
-    const champ = champByIdMap.get(pend.champ);
-    if (!champ) continue;
-    const defaultSplash = `${DDRAGON_BASE}/cdn/img/champion/splash/${champ.id}_0.jpg`;
-    allSkins.push({
-      id: idStr,
-      skinNum: 999,
-      name: pend.name,
-      champion: champ.nameTr,
-      nameTr: pend.name,
-      championTr: champ.nameTr,
-      nameEn: pend.name,
-      championEn: champ.nameEn,
-      championId: champ.id,
-      image: defaultSplash,
-      imageFallback: '',
-      isPending: true,
-      ...(pend.c === 'pbe' ? { isPbe: true } : {})
-    });
-    existingIds.add(idStr);
+  // Retain known identities when both feeds omit a previously published record.
+  // An absent download stays disabled in the manifest.
+  for (const previous of prevSkinsJson?.skins || []) {
+    if (existingIds.has(String(previous.id)) || previous.isPending || previous.isCustom) continue;
+    if (!previous.isPbe) throw new Error(`Previously published live skin missing from metadata: ${previous.id}`);
+    allSkins.push({ ...previous, forms: formsByParentId.get(String(previous.id)) });
+    existingIds.add(String(previous.id));
   }
 
   // 4. ADMIN OVERRIDES UYGULA
@@ -538,7 +540,7 @@ async function main() {
     const skinIdNum = champ.key * 1000 + Number(cycle.skin);
     const idStr = String(skinIdNum);
     const manifestEntry = manifest.entries[`rainbow:${idStr}`];
-    if (!manifestEntry || !manifestEntry.enabled) continue;
+    if (!manifestEntry) continue;
     const liveSkin = skinByIdMap.get(idStr);
     const fallbackName = cycle.path.split('/').pop().replace(/\.fantome$/, '');
     const nameTr = liveSkin?.nameTr || liveSkin?.name || fallbackName;
@@ -566,8 +568,6 @@ async function main() {
       }))
     });
   }
-  rainbowItems.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-
   // 6. CLASSIC.JSON (Lazy-Load Verisi — URL gömülmez, 1.803 paketin tamamı)
   const classicItems = [];
   for (const cChamp of classicIndex.champions || []) {
@@ -583,7 +583,7 @@ async function main() {
     for (const sk of cChamp.skins || []) {
       const classicIdStr = String(sk.id);
       const manifestEntry = manifest.entries[`classic:${classicIdStr}`];
-      if (!manifestEntry || !manifestEntry.enabled) continue;
+      if (!manifestEntry) continue;
       const liveSkinIdStr = String(champKey * 1000 + Number(sk.num));
       const liveSkin = skinByIdMap.get(liveSkinIdStr);
 
@@ -625,13 +625,21 @@ async function main() {
       });
     }
   }
-  classicItems.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-
   await mkdir(DATA_DIR, { recursive: true });
 
-  const prevSkinsJson = await loadJsonIfExists(PATHS.skins);
   const prevRainbowJson = await loadJsonIfExists(PATHS.rainbow);
   const prevClassicJson = await loadJsonIfExists(PATHS.classic);
+  for (const [category, collection, previous] of [
+    ['rainbow', rainbowItems, prevRainbowJson], ['classic', classicItems, prevClassicJson]
+  ]) {
+    const ids = new Set(collection.map(skin => String(skin.id)));
+    for (const skin of previous?.skins || []) {
+      if (ids.has(String(skin.id))) continue;
+      if (!manifest.entries[`${category}:${skin.id}`]) throw new Error(`Lost catalog identity: ${category}:${skin.id}`);
+      collection.push(skin);
+    }
+    collection.sort((a, b) => a.name.localeCompare(b.name, 'tr') || String(a.id).localeCompare(String(b.id), 'en'));
+  }
   const nowIso = new Date().toISOString();
 
   const skinsPayload = {
@@ -645,6 +653,7 @@ async function main() {
     prevSkinsJson &&
     prevSkinsJson.version === skinsPayload.version &&
     prevSkinsJson.patch === skinsPayload.patch &&
+    prevSkinsJson.pbePatch === skinsPayload.pbePatch &&
     JSON.stringify(prevSkinsJson.skins) === JSON.stringify(skinsPayload.skins)
   ) {
     skinsPayload.updatedAt = prevSkinsJson.updatedAt;
@@ -659,6 +668,7 @@ async function main() {
   };
   if (
     prevRainbowJson &&
+    prevRainbowJson.version === rainbowPayload.version &&
     prevRainbowJson.patch === rainbowPayload.patch &&
     JSON.stringify(prevRainbowJson.skins) === JSON.stringify(rainbowPayload.skins)
   ) {
@@ -675,7 +685,9 @@ async function main() {
   };
   if (
     prevClassicJson &&
+    prevClassicJson.version === classicPayload.version &&
     prevClassicJson.patch === classicPayload.patch &&
+    prevClassicJson.totalChampions === classicPayload.totalChampions &&
     JSON.stringify(prevClassicJson.skins) === JSON.stringify(classicPayload.skins)
   ) {
     classicPayload.updatedAt = prevClassicJson.updatedAt;
@@ -693,7 +705,9 @@ async function main() {
   console.log(`classic.json : ${classicItems.length} Classic paketi (${classicItems.filter(x => !x.parentSkinId).length} ana + ${classicItems.filter(x => x.parentSkinId).length} chroma, lazy-load)`);
 }
 
-main().catch(err => {
-  console.error('[update-data] HATA:', err.message);
-  process.exit(1);
-});
+if (process.argv[1]?.endsWith('update-skins.mjs')) {
+  updateSkins().catch(err => {
+    console.error('[update-data] HATA:', err.message);
+    process.exitCode = 1;
+  });
+}

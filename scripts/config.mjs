@@ -6,20 +6,17 @@ const __dirname = path.dirname(__filename);
 
 export const ROOT_DIR = path.resolve(__dirname, '..');
 export const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
-export const DATA_DIR = path.join(PUBLIC_DIR, 'data');
+export const DATA_DIR = process.env.SKIN_SYNC_DATA_DIR || path.join(PUBLIC_DIR, 'data');
 
 export const SOURCE_REPO = process.env.YIMIKAMI_REPO || 'Yimikami/LeagueSkins-Experimental';
 export const SOURCE_BRANCH = process.env.YIMIKAMI_BRANCH || 'main';
 export const RAW_BASE_URL = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_BRANCH}/`;
-export const GITHUB_TREE_API_URL = `https://api.github.com/repos/${SOURCE_REPO}/git/trees/${SOURCE_BRANCH}?recursive=1`;
 
 // Yalnızca manifest üretiminde (prepare-fantome) kaynak repoda olmayan eski yerel dosya girdilerini etkinleştiren bayrak
 export const ENABLE_LEGACY_FANTOME = process.env.ENABLE_LEGACY_FANTOME === 'true';
 export const LEGACY_BASE_PATH = '/fantome/';
 export const LEGACY_EXTERNAL_DIR = process.env.LOL_SKINS_LEGACY_DIR || '';
 
-// Kaynaktan silinen bir paketin devre dışı bırakılmadan önce kaç çalışma boyunca "missing" kalacağı
-export const MISSING_GRACE_RUNS = 3;
 
 // Güvenlik eşiği: kaynakta toplam girdi sayısı %5'ten fazla düşerse hata verip dur
 export const MAX_ALLOWED_DROP_RATIO = 0.05;

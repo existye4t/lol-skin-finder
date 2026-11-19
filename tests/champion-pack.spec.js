@@ -17,6 +17,12 @@ const FANTOME_DIR = path.join(ROOT, 'public', 'fantome');
 const SKINS_JSON = path.join(ROOT, 'public', 'data', 'skins.json');
 const MANIFEST_JSON = path.join(ROOT, 'public', 'data', 'fantome-manifest.json');
 const FILES_JSON = path.join(ROOT, 'public', 'data', 'fantome-files.json');
+const manifest = JSON.parse(fs.readFileSync(MANIFEST_JSON, 'utf8'));
+
+function expectSourceUrl(url, directory = '') {
+  expect(url).toEqual(expect.stringContaining(manifest.baseUrl + directory));
+  expect(url.startsWith(manifest.baseUrl + directory)).toBe(true);
+}
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -212,7 +218,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
 
   async function mockRemoteFantomePayloads(page) {
     await page.route('**/*.fantome', async (route, request) => {
-      expect(request.url()).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\//);
+      expectSourceUrl(request.url());
       await route.fulfill({
         status: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -427,7 +433,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     for (let i = 0; i < count; i++) {
       const el = downloadItems.nth(i);
       const hrefAttr = await el.getAttribute('href');
-      expect(hrefAttr).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\//);
+      expectSourceUrl(hrefAttr);
       const downloadAttr = await el.getAttribute('download');
       expect(downloadAttr).not.toBeNull();
       // Should NOT be a bare numeric ID like "55001.fantome"
@@ -661,14 +667,18 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await expect(tabs).toHaveCount(3);
     await expect(page.locator('.collection-tab[data-collection="skins"]')).toHaveClass(/is-active/);
 
-    // 2. Search for a PBE skin ("Zamanın Ötesinde Riven") in Skinler tab
-    await openModal(page, 'Tatlı Pastane Neeko');
+    // Select a currently indexed base so the browser test follows the PBE rotation.
+    const pbe = readSkins().find(skin => skin.isPbe && !skin.parentSkinId &&
+      manifest.entries[`pbe:${skin.id}`]?.enabled);
+    expect(pbe).toBeTruthy();
+    await openModal(page, pbe.id);
     await expect(page.locator('#results .skin-card .skin-badge-pbe').first()).toBeAttached();
     await expect(page.locator('#modal-collection-badge')).toBeVisible();
     await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-pbe/);
     await expect(page.locator('#modal-pbe-warning')).toBeVisible();
     const pbeHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
-    expect(pbeHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/PBE\//);
+    expectSourceUrl(pbeHref, 'PBE/');
+    expect(decodeURIComponent(pbeHref.slice(manifest.baseUrl.length))).toBe(manifest.entries[`pbe:${pbe.id}`].path);
     await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
 
@@ -680,7 +690,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await expect(page.locator('.collection-tab[data-collection="rainbow"]')).toHaveClass(/is-active/);
     await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-rainbow/);
     const rainbowHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
-    expect(rainbowHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/rainbow\//);
+    expectSourceUrl(rainbowHref, 'rainbow/');
     await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
 
@@ -692,10 +702,27 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await openModal(page, 'Ahri');
     await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-classic/);
     const classicHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
-    expect(classicHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/classic\//);
+    expectSourceUrl(classicHref, 'classic/');
     await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
     console.log('  Collection tabs, PBE badge, Rainbow modal link and Classic tab verified ✓');
+  });
+
+  test('Promoted PBE skin uses Live and unavailable forms retain disabled rows', async ({ page }) => {
+    await page.goto(PREVIEW_URL);
+    await waitForData(page);
+    await openModal(page, '142045');
+    await expect(page.locator('#modal-pbe-warning')).toBeHidden();
+    expectSourceUrl(await page.locator('#download-list .download-item[href]').first().getAttribute('href'), 'skins/Zoe/');
+    await page.locator('#skin-modal .modal-close').click();
+    await expect(page.locator('#skin-modal')).toBeHidden();
+    await openModal(page, '37077');
+    const forms = page.locator('#download-list .download-item').filter({ hasText: /37077_f[12]/ });
+    await expect(forms).toHaveCount(2);
+    for (const form of await forms.all()) {
+      await expect(form).toHaveAttribute('aria-disabled', 'true');
+      await expect(form).not.toHaveAttribute('href');
+    }
   });
 
   test('Special Packages row: shows when present, hides when absent, points to raw repo with HEAD 200', async ({ page }) => {
@@ -713,7 +740,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     const rumbleDownloadAttr = await rumbleRows.first().getAttribute('download');
     expect(rumbleDownloadAttr).toMatch(/\(Rainbow\)\.fantome$/);
     const rumbleHref = await rumbleRows.first().getAttribute('href');
-    expect(rumbleHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/rainbow\//);
+    expectSourceUrl(rumbleHref, 'rainbow/');
     const rumbleHeadResp = await page.request.head(rumbleHref);
     expect(rumbleHeadResp.status()).toBe(200);
     const rumbleNote = rumbleSpecialBox.locator('.special-package-notice');
@@ -732,7 +759,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
     const annieDownloadAttr = await annieRows.first().getAttribute('download');
     expect(annieDownloadAttr).toMatch(/\(Classic\)\.fantome$/);
     const annieHref = await annieRows.first().getAttribute('href');
-    expect(annieHref).toMatch(/^https:\/\/raw\.githubusercontent\.com\/Yimikami\/LeagueSkins-Experimental\/main\/classic\//);
+    expectSourceUrl(annieHref, 'classic/');
     const annieHeadResp = await page.request.head(annieHref);
     expect(annieHeadResp.status()).toBe(200);
     const annieNote = annieSpecialBox.locator('.special-package-notice');

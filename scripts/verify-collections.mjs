@@ -2,11 +2,10 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { fetchSourceTree } from './prepare-fantome.mjs';
+import { fetchSourceTree, sourceSnapshot } from './sync-source.mjs';
 import {
   DATA_DIR,
   PATHS,
-  RAW_BASE_URL,
   sanitizeYimiFileName,
   sanitizeYimiFolderName
 } from './config.mjs';
@@ -20,7 +19,53 @@ async function loadJson(filePath) {
   return JSON.parse(content);
 }
 
-export async function verifyCollections({ verbose = false, sampleSize = 15 } = {}) {
+export function catalogIdentityErrors({ skinsData, rainbowData, classicData, manifest }) {
+  const errors = [];
+  const championKeys = new Map(skinsData.skins.filter(skin => skin.skinNum === 0 && !skin.isCustom)
+    .map(skin => [skin.championId, Math.floor(Number(skin.id) / 1000)]));
+  const formIds = new Set();
+  for (const [collection, catalog] of [['skins', skinsData], ['rainbow', rainbowData], ['classic', classicData]]) {
+    const byId = new Map(catalog.skins.map(skin => [String(skin.id), skin]));
+    if (byId.size !== catalog.skins.length) errors.push(`Duplicate catalog IDs in ${collection}`);
+    const offset = collection === 'classic' ? 60_000_000 : 0;
+    for (const skin of catalog.skins) {
+      const id = String(skin.id);
+      if (skin.isCustom) continue;
+      const numericId = Number(id) - offset;
+      const owner = Math.floor(numericId / 1000);
+      if (!/^\d+$/.test(id) || owner <= 0 || !skin.championId ||
+          championKeys.get(skin.championId) !== owner ||
+          collection !== 'classic' && numericId % 1000 !== skin.skinNum) {
+        errors.push(`Invalid champion or skin identity: ${collection}:${id}`);
+      }
+      const parent = skin.parentSkinId ? byId.get(String(skin.parentSkinId)) : null;
+      if (skin.parentSkinId && (!parent || parent.championId !== skin.championId || parent === skin)) {
+        errors.push(`Invalid parent: ${collection}:${id} -> ${skin.parentSkinId}`);
+      }
+      const category = skin.isPbe && collection === 'skins' ? 'pbe' : collection;
+      const asset = manifest.entries[`${category}:${id}`];
+      const variantParent = skin.formOf || skin.parentSkinId;
+      if (asset?.enabled && !asset.legacy &&
+          (asset.champ !== skin.championId ||
+           collection === 'skins' && (asset.type !== (skin.formOf ? 'form' : skin.parentSkinId ? 'chroma' : 'base') ||
+             variantParent && String(asset.pId) !== String(variantParent)))) {
+        errors.push(`Incompatible asset: ${category}:${id}`);
+      }
+      for (const form of skin.forms || []) {
+        const key = `${form.isPbe ? 'pbe' : category}:${form.id}`;
+        const entry = manifest.entries[key];
+        if (formIds.has(key) || !entry || entry.type !== 'form' || entry.champ !== skin.championId ||
+            String(entry.pId) !== id || Boolean(entry.enabled) === Boolean(form.downloadUnavailable)) {
+          errors.push(`Invalid form mapping: ${key} -> ${id}`);
+        }
+        formIds.add(key);
+      }
+    }
+  }
+  return errors;
+}
+
+export async function verifyCollections({ verbose = false, sampleSize = 15, snapshot } = {}) {
   console.log('====================================================');
   console.log('🔍 LOL SKIN FINDER — KOLEKSİYON VERİ DOĞRULAMA');
   console.log('   Doğruluğun Kaynağı: GitHub Git Trees API (Canlı Ağaç)');
@@ -28,9 +73,10 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
 
   // 1. Dosyaları ve ağacı yükle
   console.log('[1/5] Git Trees ağacı ve yerel/uzak veri indeksleri çekiliyor...');
+  const manifest = await loadJson(PATHS.manifest);
+  snapshot ??= await sourceSnapshot();
   const [
     tree,
-    manifest,
     skinsData,
     rainbowData,
     classicData,
@@ -40,16 +86,15 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
     rainbowIndex,
     classicIndex
   ] = await Promise.all([
-    fetchSourceTree(),
-    loadJson(PATHS.manifest),
+    fetchSourceTree(snapshot.revision),
     loadJson(PATHS.skins),
     loadJson(PATHS.rainbow),
     loadJson(PATHS.classic),
-    fetch(`${RAW_BASE_URL}index.json`).then(r => r.json()).catch(() => null),
-    fetch(`${RAW_BASE_URL}PBE/index.json`).then(r => r.json()).catch(() => null),
-    fetch(`${RAW_BASE_URL}rainbow/chroma-cycles.json`).then(r => r.json()).catch(() => null),
-    fetch(`${RAW_BASE_URL}rainbow/index.json`).then(r => r.json()).catch(() => null),
-    fetch(`${RAW_BASE_URL}classic/index.json`).then(r => r.json()).catch(() => null)
+    snapshot.index('index.json'),
+    snapshot.index('PBE/index.json'),
+    snapshot.index('rainbow/chroma-cycles.json'),
+    snapshot.index('rainbow/index.json'),
+    snapshot.index('classic/index.json')
   ]);
 
   if (!tree || !manifest || !skinsData || !rainbowData || !classicData) {
@@ -76,7 +121,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
 
   console.log(`✓ Git Trees Ağacı: ${tree.length} öğe, ${treeBlobs.size} blob.`);
   console.log(`  - Skins:   ${treeSkinsFantomes.size} .fantome`);
-  console.log(`  - PBE:     ${treePbeFantomes.size} .fantome (19 skin/chroma + 2 DJ Sona form paketi)`);
+  console.log(`  - PBE:     ${treePbeFantomes.size} .fantome`);
   console.log(`  - Rainbow: ${treeRainbowFantomes.size} .fantome`);
   console.log(`  - Classic: ${treeClassicFantomes.size} .fantome\n`);
 
@@ -93,6 +138,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   for (const s of skinsData.skins || []) {
     liveSkinById.set(String(s.id), s);
   }
+  const identityErrors = catalogIdentityErrors({ skinsData, rainbowData, classicData, manifest });
 
   // ====================================================
   // BÖLÜM 1: İNDEKS DOSYALARI ↔ GİT TREES VARLIK KONTROLÜ
@@ -235,7 +281,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   // A3: rainbow.json'daki her girdi için dosya Trees'te var mı?
   for (const r of rainbowData.skins || []) {
     const entry = manifestByCollectionAndId.get(`rainbow:${r.id}`);
-    if (!entry || !entry.path || !treeBlobs.has(entry.path)) {
+    if (!entry || (entry.enabled && !treeBlobs.has(entry.path))) {
       errorsA.rainbowJsonMissingRepo.push({
         id: r.id,
         name: r.name,
@@ -248,7 +294,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   // A4: classic.json'daki her girdi için dosya Trees'te var mı?
   for (const c of classicData.skins || []) {
     const entry = manifestByCollectionAndId.get(`classic:${c.id}`);
-    if (!entry || !entry.path || !treeBlobs.has(entry.path)) {
+    if (!entry || (entry.enabled && !treeBlobs.has(entry.path))) {
       errorsA.classicJsonMissingRepo.push({
         id: c.id,
         name: c.name,
@@ -262,7 +308,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   const pbeSkinsList = (skinsData.skins || []).filter(s => s.isPbe);
   for (const s of pbeSkinsList) {
     const entry = manifestByCollectionAndId.get(`pbe:${s.id}`);
-    if (!entry || !entry.path || !treeBlobs.has(entry.path)) {
+    if (entry?.enabled && !treeBlobs.has(entry.path)) {
       errorsA.pbeMissingRepo.push({
         id: s.id,
         name: s.name,
@@ -274,7 +320,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
     if (Array.isArray(s.forms)) {
       for (const f of s.forms) {
         const fEntry = manifestByCollectionAndId.get(`pbe:${f.id}`);
-        if (!fEntry || !fEntry.path || !treeBlobs.has(fEntry.path)) {
+        if (fEntry?.enabled && !treeBlobs.has(fEntry.path)) {
           errorsA.pbeMissingRepo.push({
             id: f.id,
             name: f.name,
@@ -303,7 +349,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   console.log(`  2. hasClassic=true ama repoda yok:       ${errorsA.skinsHasClassicMissingRepo.length}`);
   console.log(`  3. rainbow.json kartı var ama repoda yok: ${errorsA.rainbowJsonMissingRepo.length}`);
   console.log(`  4. classic.json kartı var ama repoda yok: ${errorsA.classicJsonMissingRepo.length}`);
-  console.log(`  5. PBE (19 skin/chroma + 2 form) repoda yok: ${errorsA.pbeMissingRepo.length}`);
+  console.log(`  5. Etkin PBE bağlantısı repoda yok: ${errorsA.pbeMissingRepo.length}`);
   console.log(`  6. Manifest enabled=true ama repoda yok: ${errorsA.manifestEnabledMissingRepo.length}\n`);
 
   // ====================================================
@@ -490,8 +536,9 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   // ====================================================
   // ÖZET VE SONUÇ
   // ====================================================
-  const totalPbePacksInRepo = treePbeFantomes.size; // 21
-  const totalPbeVerified = pbeSkinsList.length + 2; // 19 + 2 DJ Sona forms = 21
+  const totalPbePacksInRepo = treePbeFantomes.size;
+  const totalPbeVerified = Object.values(manifestEntries).filter(entry =>
+    entry.c === 'pbe' && entry.enabled && treePbeFantomes.has(entry.path)).length;
 
   console.log('\n====================================================');
   console.log('📊 KOLEKSİYON DOĞRULAMA TABLOSU:');
@@ -504,24 +551,28 @@ export async function verifyCollections({ verbose = false, sampleSize = 15 } = {
   console.log(`| PBE          | ${String(totalPbePacksInRepo).padEnd(12)} | ${String(totalPbeVerified).padEnd(10)} | ${String(errorsA.pbeMissingRepo.length).padEnd(17)} | 0        |`);
   console.log('=====================================================================\n');
 
-  const totalErrorsA =
+  const reconciledIndexPaths = new Set(Object.values(manifestEntries)
+    .filter(entry => !entry.legacy && (!entry.enabled || entry.indexedPath))
+    .map(entry => entry.indexedPath || entry.path));
+  const unreconciledIndexPaths = Object.values(indexMissing).flat()
+    .map(item => typeof item === 'string' ? item : item.path)
+    .filter(path => !reconciledIndexPaths.has(path));
+  const totalErrorsA = identityErrors.length + unreconciledIndexPaths.length +
     errorsA.skinsHasRainbowMissingRepo.length +
     errorsA.skinsHasClassicMissingRepo.length +
     errorsA.rainbowJsonMissingRepo.length +
     errorsA.classicJsonMissingRepo.length +
     errorsA.pbeMissingRepo.length +
-    errorsA.manifestEnabledMissingRepo.length +
-    indexMissing.rootIndex.length +
-    indexMissing.pbeIndex.length +
-    indexMissing.rainbowCycles.length +
-    indexMissing.classicIndex.length;
+    errorsA.manifestEnabledMissingRepo.length;
 
   if (totalErrorsA > 0) {
+    if (identityErrors.length) console.error('Katalog kimlik hataları:', identityErrors.slice(0, 25));
+    if (unreconciledIndexPaths.length) console.error('Eşlenmemiş indeks yolları:', unreconciledIndexPaths.slice(0, 25));
     console.error(`❌ BAŞARISIZ: Toplam ${totalErrorsA} adet eksik dosya veya tutarsızlık bulundu!`);
     return { success: false, totalErrorsA, errorsA, warningsB, indexMissing };
   }
 
-  console.log('✅ BAŞARILI: Sıfır hata! PBE 21/21 paket, Classic 1803/1803 paket, Rainbow 562/562 paket ve canlı skinler %100 doğrulandı.');
+  console.log('✅ BAŞARILI: Koleksiyon kimlikleri ve etkin indirme yolları doğrulandı.');
   return { success: true, totalErrorsA: 0, errorsA, warningsB, indexMissing };
 }
 

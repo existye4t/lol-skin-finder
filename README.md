@@ -86,12 +86,15 @@ lol-skin-finder/
 
 ## 🔄 Veri Güncelleme ve Manifest Sistemi
 
-Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez (ENABLE_LEGACY_FANTOME bayrağı yalnızca manifest üretiminde kaynak repoda karşılığı bulunmayan 6 sahipsiz girdiyi [ID: 234994–234999] kontrol eder).
+Senkronizasyon Yimikami’nin indekslerini ve Git ağacını aynı commit üzerinden okur. Data Dragon ve CommunityDragon katalog kayıtlarının kimliğini, dilini ve Live/PBE durumunu belirler. İndirilebilir paketler kategori, şampiyon, skin ve varyant kimliğiyle eşlenir. Bir dosya taşınmışsa aynı şampiyon altında tek bir eşleşmesi olan önceki Git blob’u yeniden kullanılabilir. Eksik veya belirsiz bağlantılar katalog kayıtlarında devre dışı gösterilir.
 
 Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
 
 ```bash
 npm run sync-data
+npm run sync-data -- --dry-run
+npm run sync-data -- --download-samples
+npm run test:sync
 ```
 
 Komutları ayrı ayrı çalıştırmak için:
@@ -107,7 +110,9 @@ npm run update-data
 npm run check-links
 ```
 
-> **GitHub Actions Ayarı Gereksinimi:** `.github/workflows/sync-skins.yml` iş akışının büyük değişikliklerde veya yama geçişlerinde otomatik Pull Request açabilmesi için depo ayarlarında **Settings → Actions → General → Workflow permissions** altında **"Allow GitHub Actions to create and approve pull requests"** seçeneği işaretlenmelidir. `workflow_dispatch` üzerinden `dry_run: true` seçildiğinde ise repo üzerinde hiçbir commit/PR oluşturulmaz, yalnızca özet loglanır. `force_deploy: true` seçildiğinde ise veri değişikliği olmasa dahi GitHub Pages deploy akışı canlı olarak tetiklenir (`dry_run: true` önceliklidir).
+GitHub Actions her gün 00:17, 06:17, 12:17 ve 18:17 UTC’de çalışır. Doğrulanmış ve değişmiş katalog çıktıları tek commit ile `main` dalına yazılır ve mevcut Pages iş akışı bu commit’i yayınlar. Git push, arada gelen başka bir `main` değişikliği veya branch kuralı nedeniyle reddedilirse sonraki koşu güncel daldan başlar. `workflow_dispatch` ile `dry_run` doğrulama ve derlemeyi çalıştırır. `force_deploy`, doğrulanmış bir koşuda veri değişmemişse Pages dağıtımını yeniler.
+
+Rainbow indeksindeki boyut Git blob’undan farklıysa paket içindeki `META/build.json` şampiyon ve skin numarasıyla karşılaştırılır. Başarılı doğrulama aynı blob için tekrar kullanılır. Koşu raporunda eşleşmeyen yollar ve indeks uyuşmazlıkları yer alır.
 
 ---
 

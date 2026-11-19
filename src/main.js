@@ -1432,11 +1432,7 @@ function getManifestEntryForSkin(item, collection = activeCollection) {
   if (itemCol === 'classic') {
     return manifestData.entries[`classic:${id}`] || null;
   }
-  return (
-    manifestData.entries[`skins:${id}`] ||
-    manifestData.entries[`pbe:${id}`] ||
-    null
-  );
+  return manifestData.entries[`${item.isPbe ? 'pbe' : 'skins'}:${id}`] || null;
 }
 
 function getFantomeDownloadUrl(item, collection = activeCollection) {
@@ -1448,7 +1444,7 @@ function getFantomeDownloadUrl(item, collection = activeCollection) {
     if (entry && entry.enabled !== false && entry.path) {
       return buildManifestPathUrl(entry.path);
     }
-    if (manifestData.legacyEnabled && entry && entry.legacy) {
+    if ((manifestData.config?.enableLegacyFantome || manifestData.legacyEnabled) && entry?.legacy && entry.enabled) {
       return assetUrl(`fantome/${item.id}.fantome`);
     }
     return '';
@@ -3666,7 +3662,7 @@ async function downloadChampionPack(championKey, { includeChromas, onProgress } 
       ? keys.some((k) => k === championKey)
       : normalize(getLocalizedChampionName(skin, 'tr')) === championKey;
     if (!matches) return false;
-    if (!fantomeFiles.has(String(skin.id))) return false;
+    if (!getFantomeDownloadUrl(skin, 'skins')) return false;
     if (!includeChromas && skin.parentSkinId) return false;
     return true;
   });
@@ -3745,7 +3741,7 @@ async function downloadChampionPack(championKey, { includeChromas, onProgress } 
     while (cursor < entries.length) {
       const index = cursor++;
       const { skin, name } = entries[index];
-      const url = getFantomeDownloadUrl(skin);
+      const url = getFantomeDownloadUrl(skin, 'skins');
       const buf = await fetchToBuffer(url);
       done++;
       if (onProgress) onProgress(done, total);
@@ -3799,7 +3795,7 @@ function getChampionPackFileCount(championKey, includeChromas) {
       ? keys.some((k) => k === championKey)
       : normalize(getLocalizedChampionName(skin, 'tr')) === championKey;
     if (!matches) return false;
-    if (!fantomeFiles.has(String(skin.id))) return false;
+    if (!getFantomeDownloadUrl(skin, 'skins')) return false;
     if (!includeChromas && skin.parentSkinId) return false;
     return true;
   }).length;
@@ -4397,6 +4393,8 @@ activeModalGroup = group;
       typeBadge.textContent = 'Rainbow';
     } else if (isClassicActive) {
       typeBadge.textContent = 'Classic';
+    } else if (item.formOf) {
+      typeBadge.textContent = t('itemTypeForm');
     } else if (isChromaItem) {
       typeBadge.textContent = t('itemTypeChroma');
     } else {
@@ -4496,18 +4494,18 @@ activeModalGroup = group;
     fragment.appendChild(subheading);
 
     skin.forms.forEach((form) => {
-      const formUrl = buildManifestPathUrl(form.path);
-      if (!formUrl) return;
-
-      const element = document.createElement('a');
-      element.className = 'download-item chroma-card';
-      element.href = formUrl;
-      element.download = `${sanitizeFilename(form.name || String(form.id))}.fantome`;
-      element.title = t('downloadFantomeTitle', { id: form.id });
-      element.setAttribute(
-        'aria-label',
-        t('downloadFantomeAriaLabel', { name: form.name || String(form.id) })
-      );
+      const formUrl = getFantomeDownloadUrl({ ...form, isPbe: form.isPbe || skin.isPbe }, 'skins');
+      const element = document.createElement(formUrl ? 'a' : 'div');
+      element.className = 'download-item chroma-card' + (formUrl ? '' : ' unavailable');
+      if (formUrl) {
+        element.href = formUrl;
+        element.download = `${sanitizeFilename(form.name || String(form.id))}.fantome`;
+        element.title = t('downloadFantomeTitle', { id: form.id });
+        element.setAttribute('aria-label', t('downloadFantomeAriaLabel', { name: form.name || String(form.id) }));
+      } else {
+        element.title = t('fileNotFound');
+        element.setAttribute('aria-disabled', 'true');
+      }
 
       const dot = document.createElement('div');
       dot.className = 'download-dot chroma-preview';
@@ -4532,7 +4530,7 @@ activeModalGroup = group;
       idSpan.textContent = form.id;
       element.appendChild(idSpan);
 
-      element.addEventListener('click', () => {
+      if (formUrl) element.addEventListener('click', () => {
         track('fantome_download', {
           skin_id: form.id,
           skin_name: form.name || skin.name,

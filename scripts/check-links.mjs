@@ -1,20 +1,25 @@
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { PATHS, buildSourceDownloadUrl } from './config.mjs';
-import { fetchSourceTree } from './prepare-fantome.mjs';
+import { fetchSourceTree, fetchWithRetry, sourceSnapshot } from './sync-source.mjs';
+import { validAssetPath } from './reconcile-downloads.mjs';
+import { downloadVerifiedPackage } from './fantome-package.mjs';
 
 function parseArgs(argv) {
   let sampleSize = 20;
   let newOnly = false;
+  let download = false;
   for (const arg of argv) {
     if (arg === '--new-only') {
       newOnly = true;
+    } else if (arg === '--download-samples') {
+      download = true;
     } else if (arg.startsWith('--sample=')) {
       const val = Number(arg.split('=')[1]);
       if (Number.isFinite(val) && val >= 0) sampleSize = val;
     }
   }
-  return { sampleSize, newOnly };
+  return { sampleSize, newOnly, download };
 }
 
 function pickRandomSample(items, count) {
@@ -26,33 +31,7 @@ function pickRandomSample(items, count) {
   return arr.slice(0, Math.min(count, arr.length));
 }
 
-async function headWithRetry(url, retries = 3) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(url, {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'lol-skin-finder-link-checker' }
-      });
-      if (res.status === 429 || res.status >= 500) {
-        if (attempt < retries) {
-          await new Promise(r => setTimeout(r, attempt * 1000));
-          continue;
-        }
-      }
-      return { ok: res.ok, status: res.status };
-    } catch (err) {
-      if (attempt === retries) {
-        return { ok: false, status: 0, error: err.message };
-      }
-      await new Promise(r => setTimeout(r, attempt * 1000));
-    }
-  }
-  return { ok: false, status: 0 };
-}
-
-async function main() {
-  const { sampleSize, newOnly } = parseArgs(process.argv.slice(2));
-
+export async function checkLinks({ sampleSize = 20, newOnly = false, download = false, snapshot } = {}) {
   if (!existsSync(PATHS.manifest)) {
     throw new Error('fantome-manifest.json bulunamadı! Önce "npm run prepare-fantome" çalıştırın.');
   }
@@ -66,11 +45,15 @@ async function main() {
   console.log(`[check-links] Manifest doğrulanıyor (${entries.length} toplam girdi)...`);
 
   // 1. GitHub Trees API dosya listesini çek
-  const treeItems = await fetchSourceTree();
-  const remoteBlobSet = new Set(
+  snapshot ??= await sourceSnapshot();
+  if (manifest.sourceRevision && (await sourceSnapshot(manifest.sourceRevision)).baseUrl !== manifest.baseUrl) {
+    throw new Error('Manifest download URL does not match its upstream commit');
+  }
+  const treeItems = await fetchSourceTree(snapshot.revision);
+  const remoteBlobs = new Map(
     treeItems
       .filter(item => item.type === 'blob' && item.path.endsWith('.fantome'))
-      .map(item => item.path)
+      .map(item => [item.path, item])
   );
 
   // 2. Tüm aktif girdiler için: kompakt şema + Trees API varlık kontrolü + URL encode doğrulaması
@@ -78,18 +61,28 @@ async function main() {
   const encodeErrors = [];
   const schemaErrors = [];
   const activeEntries = [];
+  const usedPaths = new Set();
 
   for (const [key, entry] of entries) {
     if ('url' in entry || 'legacyPath' in entry) {
       schemaErrors.push(`${key}: Girdi içinde url veya legacyPath saklanmamalı!`);
     }
-    if (!entry.enabled || entry.legacy || entry.status === 'missing') continue;
+    if (key !== `${entry.c}:${entry.id}` || typeof entry.enabled !== 'boolean' ||
+        !['enabled', 'missing', 'ambiguous', 'legacy'].includes(entry.status) ||
+        !entry.legacy && entry.enabled !== (entry.status === 'enabled')) {
+      schemaErrors.push(`${key}: Invalid manifest identity or status`);
+    }
+    if (!entry.enabled || entry.legacy) continue;
 
     activeEntries.push([key, entry]);
 
-    if (!entry.path || !remoteBlobSet.has(entry.path)) {
+    const blob = remoteBlobs.get(entry.path);
+    if (!validAssetPath(entry.path, entry.c) || !blob ||
+        manifest.sourceRevision && (entry.blobSha !== blob.sha || entry.bytes !== blob.size)) {
       missingInTree.push({ key, path: entry.path });
     }
+    if (usedPaths.has(entry.path)) schemaErrors.push(`${key}: Path already assigned: ${entry.path}`);
+    usedPaths.add(entry.path);
 
     const builtUrl = buildSourceDownloadUrl(entry.path, manifest.baseUrl);
     try {
@@ -115,15 +108,15 @@ async function main() {
 
   if (schemaErrors.length > 0) {
     console.error('[check-links] Şema hataları:', schemaErrors.slice(0, 10));
-    process.exit(1);
+    throw new Error('Invalid manifest schema');
   }
   if (missingInTree.length > 0) {
     console.error('[check-links] Kaynak ağaçta bulunamayan girdiler:', missingInTree.slice(0, 15));
-    process.exit(1);
+    throw new Error('Invalid Git tree mappings');
   }
   if (encodeErrors.length > 0) {
     console.error('[check-links] URL Encode hataları:', encodeErrors.slice(0, 15));
-    process.exit(1);
+    throw new Error('Invalid generated download URL');
   }
 
   // 3. 20 rastgele (veya --new-only ile yeni eklenen) girdi için gerçek HEAD isteği
@@ -144,18 +137,32 @@ async function main() {
     }
   }
 
-  const sampled = pickRandomSample(candidates, sampleSize);
-  console.log(`[check-links] ${sampled.length} örnek girdi için HTTP HEAD kontrolü yapılıyor (eşzamanlılık: 5)...`);
+  const byCollection = [...new Set(activeEntries.map(([, entry]) => entry.c))];
+  const samplePool = download ? activeEntries.filter(([, entry]) => entry.bytes <= 35 * 1024 ** 2) : activeEntries;
+  const first = byCollection.flatMap(collection => pickRandomSample(
+    samplePool.filter(([, entry]) => entry.c === collection), download ? 2 : 1)).slice(0, sampleSize);
+  const selected = new Set(first.map(([key]) => key));
+  const remaining = (download ? samplePool : candidates).filter(([key]) => !selected.has(key));
+  const sampled = [...first, ...pickRandomSample(remaining, sampleSize - first.length)];
+  if (download && byCollection.some(collection => !sampled.some(([, entry]) => entry.c === collection))) {
+    throw new Error('Missing representative download sample');
+  }
+  console.log(`[check-links] ${sampled.length} örnek için ${download ? 'GET + paket checksum' : 'HEAD'} doğrulaması.`);
 
   const brokenLinks = [];
-  const concurrency = 5;
+  const concurrency = download ? 2 : 5;
   for (let i = 0; i < sampled.length; i += concurrency) {
     const batch = sampled.slice(i, i + concurrency);
     const results = await Promise.all(
       batch.map(async ([key, entry]) => {
         const url = buildSourceDownloadUrl(entry.path, manifest.baseUrl);
-        const res = await headWithRetry(url);
-        return { key, path: entry.path, url, ...res };
+        if (download) {
+          await downloadVerifiedPackage(manifest.baseUrl, entry);
+          console.log(`[check-links] ${key} ${entry.path} (${entry.bytes} bytes, checksum OK)`);
+          return { key, path: entry.path, url, ok: true, status: 200 };
+        }
+        const res = await fetchWithRetry(url, { method: 'HEAD' });
+        return { key, path: entry.path, url, ok: res.ok, status: res.status };
       })
     );
     for (const r of results) {
@@ -167,13 +174,16 @@ async function main() {
 
   if (brokenLinks.length > 0) {
     console.error(`[check-links] HATA: ${brokenLinks.length}/${sampled.length} HEAD isteği başarısız oldu:`, brokenLinks);
-    process.exit(1);
+    throw new Error('Broken sampled download links');
   }
 
-  console.log(`[check-links] BAŞARILI: ${sampled.length}/${sampled.length} örnek HEAD isteği HTTP 200 döndü. Kırık link yok!`);
+  console.log(`[check-links] BAŞARILI: ${sampled.length}/${sampled.length} örnek doğrulandı.`);
+  return { active: activeEntries.length, sampled: sampled.length };
 }
 
-main().catch(err => {
-  console.error('[check-links] HATA:', err.message);
-  process.exit(1);
-});
+if (process.argv[1]?.endsWith('check-links.mjs')) {
+  checkLinks(parseArgs(process.argv.slice(2))).catch(err => {
+    console.error('[check-links] HATA:', err.message);
+    process.exitCode = 1;
+  });
+}
