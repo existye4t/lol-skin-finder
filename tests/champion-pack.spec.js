@@ -676,6 +676,9 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await expect(page.locator('#modal-collection-badge')).toBeVisible();
     await expect(page.locator('#modal-collection-badge')).toHaveClass(/skin-badge-pbe/);
     await expect(page.locator('#modal-pbe-warning')).toBeVisible();
+    if (pbe.image.includes('raw.communitydragon.org/pbe/')) {
+      await expect(page.locator('#modal-image-sharp')).toHaveAttribute('src', pbe.image);
+    }
     const pbeHref = await page.locator('#download-list .download-item[href]').first().getAttribute('href');
     expectSourceUrl(pbeHref, 'PBE/');
     expect(decodeURIComponent(pbeHref.slice(manifest.baseUrl.length))).toBe(manifest.entries[`pbe:${pbe.id}`].path);
