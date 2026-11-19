@@ -34,7 +34,9 @@ export async function fetchWithRetry(url, { method = 'GET', github = false, requ
     const delay = Math.max(500 * 2 ** attempt, Number.isFinite(retryDelay) ? retryDelay : 0);
     await response.body?.cancel();
     if (attempt === 2 || delay > 30_000 || (!rateLimited && response.status < 500)) {
-      throw new Error(`HTTP ${response.status} for ${url}`);
+      const error = new Error(`HTTP ${response.status} for ${url}`);
+      error.status = response.status;
+      throw error;
     }
     await wait(delay);
   }
@@ -66,16 +68,47 @@ export async function sourceSnapshot(revision) {
   return { revision, baseUrl, index: (file) => fetchJson(baseUrl + file) };
 }
 
+export async function readSourceDirectories(directories, readTree, onSplit = () => {}) {
+  const entries = [];
+  let remaining = directories;
+  while (remaining.length) {
+    const next = [];
+    for (let offset = 0; offset < remaining.length; offset += 6) {
+      const results = await Promise.all(remaining.slice(offset, offset + 6).map(async ({ path, sha }) => {
+        let recursive;
+        try {
+          recursive = await readTree(sha, true);
+        } catch (error) {
+          if (!(error.status >= 500 && error.status < 600)) throw error;
+        }
+        const split = !recursive || recursive.truncated === true;
+        if (split) onSplit(path);
+        const tree = requireTree(split ? await readTree(sha, false) : recursive, path)
+          .map(node => ({ ...node, path: `${path}/${node.path}` }));
+        return { tree, split };
+      }));
+      for (const { tree, split } of results) {
+        entries.push(...tree);
+        if (split) next.push(...tree.filter(node => node.type === 'tree'));
+      }
+    }
+    remaining = next;
+  }
+  return entries;
+}
+
 export async function fetchSourceTree(revision) {
   const snapshot = await sourceSnapshot(revision);
   const root = requireTree(await fetchJson(`${api}/git/trees/${snapshot.revision}`, true), snapshot.revision);
-  const subtrees = await Promise.all(directories.map(async directory => {
+  const targets = directories.map(directory => {
     const node = root.find(item => item.type === 'tree' && item.path === directory);
     if (!revisionPattern.test(node?.sha)) throw new Error(`Missing upstream directory: ${directory}`);
-    const tree = requireTree(await fetchJson(`${api}/git/trees/${node.sha}?recursive=1`, true), directory);
-    return tree.map(item => ({ ...item, path: `${directory}/${item.path}` }));
-  }));
-  return [...root, ...subtrees.flat()];
+    return node;
+  });
+  const subtrees = await readSourceDirectories(targets,
+    (sha, recursive) => fetchJson(`${api}/git/trees/${sha}${recursive ? '?recursive=1' : ''}`, true),
+    directory => console.warn(`[sync-source] Splitting upstream tree: ${directory}`));
+  return [...root, ...subtrees];
 }
 
 export async function latestDataDragonVersion() {
