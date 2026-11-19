@@ -6,11 +6,28 @@ import { verifyPackageBytes, verifyRainbowIdentity } from '../scripts/fantome-pa
 import { indexedDownloads } from '../scripts/prepare-fantome.mjs';
 import { reconcileDownloads } from '../scripts/reconcile-downloads.mjs';
 import { fetchWithRetry, readSourceDirectories, requireTree } from '../scripts/sync-source.mjs';
+import { getChromaVisuals } from '../scripts/update-skins.mjs';
 import { catalogIdentityErrors } from '../scripts/verify-collections.mjs';
 
 const first = { c: 'skins', id: 1001, champ: 'Annie', type: 'base', name: 'Fixture', path: 'skins/Annie/Fixture.fantome' };
 const second = { ...first, id: 1002, path: 'skins/Annie/New.fantome' };
 const blob = (path, sha = 'a'.repeat(40)) => ({ type: 'blob', path, sha, size: 100 });
+
+test('chroma previews use exact metadata on Live and PBE and degrade without artwork', () => {
+  const catalogRoot = 'https://raw.communitydragon.org';
+  const directory = '/plugins/rcp-be-lol-game-data/global/default/assets/characters/ahri/skins/skin60';
+  const chromaPath = '/lol-game-data/assets/ASSETS/Characters/Ahri/Skins/Skin60/ChromaPreview.ChromaAssetMigration.png';
+  assert.deepEqual(getChromaVisuals({ colors: ['invalid'] }, { chromaPath, colors: ['#2E38C4'] }, 'latest'), {
+    imageFallback: `${catalogRoot}/latest${directory}/chromapreview.chromaassetmigration.png`,
+    color: '#2E38C4'
+  });
+  assert.deepEqual(getChromaVisuals({ tilePath: chromaPath }, undefined, 'pbe'), {
+    imageFallback: `${catalogRoot}/pbe${directory}/chromapreview.chromaassetmigration.png`
+  });
+  assert.deepEqual(getChromaVisuals({ splashPath: '/parent-splash.jpg', colors: ['#2E38C4'] }, null, 'pbe'), {
+    imageFallback: '', color: '#2E38C4'
+  });
+});
 
 test('new and replaced files use the current indexed path and object ID', () => {
   const old = reconcileDownloads([first], [blob(first.path)]).entries;

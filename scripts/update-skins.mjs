@@ -38,6 +38,15 @@ function imageUrlFromSplashPath(splashPath, branch = 'latest') {
   return `https://raw.communitydragon.org/${branch}/plugins/rcp-be-lol-game-data/global/default/${normalizedPath}`;
 }
 
+export function getChromaVisuals(localized, fallback, branch) {
+  const imageFallback = imageUrlFromSplashPath(
+    localized?.chromaPath || fallback?.chromaPath || localized?.tilePath || fallback?.tilePath,
+    branch
+  );
+  const color = [localized?.colors?.[0], fallback?.colors?.[0]].find(value => /^#[\da-f]{6}$/i.test(value));
+  return { imageFallback, ...(color ? { color } : {}) };
+}
+
 function formatChromaDisplayName(baseSkinName, chromaRawName) {
   const base = String(baseSkinName || '').trim();
   const raw = String(chromaRawName || '').trim();
@@ -244,10 +253,15 @@ export async function updateSkins({ snapshot } = {}) {
     }
   }
 
-  const parentSkinById = new Map();
+  const liveChromasById = new Map();
   Object.values({ ...enSkins, ...trSkins }).forEach(skin => {
-    skin.chromas?.forEach(chroma => {
-      parentSkinById.set(String(chroma.id), String(skin.id));
+    const parentId = String(skin.id);
+    const englishChromas = new Map((enSkins[parentId]?.chromas || []).map(chroma => [String(chroma.id), chroma]));
+    const localizedChromas = new Map(englishChromas);
+    for (const chroma of skin.chromas || []) localizedChromas.set(String(chroma.id), chroma);
+    localizedChromas.forEach(chroma => {
+      const id = String(chroma.id);
+      liveChromasById.set(id, { parentId, visuals: getChromaVisuals(chroma, englishChromas.get(id), 'latest') });
     });
   });
 
@@ -285,7 +299,7 @@ export async function updateSkins({ snapshot } = {}) {
       const id = `${champion.key}${String(skin.num).padStart(3, '0')}`;
       const trSkin = trSkins[id];
       const enSkin = enSkins[id];
-      const parentId = parentSkinById.get(id);
+      const chroma = liveChromasById.get(id);
 
       const baseNameTr = trSkin?.name || (skin.name === 'default' ? localized.name : skin.name);
       const baseNameEn =
@@ -309,8 +323,9 @@ export async function updateSkins({ snapshot } = {}) {
         championEn: championEn?.name || champion.name,
         championId: champion.id,
         image: `${DDRAGON_BASE}/cdn/img/champion/splash/${champion.id}_${skin.num}.jpg`,
-        imageFallback: imageUrlFromSplashPath(trSkin?.splashPath || enSkin?.splashPath, 'latest'),
-        ...(parentId ? { parentSkinId: parentId } : {}),
+        ...(chroma
+          ? { ...chroma.visuals, parentSkinId: chroma.parentId }
+          : { imageFallback: imageUrlFromSplashPath(trSkin?.splashPath || enSkin?.splashPath, 'latest') }),
         ...(liveFormParents.has(id) ? { formOf: liveFormParents.get(id) } : {})
       };
 
@@ -370,7 +385,7 @@ export async function updateSkins({ snapshot } = {}) {
           championEn: championEn?.name || champion.name,
           championId: champion.id,
           image: `${DDRAGON_BASE}/cdn/img/champion/splash/${champion.id}_${chNum}.jpg`,
-          imageFallback: imageUrlFromSplashPath(ch.chromaPath || chEn?.chromaPath, 'latest'),
+          ...getChromaVisuals(ch, chEn, 'latest'),
           parentSkinId: id
         };
 
@@ -483,10 +498,7 @@ export async function updateSkins({ snapshot } = {}) {
       const fullChromaTr = formatChromaDisplayName(baseNameTr, chTrObj?.name || pbeEntry.name);
       const fullChromaEn = formatChromaDisplayName(baseNameEn, chEnObj?.name || pbeEntry.name);
 
-      const chromaPreview = imageUrlFromSplashPath(
-        chTrObj?.chromaPath || chEnObj?.chromaPath || cdParentEn?.splashPath,
-        'pbe'
-      );
+      const visuals = getChromaVisuals(chTrObj, chEnObj, 'pbe');
 
       allSkins.push({
         id: idStr,
@@ -498,8 +510,8 @@ export async function updateSkins({ snapshot } = {}) {
         nameEn: fullChromaEn,
         championEn: champ.nameEn,
         championId: champ.id,
-        image: chromaPreview || `${DDRAGON_BASE}/cdn/img/champion/splash/${champ.id}_${skinNum}.jpg`,
-        imageFallback: chromaPreview,
+        image: visuals.imageFallback || `${DDRAGON_BASE}/cdn/img/champion/splash/${champ.id}_${skinNum}.jpg`,
+        ...visuals,
         parentSkinId: parentIdStr,
         isPbe: true
       });

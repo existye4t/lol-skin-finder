@@ -718,6 +718,49 @@ test.describe('Champion Pack — Preview (production build)', () => {
     console.log('  Collection tabs, PBE badge, Rainbow modal link and Classic tab verified ✓');
   });
 
+  test('Downloads show the exact Ahri and PBE chroma previews with a swatch on image failure', async ({ page }) => {
+    const catalog = readSkins();
+    const ahriChroma = catalog.find(skin => String(skin.id) === '103060');
+    const pbeParents = new Set(catalog.filter(skin => skin.isPbe && !skin.parentSkinId).map(skin => skin.id));
+    const pbeChroma = catalog.find(skin => skin.isPbe && pbeParents.has(skin.parentSkinId) &&
+      skin.imageFallback?.includes('/pbe/'));
+    expect(ahriChroma.imageFallback).toMatch(/\/latest\/.+\/skin60\/chromapreview\./);
+    const thumbnail = '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="blue"/></svg>';
+    await page.route(ahriChroma.imageFallback, route => route.fulfill({ contentType: 'image/svg+xml', body: thumbnail }));
+    if (pbeChroma) await page.route(pbeChroma.imageFallback, route => route.fulfill({ contentType: 'image/svg+xml', body: thumbnail }));
+    await page.goto(PREVIEW_URL, { waitUntil: 'domcontentloaded' });
+    const previewInRow = (id) => page.locator('#download-list .chroma-card')
+      .filter({ has: page.getByText(String(id), { exact: true }) })
+      .locator('.chroma-preview');
+    await openModal(page, '103015');
+    const ahriPreview = previewInRow(ahriChroma.id);
+    const image = ahriPreview.locator('img');
+    await expect(image).toHaveAttribute('src', ahriChroma.imageFallback);
+    await expect.poll(() => image.evaluate(el => el.naturalWidth)).toBe(60);
+    await expect(ahriPreview).toHaveClass(/is-chroma/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#skin-modal')).toBeHidden();
+
+    if (pbeChroma) {
+      await page.getByRole('tab', { name: 'PBE', exact: true }).click();
+      await openModal(page, pbeChroma.parentSkinId);
+      const preview = previewInRow(pbeChroma.id).locator('img');
+      await expect(preview).toHaveAttribute('src', pbeChroma.imageFallback);
+      await expect.poll(() => preview.evaluate(el => el.naturalWidth)).toBe(60);
+      await page.keyboard.press('Escape');
+      await expect(page.locator('#skin-modal')).toBeHidden();
+    }
+
+    await page.unroute(ahriChroma.imageFallback);
+    await page.route(ahriChroma.imageFallback, route => route.fulfill({ status: 404 }));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await openModal(page, '103015');
+    await ahriPreview.scrollIntoViewIfNeeded();
+    await expect(ahriPreview).toBeVisible();
+    await expect(image).toHaveCount(0);
+    expect(await ahriPreview.evaluate(el => el.style.getPropertyValue('--preview-color'))).toBe(ahriChroma.color);
+  });
+
   test('Promoted PBE skin uses Live and unavailable forms retain disabled rows', async ({ page }) => {
     await page.goto(PREVIEW_URL);
     await waitForData(page);

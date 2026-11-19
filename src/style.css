@@ -2250,23 +2250,26 @@ dialog::backdrop {
 }
 
 .download-dot.chroma-preview {
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  min-height: 50px;
-  border-radius: 50%;
+  display: block;
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  border-radius: 12px;
   flex-shrink: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: #2a3447;
+  background: color-mix(in srgb, var(--preview-color, var(--text-primary)) 21%, var(--bg));
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  transition: transform 170ms var(--ease-out);
 }
 
-.download-item.chroma-card.unavailable .download-dot {
-  opacity: 0.35;
+.download-dot.chroma-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.download-dot.chroma-preview.is-chroma img {
+  object-fit: contain;
 }
 
 .chroma-name {
