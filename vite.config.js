@@ -923,7 +923,8 @@ export default defineConfig(({ mode }) => {
     ],
 
     build: {
-      rollupOptions: {
+      target: ['chrome107', 'edge107', 'firefox104', 'safari16'],
+      rolldownOptions: {
         input: {
           main: resolve(
             root,
