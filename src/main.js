@@ -304,8 +304,8 @@ const TRANSLATIONS = {
   },
 
   dataLoadFailedHint: {
-    tr: 'data/skins.json dosyasının mevcut olduğundan ve geçerli JSON içerdiğinden emin olun.',
-    en: 'Make sure data/skins.json exists and contains valid JSON.'
+    tr: 'Bağlantını kontrol edip tekrar dene.',
+    en: 'Check your connection and try again.'
   },
 
   discordEyebrow: {
@@ -651,6 +651,11 @@ const TRANSLATIONS = {
   metaRainbow: {
     tr: '{count} Rainbow paketi • Yama {version}',
     en: '{count} Rainbow packages • Patch {version}'
+  },
+
+  metaPbe: {
+    tr: '{count} PBE skin grubu • Yama {version}',
+    en: '{count} PBE skin groups • Patch {version}'
   },
 
   metaClassic: {
@@ -1152,6 +1157,9 @@ const results = document.querySelector('#results');
 const empty = document.querySelector('#empty');
 const meta = document.querySelector('#meta');
 const title = document.querySelector('#result-title');
+const collectionTabs = document.querySelector('#collection-tabs');
+const collectionPanel = document.querySelector('#catalog-panel');
+const collectionRetry = document.querySelector('#collection-retry');
 const template = document.querySelector('#skin-template');
 const popularSection = document.querySelector('#popular-section');
 const popularGrid = document.querySelector('#popular-grid');
@@ -1389,9 +1397,15 @@ const DEFAULT_RAW_BASE_URL =
 let manifestData = null;
 let useLegacyLocalFantome = false;
 let activeCollection = 'skins';
+let collectionState = 'idle';
+let collectionRequest = 0;
+let skeletonTimer;
+let collectionAnimation;
+let manifestWarmupScheduled = false;
 
 const collectionStore = {
   skins: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null },
+  pbe: { skins: [], groups: [], version: '', loaded: false },
   rainbow: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null },
   classic: { skins: [], groups: [], version: '', loaded: false, loadingPromise: null }
 };
@@ -1547,7 +1561,11 @@ function renderSearchExamples() {
   const container = document.getElementById('search-examples');
   if (!container) return;
 
-  const list = SEARCH_EXAMPLES_DATA[activeCollection] || SEARCH_EXAMPLES_DATA.skins;
+  const list = activeCollection === 'pbe'
+    ? collectionStore.pbe.groups.slice(0, 3).map(({ primary }) => ({
+      qTr: primary.id, qEn: primary.id, lTr: getLocalizedSkinName(primary, 'tr'), lEn: getLocalizedSkinName(primary, 'en')
+    }))
+    : SEARCH_EXAMPLES_DATA[activeCollection];
   container.replaceChildren();
 
   list.forEach(item => {
@@ -1576,7 +1594,7 @@ async function navigateToCollectionSkin(targetCollection, targetSkinId, skinFall
   if (!isModalCurrentlyOpen) {
     closeSkinModal(true);
   }
-  await switchCollection(targetCollection);
+  if (!await switchCollection(targetCollection)) return;
 
   const store = collectionStore[targetCollection];
   let targetGroup = null;
@@ -1614,9 +1632,8 @@ async function navigateToCollectionSkin(targetCollection, targetSkinId, skinFall
 }
 
 function updateCollectionMeta() {
-  if (!meta) return;
+  if (!meta || collectionState !== 'ready') return;
   const store = collectionStore[activeCollection];
-  if (!store?.groups?.length) return;
 
   const query = normalize(search?.value || '');
   const favoriteActive = isFavoriteFilterActive();
@@ -1628,12 +1645,7 @@ function updateCollectionMeta() {
     manifestData?.patch ||
     (currentLang === 'en' ? 'Unknown' : 'Bilinmiyor');
 
-  const metaKey =
-    activeCollection === 'rainbow'
-      ? 'metaRainbow'
-      : activeCollection === 'classic'
-        ? 'metaClassic'
-        : 'metaVersion';
+  const metaKey = { skins: 'metaVersion', pbe: 'metaPbe', rainbow: 'metaRainbow', classic: 'metaClassic' }[activeCollection];
 
   meta.textContent = t(metaKey, {
     count: formatNumber(store.groups.length),
@@ -2742,7 +2754,7 @@ function createSkinCard(group) {
 
   if (idElement) {
     if (
-      (skin.collection === 'rainbow' || activeCollection === 'rainbow') &&
+      skin.collection === 'rainbow' &&
       skin.cycleCount
     ) {
       idElement.textContent = t('rainbowCycleInfo', {
@@ -2765,13 +2777,13 @@ function createSkinCard(group) {
     badge.dataset.i18n = 'badgePbe';
     badge.textContent = t('badgePbe');
     article.appendChild(badge);
-  } else if (skin.collection === 'rainbow' || activeCollection === 'rainbow') {
+  } else if (skin.collection === 'rainbow') {
     const badge = document.createElement('span');
     badge.className = 'skin-badge skin-badge-rainbow lang-switch-text';
     badge.dataset.i18n = 'badgeRainbow';
     badge.textContent = t('badgeRainbow');
     article.appendChild(badge);
-  } else if (skin.collection === 'classic' || activeCollection === 'classic') {
+  } else if (skin.collection === 'classic') {
     const badge = document.createElement('span');
     badge.className = 'skin-badge skin-badge-classic lang-switch-text';
     badge.dataset.i18n = 'badgeClassic';
@@ -2938,13 +2950,19 @@ function initScrollRevealAnimation() {
 
             scrollRevealObserver.unobserve(el);
 
-            const delay =
-              staggerIndex *
-              SCROLL_REVEAL_STAGGER_MS;
+            const catalogCard = el.parentElement === results;
+            const delay = catalogCard
+              ? Math.min(staggerIndex, 4) * 14
+              : staggerIndex * SCROLL_REVEAL_STAGGER_MS;
 
             staggerIndex += 1;
 
             setTimeout(() => {
+              if (!el.isConnected) return;
+              if (isReducedMotion()) {
+                el.classList.add('visible');
+                return;
+              }
               el.classList.add(
                 'scroll-reveal-animating'
               );
@@ -2954,7 +2972,7 @@ function initScrollRevealAnimation() {
                 el.classList.remove(
                   'scroll-reveal-animating'
                 );
-              }, SCROLL_REVEAL_DURATION_MS);
+              }, catalogCard ? 170 : SCROLL_REVEAL_DURATION_MS);
             }, delay);
           });
         },
@@ -3106,13 +3124,14 @@ function renderPopular() {
     return;
   }
 
-  if (!skinGroups.length) {
+  const popularSource = collectionStore.skins.groups;
+  if (!popularSource.length) {
     return;
   }
 
   const groupsById = new Map();
 
-  skinGroups.forEach((group) => {
+  popularSource.forEach((group) => {
     group.skins.forEach((skin) => {
       groupsById.set(String(skin.id), group);
     });
@@ -3141,7 +3160,6 @@ function renderPopular() {
     .filter(Boolean);
 
   popularGrid.replaceChildren(...cards);
-  popularSection.hidden = false;
   popularRendered = true;
 
   // Yeni render edilen kartlara scroll reveal + tilt uygula
@@ -3169,6 +3187,11 @@ function render() {
     !empty ||
     !title
   ) {
+    return;
+  }
+
+  if (collectionState !== 'ready') {
+    renderCollectionStatus();
     return;
   }
 
@@ -3225,15 +3248,6 @@ function render() {
       );
     }
 
-    // Koleksiyon izolasyonu: Sadece seçili aktif koleksiyona ait girdiler
-    found = found.filter((group) => {
-      const primary = group.primary;
-      if (activeCollection === 'skins') {
-        return !primary.collection || primary.collection === 'skins';
-      }
-      return primary.collection === activeCollection;
-    });
-
     // Cache the full sorted/filtered results
     setCachedSearchResult(cacheKey, found);
   }
@@ -3287,24 +3301,20 @@ function render() {
   renderState.batchSize = maxVisible <= 30 ? maxVisible : 30;
 
   // Clear previous results and start incremental rendering
-  results.replaceChildren();
+  clearResultCards();
   empty.hidden = found.length !== 0;
   results.hidden = found.length === 0;
 
   // Render first batch
   renderNextBatch();
 
-  // Set up intersection observer for progressive loading
-  setupRenderObserver();
+  if (renderState.renderedCount < found.length) setupRenderObserver();
 
   /* ---------------------------------------
      Meta
   --------------------------------------- */
 
-  if (
-    meta &&
-    skinGroups.length
-  ) {
+  if (meta) {
     if (
       query ||
       favoriteActive
@@ -3421,11 +3431,6 @@ function renderNextBatch() {
 }
 
 function setupRenderObserver() {
-  // Clean up previous observer
-  if (renderState.observer) {
-    renderState.observer.disconnect();
-  }
-
   // Create sentinel element for intersection observer
   let sentinel = results.querySelector('.render-sentinel');
   if (!sentinel) {
@@ -3435,9 +3440,10 @@ function setupRenderObserver() {
     results.appendChild(sentinel);
   }
 
-  renderState.observer = new IntersectionObserver(
+  const observer = new IntersectionObserver(
     (entries) => {
-      if (entries[0].isIntersecting && renderState.renderedCount < renderState.allGroups.length) {
+      if (renderState.observer === observer && entries[0].isIntersecting &&
+          renderState.renderedCount < renderState.allGroups.length) {
         renderNextBatch();
       }
     },
@@ -3447,7 +3453,17 @@ function setupRenderObserver() {
     }
   );
 
-  renderState.observer.observe(sentinel);
+  renderState.observer = observer;
+  observer.observe(sentinel);
+}
+
+function clearResultCards() {
+  renderState.observer?.disconnect();
+  renderState.observer = null;
+  if (scrollRevealObserver) {
+    results.querySelectorAll('.scroll-reveal:not(.visible)').forEach(card => scrollRevealObserver.unobserve(card));
+  }
+  results.replaceChildren();
 }
 
 /* =========================================
@@ -3646,13 +3662,14 @@ function savePackChromasPref(val) {
  * @returns {Promise<{skipped:number}>}
  */
 async function downloadChampionPack(championKey, { includeChromas, onProgress } = {}) {
+  const catalog = skins;
   await ensureManifestLoaded();
   if (!manifestData) {
     console.warn('Manifest yüklenemediği için champion pack indirilemiyor.');
     throw new Error(t('manifestLoadError'));
   }
   // 1) Şampiyona ait, dosyası olan skinleri topla
-  let championSkins = skins.filter((skin) => {
+  const championSkins = catalog.filter((skin) => {
     const keys = skin._championKeys;
     const matches = keys
       ? keys.some((k) => k === championKey)
@@ -3932,6 +3949,10 @@ function updatePackToolbarBtn() {
   const btn     = document.getElementById('champion-pack-toolbar-btn');
   const cbx     = document.getElementById('champion-pack-toolbar-chroma-checkbox');
   if (!wrapper || !btn) return;
+  if (collectionState !== 'ready') {
+    wrapper.hidden = true;
+    return;
+  }
 
   // Toolbar checkbox'ı packIncludeChromas ile senkronize et (ilk render)
   if (cbx && cbx._initialized !== true) {
@@ -3976,12 +3997,13 @@ function updatePackToolbarBtn() {
   }
 
   // Şampiyon yoksa veya değiştiyse: sıfırla ve gizle
-  if (!singleChampionKey || singleChampionKey !== btn._packChampKey) {
+  if (!singleChampionKey || singleChampionKey !== btn._packChampKey || activeCollection !== btn._packCollection) {
     if (btn.dataset.packState !== 'progress') {
       btn.dataset.packState = '';
       btn.disabled = false;
       btn.textContent = '';
       btn._packChampKey = null;
+      btn._packCollection = activeCollection;
       btn.onclick = null;
     }
     if (!singleChampionKey) {
@@ -6070,9 +6092,7 @@ function addFantomeFile(value) {
    SKIN GRUPLARINI OLUŞTUR
 ========================================= */
 
-function buildSkinGroups(
-  skinList
-) {
+function buildSkinGroups(skinList, groupByIdentity = false) {
   const groups = new Map();
   const skinById = new Map(
     skinList.map((skin) => [String(skin.id), skin])
@@ -6095,10 +6115,9 @@ function buildSkinGroups(
      * isimlerini aynı grupta tut.
      */
 
-    const key =
-      `${skin.championId ?? skin.champion}:${normalize(
-        baseName
-      )}`;
+    const key = groupByIdentity
+      ? String(skin.parentSkinId || skin.id)
+      : `${skin.championId ?? skin.champion}:${normalize(baseName)}`;
 
     if (!groups.has(key)) {
       groups.set(
@@ -6120,7 +6139,7 @@ function buildSkinGroups(
      * primary olarak kullanılır.
      */
 
-    if (!skin.parentSkinId && getLocalizedSkinName(skin, 'tr').trim() === baseName) {
+    if (!skin.parentSkinId && (groupByIdentity || getLocalizedSkinName(skin, 'tr').trim() === baseName)) {
       group.primary = skin;
     }
   });
@@ -6186,9 +6205,6 @@ function renderSkeletonCards(container, count) {
     return;
   }
 
-  /* Once varsa eski iskeletleri temizle */
-  clearSkeletonCards(container);
-
   const fragment =
     document.createDocumentFragment();
 
@@ -6229,264 +6245,182 @@ function renderSkeletonCards(container, count) {
   container.appendChild(fragment);
 }
 
-function clearSkeletonCards(container) {
-  if (!container) {
-    return;
-  }
+const collectionFiles = {
+  skins: 'data/skins.json',
+  rainbow: 'data/rainbow.json',
+  classic: 'data/classic.json'
+};
 
-  container
-    .querySelectorAll('.skeleton-card')
-    .forEach((card) => card.remove());
-}
+function ensureCollectionLoaded(collection) {
+  const sourceCollection = collection === 'pbe' ? 'skins' : collection;
+  const store = collectionStore[sourceCollection];
+  if (store.loaded) return Promise.resolve();
+  if (store.loadingPromise) return store.loadingPromise;
 
-async function ensureCollectionLoaded(collection) {
-  const store = collectionStore[collection];
-  if (!store) return;
-  if (store.loaded) return;
-  if (store.loadingPromise) {
-    await store.loadingPromise;
-    return;
-  }
-
-  const fileMap = {
-    skins: 'data/skins.json',
-    rainbow: 'data/rainbow.json',
-    classic: 'data/classic.json'
-  };
-
-  const targetPath = fileMap[collection];
-  if (!targetPath) return;
-
+  const targetPath = collectionFiles[sourceCollection];
   store.loadingPromise = (async () => {
     const response = await fetch(assetUrl(targetPath), { cache: 'no-cache' });
     if (!response.ok) {
-      throw new Error(`${targetPath} yüklenemedi (${response.status})`);
+      throw new Error(`${targetPath} could not be loaded (${response.status})`);
     }
     const data = await response.json();
-    const rawItems = Array.isArray(data?.skins) ? data.skins : [];
-    const normalizedItems = rawItems.map(normalizeSkin).filter(Boolean);
-    store.skins = normalizedItems;
-    store.groups = buildSkinGroups(normalizedItems);
-    store.version = data?.version || collectionStore.skins.version || '';
-    store.loaded = true;
-  })();
+    if (!Array.isArray(data?.skins)) {
+      throw new Error(`${targetPath} does not contain a skin list`);
+    }
 
-  try {
-    await store.loadingPromise;
-  } finally {
+    const items = data.skins.map(normalizeSkin).filter(Boolean).filter((item) =>
+      (item.collection || 'skins') === sourceCollection
+    );
+    const groups = buildSkinGroups(items);
+    if (sourceCollection === 'skins') {
+      if (!items.length) throw new Error(`${targetPath} has no valid skins`);
+      const pbeItems = items.filter((item) => item.isPbe);
+      Object.assign(collectionStore.pbe, {
+        skins: pbeItems,
+        groups: buildSkinGroups(pbeItems, true),
+        version: data.pbePatch || data.version || '',
+        loaded: true
+      });
+    }
+
+    Object.assign(store, { skins: items, groups, version: data.version || '', loaded: true });
+    if (sourceCollection === 'skins') {
+      track('skin_data_loaded', { skin_count: items.length, group_count: groups.length });
+    }
+  })().finally(() => {
     store.loadingPromise = null;
-  }
+  });
+  return store.loadingPromise;
 }
 
-async function switchCollection(targetCollection) {
-  if (!['skins', 'rainbow', 'classic'].includes(targetCollection)) {
-    return;
+function renderCollectionStatus() {
+  const failed = collectionState === 'error';
+  meta.textContent = t(failed ? 'dataLoadFailedMeta' : 'loadingData');
+  title.textContent = t('exploreSkins');
+  empty.hidden = !failed;
+  results.hidden = failed;
+  collectionRetry.hidden = !failed;
+  collectionRetry.textContent = t('retry');
+  if (failed) {
+    empty.querySelector('h2').textContent = t('dataLoadFailedTitle');
+    empty.querySelector('p').textContent = t('dataLoadFailedHint');
   }
+  if (popularSection) popularSection.hidden = true;
+  updatePackToolbarBtn();
+}
 
-  document.querySelectorAll('.collection-tab').forEach((tab) => {
-    const isActive = tab.dataset.collection === targetCollection;
-    tab.classList.toggle('is-active', isActive);
-    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+const collectionTabButtons = [...collectionTabs.querySelectorAll('.collection-tab')];
+
+async function switchCollection(targetCollection) {
+  if (!Object.hasOwn(collectionStore, targetCollection)) return false;
+  const isCurrent = activeCollection === targetCollection;
+  if (isCurrent && collectionState === 'ready') return true;
+  if (isCurrent && collectionState === 'loading') return false;
+
+  const request = ++collectionRequest;
+  clearTimeout(skeletonTimer);
+  collectionAnimation?.cancel();
+  activeCollection = targetCollection;
+
+  collectionTabButtons.forEach((tab, index) => {
+    const selected = tab.dataset.collection === targetCollection;
+    tab.classList.toggle('is-active', selected);
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    if (selected) {
+      collectionTabs.style.setProperty('--collection-tab-index', index);
+      collectionPanel.setAttribute('aria-labelledby', tab.id);
+    }
   });
 
-  if (activeCollection === targetCollection && collectionStore[targetCollection].loaded) {
-    return;
-  }
+  const store = collectionStore[targetCollection];
+  if (!store.loaded) {
+    collectionState = 'loading';
+    skins = [];
+    skinGroups = [];
+    renderSearchExamples();
+    renderChampionFilterOptions();
+    clearResultCards();
+    results.setAttribute('aria-busy', 'true');
+    renderCollectionStatus();
+    skeletonTimer = setTimeout(() => {
+      if (request === collectionRequest) renderSkeletonCards(results, 12);
+    }, 160);
 
-  activeCollection = targetCollection;
-  renderSearchExamples();
-
-  if (!collectionStore[targetCollection].loaded) {
-    renderSkeletonCards(results, 12);
     try {
       await ensureCollectionLoaded(targetCollection);
     } catch (error) {
-      console.error(`${targetCollection} koleksiyonu yüklenemedi:`, error);
-      clearSkeletonCards(results);
-      return;
+      if (request !== collectionRequest) return false;
+      clearTimeout(skeletonTimer);
+      clearResultCards();
+      results.setAttribute('aria-busy', 'false');
+      collectionState = 'error';
+      console.warn('Catalog request failed:', error);
+      renderCollectionStatus();
+      return false;
     }
-    clearSkeletonCards(results);
   }
 
-  skins = collectionStore[targetCollection].skins;
-  skinGroups = collectionStore[targetCollection].groups;
+  if (request !== collectionRequest) return false;
+  clearTimeout(skeletonTimer);
+  results.setAttribute('aria-busy', 'false');
+  collectionState = 'ready';
+  collectionRetry.hidden = true;
+  skins = store.skins;
+  skinGroups = store.groups;
   syncFantomeFilesForCollection(targetCollection);
-  clearSearchCache();
   renderChampionFilterOptions();
   renderSearchExamples();
-  updateCollectionMeta();
+  if (collectionStore.skins.loaded && !popularRendered) renderPopular();
   render();
 
-  track('collection_change', {
-    collection: targetCollection
-  });
-}
-
-document.querySelectorAll('.collection-tab').forEach((tab) => {
-  tab.addEventListener('click', () => {
-    const target = tab.dataset.collection;
-    if (target) {
-      switchCollection(target);
-    }
-  });
-});
-
-async function loadData() {
-  if (
-    !search ||
-    !results ||
-    !empty
-  ) {
-    console.error(
-      'Gerekli HTML elementleri bulunamadı.'
-    );
-
-    return;
+  if (!isCurrent && !isReducedMotion()) {
+    const content = results.hidden ? empty : results;
+    collectionAnimation = content.animate([
+      { opacity: 0.9, transform: 'translateY(4px)' },
+      { opacity: 1, transform: 'translateY(0)' }
+    ], { duration: 170, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
   }
 
-  /* Veri cekme baslamadan once iskelet
-     kartlari goster (izole, sadece DOM'a
-     ekleme yapar) */
-  renderSkeletonCards(results, 12);
-
-  try {
-    const dataResponse = await fetch(
-      assetUrl('data/skins.json'),
-      {
-        cache: 'no-cache'
-      }
-    );
-
-    /* ---------------------------------------
-       skins.json
-    --------------------------------------- */
-
-    if (!dataResponse.ok) {
-      throw new Error(
-        `skins.json yüklenemedi (${dataResponse.status})`
-      );
-    }
-
-    const data =
-      await dataResponse.json();
-
-    /* ---------------------------------------
-       Skin listesi
-    --------------------------------------- */
-
-    const rawSkins =
-      Array.isArray(
-        data?.skins
-      )
-        ? data.skins
-        : [];
-
-    skins =
-      rawSkins
-        .map(
-          normalizeSkin
-        )
-        .filter(Boolean);
-
-    if (
-      skins.length === 0
-    ) {
-      throw new Error(
-        'skins.json içinde geçerli skin bulunamadı.'
-      );
-    }
-
-    /* ---------------------------------------
-       Gruplar & Koleksiyon deposu
-    --------------------------------------- */
-
-    skinGroups =
-      buildSkinGroups(
-        skins
-      );
-
-    collectionStore.skins.skins = skins;
-    collectionStore.skins.groups = skinGroups;
-    collectionStore.skins.version = data?.version || '';
-    collectionStore.skins.loaded = true;
-
-    syncFantomeFilesForCollection(activeCollection);
-
-    /* ---------------------------------------
-       Meta
-    --------------------------------------- */
-
-    updateCollectionMeta();
-    renderSearchExamples();
-
-    updateFavoriteCount();
-
-    /* Iskelet kartlari kaldir, gercek kartlari
-       render() baslat */
-    clearSkeletonCards(results);
-
-    renderPopular();
-    render();
-
-    // Manifest ilk açılışı bloke etmemesi için ilk çizimden sonra boşta (idle) yüklenir
+  if (!manifestWarmupScheduled) {
+    manifestWarmupScheduled = true;
     if (typeof window.requestIdleCallback === 'function') {
       window.requestIdleCallback(() => { ensureManifestLoaded(); }, { timeout: 1500 });
     } else {
       window.setTimeout(() => { ensureManifestLoaded(); }, 150);
     }
-
-    track(
-      'skin_data_loaded',
-      {
-        skin_count:
-          skins.length,
-
-        group_count:
-          skinGroups.length
-      }
-    );
-  } catch (error) {
-    console.error(
-      'Skin verileri yüklenemedi:',
-      error
-    );
-
-    /* Hata durumunda da iskeletleri temizle */
-    clearSkeletonCards(results);
-
-    if (meta) {
-      meta.textContent =
-        t('dataLoadFailedMeta');
-    }
-
-    empty.hidden = false;
-    results.hidden = true;
-
-    const emptyTitle =
-      empty.querySelector(
-        'h2'
-      );
-
-    const emptyText =
-      empty.querySelector(
-        'p'
-      );
-
-    if (emptyTitle) {
-      emptyTitle.textContent =
-        t(
-          'dataLoadFailedTitle'
-        );
-    }
-
-    if (emptyText) {
-      emptyText.textContent =
-        t(
-          'dataLoadFailedHint'
-        );
-    }
   }
+  if (!isCurrent) track('collection_change', { collection: targetCollection });
+  return true;
 }
+
+collectionTabs.addEventListener('click', (event) => {
+  const tab = event.target.closest('.collection-tab');
+  if (tab) switchCollection(tab.dataset.collection);
+});
+
+collectionTabs.addEventListener('keydown', (event) => {
+  const index = collectionTabButtons.indexOf(event.target);
+  if (index === -1) return;
+  const last = collectionTabButtons.length - 1;
+  const next = {
+    ArrowLeft: index === 0 ? last : index - 1,
+    ArrowRight: index === last ? 0 : index + 1,
+    Home: 0,
+    End: last
+  }[event.key];
+  if (next === undefined) return;
+
+  event.preventDefault();
+  const tab = collectionTabButtons[next];
+  tab.focus();
+  switchCollection(tab.dataset.collection);
+});
+
+collectionRetry.addEventListener('click', () => {
+  collectionTabButtons.find((tab) => tab.dataset.collection === activeCollection)?.focus();
+  switchCollection(activeCollection);
+});
 
 async function loadDiscordProfile() {
   try {
@@ -6986,9 +6920,7 @@ updateFavoriteCount();
 
 setFavoriteFilter(false);
 
-loadData().catch((error) => {
-  console.error('loadData failed:', error);
-});
+switchCollection('skins');
 
 loadDiscordProfile().catch((error) => {
   console.error('loadDiscordProfile failed:', error);
