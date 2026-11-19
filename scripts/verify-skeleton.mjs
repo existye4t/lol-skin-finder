@@ -50,16 +50,16 @@ for (let i = 1; i <= 3; i++) {
   const skeletonVisible = await page.locator('#results .skeleton-card').count();
   check('Yavas agda iskelet kartlar gorunuyor', skeletonVisible >= 8, skeletonVisible + ' adet');
 
-  // shimmer animasyonu gercekten calisiyor mu? background-position zamanla degismeli
+  // The shimmer overlay's transform should change over time.
   const probe = async () =>
     page.locator('#results .skeleton-shimmer').first().evaluate(
-      (el) => getComputedStyle(el).backgroundPosition
+      (el) => getComputedStyle(el, '::after').transform
     );
   if (skeletonVisible > 0) {
     const p1 = await probe();
     await page.waitForTimeout(400);
     const p2 = await probe();
-    check('Shimmer animasyonu calisiyor (background-position degisiyor)', p1 !== p2, `${p1} -> ${p2}`);
+    check('Shimmer animasyonu calisiyor (transform degisiyor)', p1 !== p2, `${p1} -> ${p2}`);
   }
 
   // Veri gelince iskeletler kalkmali, gercek kartlar gelmeli

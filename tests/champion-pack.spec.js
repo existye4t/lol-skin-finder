@@ -658,13 +658,13 @@ test.describe('Champion Pack — Preview (production build)', () => {
     console.log('  Screenshot saved: test-results/pack-neon.png');
   });
 
-  test('Collection tabs (Skinler · Rainbow · Classic), PBE badge and Rainbow modal link work', async ({ page }) => {
+  test('Collection tabs (Skinler · PBE · Rainbow · Classic), PBE badge and Rainbow modal link work', async ({ page }) => {
     await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
     await waitForData(page);
 
     // 1. Verify collection tabs exist and "skins" is active by default
     const tabs = page.locator('#collection-tabs .collection-tab');
-    await expect(tabs).toHaveCount(3);
+    await expect(tabs).toHaveText(['Skinler', 'PBE', 'Rainbow', 'Classic']);
     await expect(page.locator('.collection-tab[data-collection="skins"]')).toHaveClass(/is-active/);
 
     // Select a currently indexed base so the browser test follows the PBE rotation.
@@ -684,6 +684,13 @@ test.describe('Champion Pack — Preview (production build)', () => {
     expect(decodeURIComponent(pbeHref.slice(manifest.baseUrl.length))).toBe(manifest.entries[`pbe:${pbe.id}`].path);
     await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+
+    await tabs.nth(1).click();
+    await openModal(page, pbe.id);
+    await expect(page.locator('#download-list .download-item[href]').first()).toHaveAttribute('href', pbeHref);
+    await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
+    await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
+    await tabs.first().click();
 
     // 3. Open a skin with Rainbow support ("Ruh Çiçeği Ahri") and click "Rainbow sürümü →"
     await openModal(page, 'Ruh Çiçeği Ahri');
@@ -782,11 +789,11 @@ test.describe('Champion Pack — Preview (production build)', () => {
     await page.waitForFunction(() => !document.getElementById('skin-modal')?.hasAttribute('open'), { timeout: 5000 });
   });
 
-  test('Sample chips in all tabs (Skins, Rainbow, Classic) yield at least 1 result in TR and EN', async ({ page }) => {
+  test('Sample chips in all four tabs yield at least 1 result in TR and EN', async ({ page }) => {
     await page.goto(PREVIEW_URL, { waitUntil: 'networkidle', timeout: 30000 });
     await waitForData(page);
 
-    const tabs = ['skins', 'rainbow', 'classic'];
+    const tabs = ['skins', 'pbe', 'rainbow', 'classic'];
     const langs = ['tr', 'en'];
 
     for (const lang of langs) {

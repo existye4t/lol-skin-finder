@@ -1113,8 +1113,12 @@ h1 em {
    ========================================= */
 
 .collection-tabs {
-  display: inline-flex;
+  --collection-tab-index: 0;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
+  max-width: 100%;
   gap: 4px;
   margin: 0 0 14px;
   padding: 4px;
@@ -1123,29 +1127,58 @@ h1 em {
   background: rgba(8, 12, 19, 0.9);
 }
 
+.collection-tabs::before {
+  content: "";
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: 4px;
+  inline-size: calc((100% - 20px) / 4);
+  border: 1px solid var(--border);
+  border-radius: inherit;
+  background: var(--surface-elevated);
+  pointer-events: none;
+  transform: translateX(calc(var(--collection-tab-index) * (100% + 4px)));
+  transition: transform 170ms var(--ease-out);
+}
+
 .collection-tab {
+  position: relative;
+  min-height: 44px;
+  min-width: 0;
   appearance: none;
   border: 1px solid transparent;
   border-radius: 9999px;
-  padding: 7px 16px;
+  padding: 0 clamp(9px, 3vw, 16px);
   background: transparent;
   color: var(--text-secondary);
   font: 600 0.85rem -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", sans-serif;
   cursor: pointer;
-  transition:
-    color 0.18s ease,
-    background-color 0.18s ease,
-    border-color 0.18s ease;
+  transition: color 170ms var(--ease-out), transform 170ms var(--ease-out);
 }
 
-.collection-tab:hover {
-  color: var(--text-primary);
-}
-
+.collection-tab:hover,
 .collection-tab.is-active {
   color: var(--text-primary);
-  background: var(--surface-elevated);
-  border-color: var(--border);
+}
+
+.collection-tab:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: -2px;
+}
+
+.collection-tab:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-tabs::before,
+  .collection-tab {
+    transition: none;
+  }
+
+  .collection-tab:active {
+    transform: none;
+  }
 }
 
 .search-row {
@@ -1421,6 +1454,7 @@ kbd {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-height: 32px;
   margin-top: 18px;
 }
 
@@ -1550,9 +1584,15 @@ kbd {
 }
 
 .results-grid {
+  --result-card-height: 310px;
+  --result-card-radius: 14px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
   gap: 16px;
+}
+
+.results-grid[aria-busy="true"] {
+  min-height: var(--result-card-height);
 }
 
 .skin-card {
@@ -3253,6 +3293,8 @@ dialog::backdrop {
   }
 
   .results-grid {
+    --result-card-height: 240px;
+    --result-card-radius: 12px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
@@ -3279,7 +3321,18 @@ dialog::backdrop {
 }
 
 @media (max-width: 420px) {
+  .results-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .results-header #meta {
+    text-align: left;
+  }
+
   .results-grid {
+    --result-card-height: 280px;
     grid-template-columns: 1fr;
   }
 
@@ -3349,6 +3402,14 @@ dialog::backdrop {
   transition:
     opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.results-grid .scroll-reveal:not(.visible) {
+  transform: translateY(6px);
+}
+
+.results-grid .scroll-reveal.scroll-reveal-animating {
+  transition: opacity 170ms var(--ease-out), transform 170ms var(--ease-out);
 }
 
 /* =========================================
@@ -3888,12 +3949,12 @@ dialog::backdrop {
   flex-direction: column;
   gap: 10px;
 
-  min-height: 310px;
+  min-height: var(--result-card-height);
   padding: 12px;
   overflow: hidden;
 
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--result-card-radius);
   background: var(--card);
 
   pointer-events: none;
@@ -3901,7 +3962,7 @@ dialog::backdrop {
 
 .skeleton-block {
   border-radius: 8px;
-  background: #1a2231;
+  background: color-mix(in srgb, var(--card) 90%, var(--text-primary));
 }
 
 .skeleton-image {
@@ -3925,27 +3986,28 @@ dialog::backdrop {
   width: 40%;
 }
 
-/* LinkedIn/Facebook tarzi shimmer:
-   acik gri gradient soldan saga kayar */
 .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    #1a2231 0%,
-    #2a364d 45%,
-    #354560 50%,
-    #2a364d 55%,
-    #1a2231 100%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.6s linear infinite;
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
 
 @keyframes skeleton-shimmer {
-  from {
-    background-position: 200% 0;
-  }
-  to {
-    background-position: -200% 0;
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::after {
+    display: none;
   }
 }
 
@@ -4608,6 +4670,10 @@ html[data-appearance="gold"] .appearance-option:has(input:checked) {
   color: var(--text-tertiary, #94a3b8);
   font: 500 12px/1.4 "DM Mono", monospace;
   text-align: center;
+}
+
+#collection-retry[hidden] {
+  display: none;
 }
 
 .manifest-retry-btn {
