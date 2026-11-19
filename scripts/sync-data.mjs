@@ -42,9 +42,10 @@ async function synchronize() {
     if (!result.success) throw new Error('Catalog validation failed');
     const changed = [];
     for (const file of generated) {
-      const original = await readFile(path.join(backup, file));
-      const candidate = await readFile(path.join(staging, file));
-      if (!original.equals(candidate)) changed.push(file);
+      // Git can check out generated text with CRLF on Windows.
+      const original = await readFile(path.join(backup, file), 'utf8');
+      const candidate = await readFile(path.join(staging, file), 'utf8');
+      if (original.replaceAll('\r\n', '\n') !== candidate) changed.push(file);
     }
     const fullDownloads = args.includes('--download-samples');
     await checkLinks({ snapshot, newOnly: !fullDownloads, download: fullDownloads,

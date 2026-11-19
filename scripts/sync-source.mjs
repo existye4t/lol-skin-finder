@@ -5,6 +5,7 @@ const api = `https://api.github.com/repos/${SOURCE_REPO}`;
 const directories = ['skins', 'PBE', 'rainbow', 'classic'];
 const revisionPattern = /^[a-f0-9]{40}$/;
 const jsonRequests = new Map();
+const treeRequests = new Map();
 
 export async function fetchWithRetry(url, { method = 'GET', github = false, request = fetch, wait = sleep } = {}) {
   const headers = { 'User-Agent': 'lol-skin-finder-sync' };
@@ -97,9 +98,8 @@ export async function readSourceDirectories(directories, readTree, onSplit = () 
   return entries;
 }
 
-export async function fetchSourceTree(revision) {
-  const snapshot = await sourceSnapshot(revision);
-  const root = requireTree(await fetchJson(`${api}/git/trees/${snapshot.revision}`, true), snapshot.revision);
+async function buildSourceTree(revision) {
+  const root = requireTree(await fetchJson(`${api}/git/trees/${revision}`, true), revision);
   const targets = directories.map(directory => {
     const node = root.find(item => item.type === 'tree' && item.path === directory);
     if (!revisionPattern.test(node?.sha)) throw new Error(`Missing upstream directory: ${directory}`);
@@ -109,6 +109,14 @@ export async function fetchSourceTree(revision) {
     (sha, recursive) => fetchJson(`${api}/git/trees/${sha}${recursive ? '?recursive=1' : ''}`, true),
     directory => console.warn(`[sync-source] Splitting upstream tree: ${directory}`));
   return [...root, ...subtrees];
+}
+
+export async function fetchSourceTree(revision) {
+  const snapshot = await sourceSnapshot(revision);
+  if (!treeRequests.has(snapshot.revision)) {
+    treeRequests.set(snapshot.revision, buildSourceTree(snapshot.revision));
+  }
+  return treeRequests.get(snapshot.revision);
 }
 
 export async function latestDataDragonVersion() {
