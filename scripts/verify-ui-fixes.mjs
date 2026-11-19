@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SCREENSHOTS_DIR = path.join(ROOT, 'test-results', 'screenshots');
-const ARTIFACT_DIR = 'C:\\Users\\Exist\\.gemini\\antigravity\\brain\\f0e21201-f704-4c21-9726-54d51f32f1bd';
+const ARTIFACT_DIR = process.env.UI_ARTIFACT_DIR || path.join(ROOT, 'test-results', 'ui-artifacts');
+const BASE_URL = process.argv[2] || 'http://127.0.0.1:4173';
 
 fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
@@ -55,9 +56,9 @@ async function run() {
     }
   });
 
-  await page.goto('http://127.0.0.1:4173');
+  await page.goto(BASE_URL);
   // Verilerin yüklenmesini bekle
-  await page.waitForFunction(() => document.getElementById('meta')?.textContent?.includes('16.22'));
+  await page.locator('#results .skin-card').first().waitFor({ state: 'attached', timeout: 30000 });
   await page.addStyleTag({ content: '.scroll-reveal { opacity: 1 !important; transform: none !important; }' });
   console.log('✓ Sayfa ve veriler başarıyla yüklendi.');
 
@@ -243,9 +244,14 @@ async function run() {
   await page.evaluate(() => document.querySelector('#skin-modal .modal-close')?.click());
   await page.waitForTimeout(500);
 
-  // TEST 6: PBE Skini (Cafe Cuties Zoe 142045)
-  console.log('\n[Test 6] PBE Skini (Cafe Cuties Zoe 142045)...');
-  await page.locator('#search').fill('142045');
+  const pbe = await page.evaluate(async () => {
+    const [catalog, manifest] = await Promise.all(['data/skins.json', 'data/fantome-manifest.json']
+      .map(async pathname => (await fetch(pathname)).json()));
+    return catalog.skins.find(skin => skin.isPbe && !skin.parentSkinId && manifest.entries['pbe:' + skin.id]?.enabled);
+  });
+  if (!pbe) throw new Error('İndirilebilir PBE skini bulunamadı.');
+  console.log(`\n[Test 6] PBE Skini (${pbe.name} ${pbe.id})...`);
+  await page.locator('#search').fill(pbe.id);
   await page.waitForTimeout(600);
   await clickFirstCard(page);
   await waitForModalReady(page);
@@ -253,15 +259,15 @@ async function run() {
   const pbeBadgeVisible = await page.locator('#modal-collection-badge').isVisible();
   const pbeBadgeText = await page.locator('#modal-collection-badge').textContent();
   const pbeWarningVisible = await page.locator('#modal-pbe-warning').isVisible();
-  console.log(`  Zoe: PBE rozet görünür: ${pbeBadgeVisible} ("${pbeBadgeText}"), PBE uyarı kutusu görünür: ${pbeWarningVisible}`);
+  console.log(`  PBE rozet görünür: ${pbeBadgeVisible} ("${pbeBadgeText}"), PBE uyarı kutusu görünür: ${pbeWarningVisible}`);
   if (!pbeBadgeVisible || !pbeBadgeText.includes('PBE') || !pbeWarningVisible) {
     throw new Error('PBE skininde PBE rozeti ve uyarı kutusu görünmeli!');
   }
 
   // Ekran görüntüsü 4: PBE skin modalı
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'modal-pbe-zoe.png') });
-  copyToArtifact('modal-pbe-zoe.png');
-  console.log('📸 Ekran görüntüsü kaydedildi: modal-pbe-zoe.png');
+  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'modal-pbe.png') });
+  copyToArtifact('modal-pbe.png');
+  console.log('📸 Ekran görüntüsü kaydedildi: modal-pbe.png');
 
   // TEST 7: Mobil Genişlik (390px) Responsive Kontrolü
   console.log('\n[Test 7] Mobil genişlik (390px) responsive testi...');

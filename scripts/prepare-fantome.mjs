@@ -1,583 +1,246 @@
+import { isDeepStrictEqual } from 'node:util';
+import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
 import {
-  DATA_DIR,
-  SOURCE_REPO,
-  SOURCE_BRANCH,
-  RAW_BASE_URL,
-  GITHUB_TREE_API_URL,
-  ENABLE_LEGACY_FANTOME,
-  LEGACY_BASE_PATH,
-  MISSING_GRACE_RUNS,
-  MAX_ALLOWED_DROP_RATIO,
-  PATHS,
-  sanitizeYimiFileName,
-  sanitizeYimiFolderName
+  DATA_DIR, SOURCE_REPO, SOURCE_BRANCH, ENABLE_LEGACY_FANTOME, LEGACY_BASE_PATH,
+  MAX_ALLOWED_DROP_RATIO, PATHS, sanitizeYimiFileName, sanitizeYimiFolderName
 } from './config.mjs';
+import { fetchJson, fetchSourceTree, latestDataDragonVersion, sourceSnapshot } from './sync-source.mjs';
+import { reconcileDownloads, skinNumber } from './reconcile-downloads.mjs';
+import { downloadVerifiedPackage, verifyRainbowIdentity } from './fantome-package.mjs';
 
-const DDRAGON_VERSIONS_URL = 'https://ddragon.leagueoflegends.com/api/versions.json';
+export { fetchSourceTree } from './sync-source.mjs';
 
-function getGithubHeaders(accept = 'application/vnd.github+json') {
-  const headers = {
-    Accept: accept,
-    'User-Agent': 'lol-skin-finder-sync'
-  };
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+async function readOptional(file, fallback) {
+  try {
+    return JSON.parse(await readFile(file, 'utf8'));
+  } catch (error) {
+    if (error.code === 'ENOENT') return fallback;
+    throw error;
   }
-  return headers;
 }
 
-async function fetchJson(url, useGithubAuth = false, maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const res = await fetch(url, {
-        headers: useGithubAuth ? getGithubHeaders() : { 'User-Agent': 'lol-skin-finder-sync' }
-      });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} (${res.statusText}) -> ${url}`);
-      }
-      return await res.json();
-    } catch (err) {
-      if (attempt >= maxRetries) throw err;
-      const delay = 500 * Math.pow(2, attempt);
-      await new Promise(r => setTimeout(r, delay));
+function validateIndex(root, pbe, rainbow, classic) {
+  if (!root?.patch || !Object.keys(root.champions || {}).length ||
+      !pbe?.sourcePatch || !Array.isArray(pbe.packages) || !Array.isArray(pbe.formPackages) ||
+      !Array.isArray(rainbow?.packages) || !rainbow.packages.length ||
+      !Array.isArray(classic?.champions) || !classic.champions.length) {
+    throw new Error('Incomplete Yimikami index');
+  }
+}
+
+export function indexedDownloads(root, pbe, rainbow, classic, champions) {
+  validateIndex(root, pbe, rainbow, classic);
+  const byId = new Map(champions.map(champ => [Number(champ.key), champ]));
+  const byName = new Map(champions.flatMap(champ => [
+    [champ.id.toLowerCase(), champ], [champ.name.toLowerCase(), champ]
+  ]));
+  const candidates = [];
+  const liveIds = new Set();
+  const requireChampion = (alias, key) => {
+    const byAlias = byName.get(String(alias).toLowerCase());
+    const champion = key === undefined ? byAlias : byId.get(Number(key));
+    if (!champion || (byAlias && byAlias.id !== champion.id)) {
+      throw new Error('Conflicting or unknown champion: ' + alias + ' / ' + key);
     }
-  }
-}
+    return champion;
+  };
+  const add = (c, champ, id, name, type, path, pId, sha256, sourceBytes) => {
+    const offset = c === 'classic' ? 60_000_000 : 0;
+    const owner = value => Math.floor((Number(String(value).split('_')[0]) - offset) / 1000);
+    if (owner(id) !== Number(champ.key) || pId !== undefined && owner(pId) !== Number(champ.key)) {
+      throw new Error('Cross-champion source ID: ' + c + ':' + id);
+    }
+    if (sha256 && !/^[a-f0-9]{64}$/.test(sha256)) throw new Error('Invalid source digest: ' + path);
+    const segments = path.split('/');
+    const folder = c === 'pbe' ? segments[2] : segments[1];
+    if (c === 'classic' ? !folder?.startsWith('Jade_') ||
+        requireChampion(folder.slice(5)).id !== champ.id || segments.at(-1) !== id + '.fantome' :
+        requireChampion(folder).id !== champ.id) {
+      throw new Error('Cross-champion source path: ' + path);
+    }
+    candidates.push({
+      c, id, ...(pId !== undefined ? { pId } : {}), champ: champ.id, name, type, path,
+      ...(sha256 ? { sha256 } : {}),
+      ...(Number.isSafeInteger(sourceBytes) && sourceBytes > 0 ? { sourceBytes } : {})
+    });
+  };
 
-/**
- * Kaynak reponun Git ağacını klonlamadan çeker.
- * Çok büyük repolarda root recursive=1 isteği 500 veya truncated verebileceğinden,
- * hata/truncated durumunda hedef alt klasörleri (skins, PBE, rainbow, classic) ayrı ayrı çeker.
- */
-export async function fetchSourceTree() {
-  const targetDirs = new Set(['skins', 'PBE', 'rainbow', 'classic']);
-  const nonRecursiveUrl = `https://api.github.com/repos/${SOURCE_REPO}/git/trees/${SOURCE_BRANCH}`;
-
-  async function fetchSubtrees() {
-    console.log('[prepare-fantome] Alt klasör ağaçları ayrı ayrı çekiliyor (skins, PBE, rainbow, classic)...');
-    const topLevel = await fetchJson(nonRecursiveUrl, true);
-    const combined = [];
-    for (const item of topLevel.tree || []) {
-      if (item.type === 'blob') {
-        combined.push(item);
-      } else if (item.type === 'tree' && targetDirs.has(item.path)) {
-        const subTree = await fetchJson(`${item.url}?recursive=1`, true);
-        for (const subItem of subTree.tree || []) {
-          combined.push({
-            ...subItem,
-            path: `${item.path}/${subItem.path}`
-          });
+  for (const [folder, group] of Object.entries(root.champions)) {
+    const champion = requireChampion(folder);
+    const base = Number(champion.key) * 1000;
+    for (const [number, name] of Object.entries(group.skins || {})) {
+      const id = base + skinNumber(number);
+      add('skins', champion, id, name, 'base', 'skins/' + folder + '/' + sanitizeYimiFileName(name) + '.fantome');
+      liveIds.add(id);
+    }
+    for (const [type, parentGroups] of [['chroma', group.chromas], ['form', group.forms]]) {
+      for (const [parent, children] of Object.entries(parentGroups || {})) {
+        const parentNumber = skinNumber(parent);
+        const parentName = parentNumber === 0 ? folder : group.skins?.[parent];
+        if (!parentName) throw new Error('Missing source parent: ' + folder + '/' + parent);
+        for (const [number, name] of Object.entries(children)) {
+          const id = base + skinNumber(number);
+          add('skins', champion, id, name, type,
+            'skins/' + folder + '/' + sanitizeYimiFolderName(parentName) + '/' + sanitizeYimiFileName(name) + '.fantome',
+            base + parentNumber);
+          liveIds.add(id);
         }
       }
     }
-    return combined;
   }
 
-  try {
-    const rootTree = await fetchJson(GITHUB_TREE_API_URL, true);
-    if (!rootTree || !Array.isArray(rootTree.tree) || rootTree.truncated) {
-      return await fetchSubtrees();
+  for (const pkg of pbe.packages) {
+    const id = Number(pkg.id);
+    if (liveIds.has(id)) continue;
+    const champion = requireChampion(pkg.champion, pkg.championId);
+    add('pbe', champion, id, pkg.name, pkg.chroma ? 'chroma' : 'base', 'PBE/' + pkg.path,
+      pkg.chroma ? Number(pkg.parentId) : undefined, pkg.sha256, pkg.bytes);
+  }
+  for (const pkg of pbe.formPackages) {
+    const id = Number(pkg.id);
+    if (liveIds.has(id)) continue;
+    add('pbe', requireChampion(pkg.champion, pkg.championId), id + '_f' + pkg.form, pkg.name, 'form',
+      'PBE/' + pkg.path, id, pkg.sha256, pkg.bytes);
+  }
+  for (const cycle of rainbow.packages) {
+    const champion = requireChampion(cycle.champion);
+    const id = Number(champion.key) * 1000 + skinNumber(cycle.skin);
+    add('rainbow', champion, id, cycle.path.split('/').at(-1).replace(/\.fantome$/, ''), 'rainbow',
+      'rainbow/' + cycle.path, undefined, cycle.sha256, cycle.bytes);
+  }
+  for (const group of classic.champions) {
+    const champion = requireChampion(group.baseKey, group.baseId);
+    for (const skin of group.skins) {
+      add('classic', champion, String(skin.id), skin.name, skin.parentSkinId ? 'classic-chroma' : 'classic',
+        'classic/' + skin.path, skin.parentSkinId ? String(skin.parentSkinId) : undefined, skin.sha256, skin.bytes);
     }
-    return rootTree.tree;
-  } catch (err) {
-    console.warn('[prepare-fantome] Root recursive trees isteği başarısız oldu, alt klasörlere geçiliyor:', err.message);
-    return await fetchSubtrees();
   }
+  return { candidates, liveIds, byId };
 }
 
-async function fetchChampionMap() {
-  const versions = await fetchJson(DDRAGON_VERSIONS_URL);
-  const latestVersion = versions[0];
-  const champData = await fetchJson(
-    `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/en_US/champion.json`
-  );
-  const byLower = new Map();
-  const byKey = new Map();
-  for (const champ of Object.values(champData.data || {})) {
-    const entry = {
-      id: champ.id, // örn. "Fiddlesticks", "MonkeyKing", "AurelionSol"
-      key: Number(champ.key),
-      name: champ.name
-    };
-    byLower.set(champ.id.toLowerCase(), entry);
-    byLower.set(champ.name.toLowerCase(), entry);
-    byKey.set(Number(champ.key), entry);
+async function verifyConflictingIndexes(entries, oldEntries, snapshot, ambiguities) {
+  const conflicts = Object.entries(entries).filter(([, entry]) =>
+    entry.enabled && entry.sourceBytes && entry.sourceBytes !== entry.bytes);
+  for (let start = 0; start < conflicts.length; start += 5) {
+    await Promise.all(conflicts.slice(start, start + 5).map(async ([key, entry]) => {
+      const previous = oldEntries[key];
+      const { sha256: indexSha, ...blob } = entry;
+      if (entry.c === 'rainbow' && entry.bytes <= 4 * 1024 ** 2) {
+        if (previous?.verifiedPackageIdentity && previous.blobSha === entry.blobSha &&
+            previous.champ === entry.champ && previous.id === entry.id) {
+          Object.assign(entry, { sha256: previous.sha256, verifiedPackageIdentity: true, indexSha256: indexSha });
+          return;
+        }
+        const bytes = await downloadVerifiedPackage(snapshot.baseUrl, blob);
+        try {
+          verifyRainbowIdentity(bytes, entry);
+          Object.assign(entry, { sha256: createHash('sha256').update(bytes).digest('hex'),
+            verifiedPackageIdentity: true, indexSha256: indexSha });
+          return;
+        } catch (error) {
+          console.warn('[prepare-fantome]', error.message, entry.path);
+        }
+      }
+      Object.assign(entry, { enabled: false, status: 'ambiguous' });
+      ambiguities.push({ key, paths: [entry.path], reason: 'Index package size differs from Git blob' });
+    }));
   }
-  return { latestVersion, byLower, byKey };
+  return conflicts.length;
 }
 
-async function loadJsonIfExists(filePath, fallback = null) {
-  if (!existsSync(filePath)) return fallback;
-  try {
-    const raw = await readFile(filePath, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-async function main() {
-  const args = process.argv.slice(2);
-  const enforceSafety = args.includes('--enforce-safety') || process.env.ENFORCE_SAFETY === 'true';
-
-  console.log(`[prepare-fantome] Kaynak repo inceleniyor: ${SOURCE_REPO}@${SOURCE_BRANCH}`);
-  const [treeItems, rootIndex, pbeIndex, rainbowCycles, classicIndex, champInfo] = await Promise.all([
-    fetchSourceTree(),
-    fetchJson(`${RAW_BASE_URL}index.json`),
-    fetchJson(`${RAW_BASE_URL}PBE/index.json`),
-    fetchJson(`${RAW_BASE_URL}rainbow/chroma-cycles.json`),
-    fetchJson(`${RAW_BASE_URL}classic/index.json`),
-    fetchChampionMap()
+export async function prepareFantome({ snapshot, writeReport = false, currentDate = new Date() } = {}) {
+  snapshot ??= await sourceSnapshot();
+  const ddragonVersion = await latestDataDragonVersion();
+  console.log('[prepare-fantome] Upstream ' + SOURCE_REPO + '@' + snapshot.revision);
+  const [tree, root, pbe, rainbow, classic, champions, previous, legacy] = await Promise.all([
+    fetchSourceTree(snapshot.revision), snapshot.index('index.json'), snapshot.index('PBE/index.json'),
+    snapshot.index('rainbow/chroma-cycles.json'), snapshot.index('classic/index.json'),
+    fetchJson('https://ddragon.leagueoflegends.com/cdn/' + ddragonVersion + '/data/en_US/champion.json'),
+    readOptional(PATHS.manifest, null), readOptional(PATHS.legacyFantomeList, [])
   ]);
+  const { candidates, liveIds, byId } = indexedDownloads(root, pbe, rainbow, classic, Object.values(champions.data));
+  const oldEntries = previous?.entries || {};
+  const { entries, ambiguities, unindexed } = reconcileDownloads(candidates, tree, oldEntries);
+  if (Object.values(entries).some(entry => entry.enabled && entry.sourceBytes && entry.sourceBytes !== entry.bytes)) {
+    console.log('[prepare-fantome] Checking ZIP identities for outdated index digests');
+  }
+  const indexConflicts = await verifyConflictingIndexes(entries, oldEntries, snapshot, ambiguities);
 
-  const fantomeBlobs = new Set(
-    treeItems
-      .filter(item => item.type === 'blob' && item.path.endsWith('.fantome'))
-      .map(item => item.path)
-  );
-
-  if (fantomeBlobs.size === 0) {
-    throw new Error('Kaynak repoda hiçbir .fantome dosyası bulunamadı! İşlem durduruldu.');
+  for (const c of ['skins', 'pbe', 'rainbow', 'classic']) {
+    const before = Object.values(oldEntries).filter(e => e.c === c && e.enabled && !e.legacy).length;
+    const after = Object.values(entries).filter(e => e.c === c && e.enabled).length;
+    if (c !== 'pbe' && before && (before - after) / before > MAX_ALLOWED_DROP_RATIO) {
+      throw new Error('Excessive upstream download loss in ' + c + ': ' + before + ' -> ' + after);
+    }
   }
 
-  const prevManifest = await loadJsonIfExists(PATHS.manifest, null);
-  const prevEntries = prevManifest?.entries || {};
-  const legacyFantomeIds = await loadJsonIfExists(PATHS.legacyFantomeList, []);
-  const legacyIdSet = new Set(legacyFantomeIds.map(Number));
+  const promoted = [];
+  const removed = Object.entries(entries).filter(([key, entry]) =>
+    oldEntries[key]?.enabled && !entry.enabled).map(([key]) => key);
+  for (const [key, old] of Object.entries(oldEntries)) {
+    if (entries[key] || old.legacy || old.status === 'pending') continue;
+    if (old.c === 'pbe' && liveIds.has(Number(old.id))) {
+      promoted.push(String(old.id));
+      continue;
+    }
+    if (old.enabled) removed.push(key);
+    const { missingCount, bytes, ...metadata } = old;
+    entries[key] = { ...metadata, status: 'missing', enabled: false };
+  }
+  for (const id of new Set(legacy.map(Number))) {
+    if (entries['skins:' + id]) continue;
+    if (!Number.isSafeInteger(id)) throw new Error('Invalid legacy skin identifier');
+    const champion = byId.get(Math.floor(id / 1000));
+    entries['skins:' + id] = {
+      c: 'skins', id, champ: champion?.id || String(Math.floor(id / 1000)), name: 'Legacy #' + id,
+      type: 'form', path: null, status: 'legacy', enabled: ENABLE_LEGACY_FANTOME, legacy: true
+    };
+  }
+  const sorted = Object.fromEntries(Object.entries(entries).sort(([a], [b]) => a.localeCompare(b, 'en')));
+  const stats = {};
+  for (const collection of ['skins', 'pbe', 'rainbow', 'classic']) {
+    const items = Object.values(sorted).filter(entry => entry.c === collection && !entry.legacy);
+    stats[collection] = {
+      total: items.length, enabled: items.filter(entry => entry.enabled).length,
+      missing: items.filter(entry => entry.status === 'missing').length,
+      ambiguous: items.filter(entry => entry.status === 'ambiguous').length
+    };
+  }
 
-  const getChamp = (folderOrName) => {
-    const key = String(folderOrName || '').toLowerCase();
-    return champInfo.byLower.get(key) || null;
+  const { generatedAt, sourceRevision, baseUrl, ...previousContent } = previous || {};
+  const content = {
+    schemaVersion: 1, sourceRepo: SOURCE_REPO, sourceBranch: SOURCE_BRANCH, legacyBasePath: LEGACY_BASE_PATH,
+    patch: root.patch, pbePatch: pbe.sourcePatch, ddragonVersion,
+    config: { enableLegacyFantome: ENABLE_LEGACY_FANTOME }, stats, entries: sorted
   };
-
-  const newEntries = {};
-  const matchedBlobPaths = new Set();
-  const liveSkinIds = new Set();
-
-  // 1. SKINS KOLEKSİYONU (Canlı skinler, chromalar ve formlar)
-  for (const [champFolder, cData] of Object.entries(rootIndex.champions || {})) {
-    const champ = getChamp(champFolder);
-    if (!champ) continue;
-    const champKey = champ.key;
-    const champId = champ.id;
-
-    // 1a. Ana Skinler
-    for (const [skinNumStr, skinName] of Object.entries(cData.skins || {})) {
-      const skinId = champKey * 1000 + Number(skinNumStr);
-      const relPath = `skins/${champFolder}/${sanitizeYimiFileName(skinName)}.fantome`;
-      if (fantomeBlobs.has(relPath)) {
-        matchedBlobPaths.add(relPath);
-        liveSkinIds.add(skinId);
-        const key = `skins:${skinId}`;
-        newEntries[key] = {
-          c: 'skins',
-          id: skinId,
-          champ: champId,
-          name: skinName,
-          type: 'base',
-          path: relPath,
-          status: 'enabled',
-          enabled: true
-        };
-      }
-    }
-
-    // 1b. Chromalar
-    for (const [parentNumStr, chromaMap] of Object.entries(cData.chromas || {})) {
-      const parentSkinId = champKey * 1000 + Number(parentNumStr);
-      const parentName = parentNumStr === '0' ? champFolder : (cData.skins?.[parentNumStr] || champFolder);
-      const parentFolder = sanitizeYimiFolderName(parentName);
-
-      for (const [chromaNumStr, chromaName] of Object.entries(chromaMap)) {
-        const chromaId = champKey * 1000 + Number(chromaNumStr);
-        const relPath = `skins/${champFolder}/${parentFolder}/${sanitizeYimiFileName(chromaName)}.fantome`;
-        if (fantomeBlobs.has(relPath)) {
-          matchedBlobPaths.add(relPath);
-          liveSkinIds.add(chromaId);
-          const key = `skins:${chromaId}`;
-          newEntries[key] = {
-            c: 'skins',
-            id: chromaId,
-            pId: parentSkinId,
-            champ: champId,
-            name: chromaName,
-            type: 'chroma',
-            path: relPath,
-            status: 'enabled',
-            enabled: true
-          };
-        }
-      }
-    }
-
-    // 1c. Formlar
-    for (const [parentNumStr, formMap] of Object.entries(cData.forms || {})) {
-      const parentSkinId = champKey * 1000 + Number(parentNumStr);
-      const parentName = parentNumStr === '0' ? champFolder : (cData.skins?.[parentNumStr] || champFolder);
-      const parentFolder = sanitizeYimiFolderName(parentName);
-
-      for (const [formKeyStr, formName] of Object.entries(formMap)) {
-        const formId = champKey * 1000 + Number(formKeyStr);
-        const relPath = `skins/${champFolder}/${parentFolder}/${sanitizeYimiFileName(formName)}.fantome`;
-        if (fantomeBlobs.has(relPath)) {
-          matchedBlobPaths.add(relPath);
-          liveSkinIds.add(formId);
-          const key = `skins:${formId}`;
-          newEntries[key] = {
-            c: 'skins',
-            id: formId,
-            pId: parentSkinId,
-            champ: champId,
-            name: formName,
-            type: 'form',
-            path: relPath,
-            status: 'enabled',
-            enabled: true
-          };
-        }
-      }
-    }
-  }
-
-  // 2. PBE KOLEKSİYONU (Canlıya çıkmış olanlar otomatik olarak skins/ altında kalır, çift kayıt oluşmaz)
-  const transitionedPbeToLive = [];
-  for (const pkg of pbeIndex.packages || []) {
-    const skinId = Number(pkg.id);
-    const relPath = `PBE/${pkg.path}`;
-    if (!fantomeBlobs.has(relPath)) continue;
-    matchedBlobPaths.add(relPath);
-
-    // Eğer aynı skin artık canlı skins/ koleksiyonunda varsa canlı sürüm kazanır!
-    if (liveSkinIds.has(skinId)) {
-      transitionedPbeToLive.push(skinId);
-      continue;
-    }
-
-    const champ = champInfo.byKey.get(Number(pkg.championId)) || getChamp(pkg.champion);
-    const champId = champ ? champ.id : pkg.champion;
-    const key = `pbe:${skinId}`;
-    const entry = {
-      c: 'pbe',
-      id: skinId,
-      champ: champId,
-      name: pkg.name,
-      type: pkg.chroma ? 'chroma' : 'base',
-      path: relPath,
-      status: 'enabled',
-      enabled: true
-    };
-    if (pkg.parentId) {
-      entry.pId = Number(pkg.parentId);
-    }
-    newEntries[key] = entry;
-  }
-
-  for (const fPkg of pbeIndex.formPackages || []) {
-    const parentId = Number(fPkg.id);
-    const relPath = `PBE/${fPkg.path}`;
-    if (!fantomeBlobs.has(relPath)) continue;
-    matchedBlobPaths.add(relPath);
-
-    if (liveSkinIds.has(parentId)) {
-      continue;
-    }
-
-    const champ = champInfo.byKey.get(Number(fPkg.championId)) || getChamp(fPkg.champion);
-    const champId = champ ? champ.id : fPkg.champion;
-    const formId = `${parentId}_f${fPkg.form}`;
-    const key = `pbe:${formId}`;
-    newEntries[key] = {
-      c: 'pbe',
-      id: formId,
-      pId: parentId,
-      champ: champId,
-      name: fPkg.name,
-      type: 'form',
-      path: relPath,
-      status: 'enabled',
-      enabled: true
-    };
-  }
-
-  // 3. RAINBOW KOLEKSİYONU
-  for (const cycle of rainbowCycles.packages || []) {
-    const champ = getChamp(cycle.champion);
-    if (!champ) continue;
-    const skinId = champ.key * 1000 + Number(cycle.skin);
-    const relPath = `rainbow/${cycle.path}`;
-    if (!fantomeBlobs.has(relPath)) continue;
-    matchedBlobPaths.add(relPath);
-
-    const skinName = cycle.path.split('/').pop().replace(/\.fantome$/, '');
-    const key = `rainbow:${skinId}`;
-    newEntries[key] = {
-      c: 'rainbow',
-      id: skinId,
-      champ: champ.id,
-      name: skinName,
-      type: 'rainbow',
-      path: relPath,
-      status: 'enabled',
-      enabled: true
-    };
-  }
-
-  // 4. CLASSIC KOLEKSİYONU
-  for (const cChamp of classicIndex.champions || []) {
-    const champ = champInfo.byKey.get(Number(cChamp.baseId)) || getChamp(cChamp.baseKey || cChamp.name);
-    const champId = champ ? champ.id : (cChamp.baseKey || cChamp.name);
-    for (const sk of cChamp.skins || []) {
-      const classicId = String(sk.id);
-      const relPath = `classic/${sk.path}`;
-      if (!fantomeBlobs.has(relPath)) continue;
-      matchedBlobPaths.add(relPath);
-
-      const key = `classic:${classicId}`;
-      const entry = {
-        c: 'classic',
-        id: classicId,
-        champ: champId,
-        name: sk.name,
-        type: sk.parentSkinId ? 'classic-chroma' : 'classic',
-        path: relPath,
-        status: 'enabled',
-        enabled: true
-      };
-      if (sk.parentSkinId) {
-        entry.pId = String(sk.parentSkinId);
-      }
-      newEntries[key] = entry;
-    }
-  }
-
-  // 5. HENÜZ INDEX.JSON VEYA DATA DRAGON'DA OLMAYAN ("PENDING") YENİ DOSYALARI YAKALA
-  let pendingIndexCounter = 1;
-  for (const blobPath of fantomeBlobs) {
-    if (matchedBlobPaths.has(blobPath)) continue;
-    const parts = blobPath.split('/');
-    const topFolder = parts[0];
-    if (!['skins', 'PBE', 'rainbow', 'classic'].includes(topFolder)) continue;
-
-    const collection = topFolder === 'PBE' ? 'pbe' : topFolder;
-    const champFolder = collection === 'pbe' ? parts[2] : parts[1];
-    const champ = getChamp(champFolder?.replace(/^Jade_/, '') || '');
-    const champId = champ ? champ.id : (champFolder || 'Unknown');
-    const fileName = parts[parts.length - 1].replace(/\.fantome$/, '');
-    const isSubitem = (collection === 'skins' && parts.length === 4) || (collection === 'pbe' && parts.length === 5);
-
-    const syntheticId = `pending_${collection}_${pendingIndexCounter++}`;
-    const key = `${collection}:${syntheticId}`;
-    newEntries[key] = {
-      c: collection,
-      id: syntheticId,
-      champ: champId,
-      name: fileName,
-      type: isSubitem ? 'chroma' : 'base',
-      path: blobPath,
-      status: 'pending',
-      enabled: true
-    };
-  }
-
-  // 6. ÖNCEKİ MANIFEST İLE KARŞILAŞTIRMA: GÜVENLİK KONTROLÜ (%5 KAYIP) VE "MISSING" YAŞAM DÖNGÜSÜ
-  const prevActiveCount = Object.values(prevEntries).filter(e => !e.legacy && e.status !== 'missing').length;
-  const currentActiveCount = Object.values(newEntries).length;
-
-  if (prevActiveCount > 0) {
-    const dropRatio = (prevActiveCount - currentActiveCount) / prevActiveCount;
-    if (dropRatio > MAX_ALLOWED_DROP_RATIO) {
-      const msg = `[GÜVENLİK DURDURMASI] Kaynak girdi sayısı %${(dropRatio * 100).toFixed(2)} azaldı (${prevActiveCount} -> ${currentActiveCount}, izin verilen maks: %${MAX_ALLOWED_DROP_RATIO * 100}). Manifest değiştirilmedi!`;
-      if (enforceSafety) {
-        console.error(msg);
-        process.exit(1);
-      } else {
-        console.warn(msg);
-      }
-    }
-  }
-
-  let missingEntriesCount = 0;
-  let newlyDisabledMissingCount = 0;
-
-  for (const [key, prevEntry] of Object.entries(prevEntries)) {
-    if (newEntries[key]) continue;
-    if (prevEntry.legacy) continue;
-
-    // PBE girdileri canlıya geçtiyse veya PBE döngüsünden kalktıysa "missing" beklemesine girmez
-    if (prevEntry.c === 'pbe') {
-      const pbeIdNum = Number(prevEntry.id);
-      if (liveSkinIds.has(pbeIdNum) && !transitionedPbeToLive.includes(pbeIdNum)) {
-        transitionedPbeToLive.push(pbeIdNum);
-      }
-      continue;
-    }
-
-    const nextMissingCount = (prevEntry.missingCount || 0) + 1;
-    const stillEnabled = nextMissingCount < MISSING_GRACE_RUNS;
-    if (!stillEnabled && prevEntry.enabled) {
-      newlyDisabledMissingCount++;
-    }
-    missingEntriesCount++;
-
-    newEntries[key] = {
-      ...prevEntry,
-      status: 'missing',
-      enabled: stillEnabled,
-      missingCount: nextMissingCount
-    };
-  }
-
-  // 7. ESKİ YEREL FANTOME DOSYALARI (Yeni kaynakta karşılığı olmayanlar: legacy=true, enabled=ENABLE_LEGACY_FANTOME)
-  const legacyOnlyIds = [];
-  for (const legacyId of legacyIdSet) {
-    if (!liveSkinIds.has(legacyId)) {
-      legacyOnlyIds.push(legacyId);
-      const champKey = Math.floor(legacyId / 1000);
-      const champ = champInfo.byKey.get(champKey);
-      const key = `skins:${legacyId}`;
-      newEntries[key] = {
-        c: 'skins',
-        id: legacyId,
-        champ: champ ? champ.id : String(champKey),
-        name: `Legacy #${legacyId}`,
-        type: 'form',
-        path: null,
-        status: 'legacy',
-        enabled: ENABLE_LEGACY_FANTOME,
-        legacy: true
-      };
-    }
-  }
-
-  // 8. İSTATİSTİKLER VE DIFF HESAPLAMA
-  const addedKeys = [];
-  const changedKeys = [];
-  for (const [key, entry] of Object.entries(newEntries)) {
-    const prev = prevEntries[key];
-    if (!prev) {
-      addedKeys.push(key);
-    } else if (
-      prev.path !== entry.path ||
-      prev.status !== entry.status ||
-      prev.enabled !== entry.enabled ||
-      prev.c !== entry.c
-    ) {
-      changedKeys.push(key);
-    }
-  }
-
-  const countBy = (col, pred) =>
-    Object.values(newEntries).filter(e => e.c === col && pred(e)).length;
-
-  const stats = {
-    skins: {
-      total: countBy('skins', e => !e.legacy),
-      base: countBy('skins', e => !e.legacy && e.type === 'base'),
-      chromas: countBy('skins', e => !e.legacy && e.type === 'chroma'),
-      forms: countBy('skins', e => !e.legacy && e.type === 'form'),
-      enabled: countBy('skins', e => !e.legacy && e.enabled),
-      pending: countBy('skins', e => e.status === 'pending'),
-      missing: countBy('skins', e => e.status === 'missing'),
-      legacyOnlyDisabled: legacyOnlyIds.length,
-      legacyTotalFiles: legacyIdSet.size
-    },
-    pbe: {
-      total: countBy('pbe', () => true),
-      base: countBy('pbe', e => e.type === 'base'),
-      chromas: countBy('pbe', e => e.type === 'chroma'),
-      forms: countBy('pbe', e => e.type === 'form'),
-      enabled: countBy('pbe', e => e.enabled),
-      pending: countBy('pbe', e => e.status === 'pending'),
-      missing: countBy('pbe', e => e.status === 'missing'),
-      transitionedToLive: transitionedPbeToLive.length
-    },
-    rainbow: {
-      total: countBy('rainbow', () => true),
-      enabled: countBy('rainbow', e => e.enabled),
-      pending: countBy('rainbow', e => e.status === 'pending'),
-      missing: countBy('rainbow', e => e.status === 'missing')
-    },
-    classic: {
-      total: countBy('classic', () => true),
-      base: countBy('classic', e => e.type === 'classic'),
-      chromas: countBy('classic', e => e.type === 'classic-chroma'),
-      enabled: countBy('classic', e => e.enabled),
-      pending: countBy('classic', e => e.status === 'pending'),
-      missing: countBy('classic', e => e.status === 'missing')
-    }
-  };
-
-  const patchChanged = Boolean(prevManifest?.patch && prevManifest.patch !== rootIndex.patch);
-
-  // İçeriği aynıysa gereksiz git diff oluşmaması için önceki generatedAt değerini koru
-  const hasAnyDiff =
-    !prevManifest ||
-    addedKeys.length > 0 ||
-    changedKeys.length > 0 ||
-    patchChanged ||
-    prevManifest.pbePatch !== pbeIndex.sourcePatch ||
-    prevManifest.config?.enableLegacyFantome !== ENABLE_LEGACY_FANTOME;
-
+  const changed = !sourceRevision || !isDeepStrictEqual(previousContent, content);
   const manifest = {
-    schemaVersion: 1,
-    generatedAt: hasAnyDiff ? new Date().toISOString() : prevManifest.generatedAt,
-    sourceRepo: SOURCE_REPO,
-    sourceBranch: SOURCE_BRANCH,
-    baseUrl: RAW_BASE_URL,
-    legacyBasePath: LEGACY_BASE_PATH,
-    patch: rootIndex.patch || '16.22',
-    pbePatch: pbeIndex.sourcePatch || '16.23',
-    ddragonVersion: champInfo.latestVersion,
-    config: {
-      enableLegacyFantome: ENABLE_LEGACY_FANTOME
-    },
-    stats,
-    entries: newEntries
+    schemaVersion: content.schemaVersion,
+    generatedAt: changed ? currentDate.toISOString() : generatedAt,
+    sourceRevision: changed ? snapshot.revision : sourceRevision,
+    baseUrl: changed ? snapshot.baseUrl : baseUrl,
+    ...content
   };
-
+  const added = Object.keys(sorted).filter(key => !oldEntries[key]);
+  const updated = Object.keys(sorted).filter(key => oldEntries[key] && !isDeepStrictEqual(oldEntries[key], sorted[key]));
+  const report = {
+    patch: manifest.patch, previousPatch: previous?.patch || null, patchChanged: previous?.patch !== manifest.patch,
+    revision: snapshot.revision, addedCount: added.length, changedCount: updated.length, removedCount: removed.length,
+    totalDeltaCount: added.length + updated.length + removed.length, promoted, ambiguities, unindexed, indexConflicts,
+    stats, addedSample: added.slice(0, 50), changedSample: updated.slice(0, 50)
+  };
   await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(PATHS.manifest, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
-
-  // Action veya CLI için özet rapor
-  const syncSummary = {
-    timestamp: new Date().toISOString(),
-    patch: manifest.patch,
-    prevPatch: prevManifest?.patch || null,
-    patchChanged,
-    hasAnyDiff,
-    addedCount: addedKeys.length,
-    changedCount: changedKeys.length,
-    totalDeltaCount: addedKeys.length + changedKeys.length,
-    transitionedPbeToLive,
-    legacyOnlyIds,
-    missingEntriesCount,
-    newlyDisabledMissingCount,
-    addedSample: addedKeys.slice(0, 50),
-    changedSample: changedKeys.slice(0, 50),
-    stats
-  };
-
-  if (args.includes('--write-report')) {
-    await writeFile(PATHS.syncReport, JSON.stringify(syncSummary, null, 2) + '\n', 'utf8');
-  }
-
-  console.log('\n=== FANTOME MANIFEST ÖZETİ ===');
-  console.log(`Yama (Patch)    : ${manifest.patch} (PBE: ${manifest.pbePatch}, DataDragon: ${manifest.ddragonVersion})`);
-  console.log(`skins/          : ${stats.skins.enabled} aktif (${stats.skins.base} ana, ${stats.skins.chromas} chroma, ${stats.skins.forms} form) | pending: ${stats.skins.pending} | missing: ${stats.skins.missing}`);
-  console.log(`PBE/            : ${stats.pbe.enabled} aktif (${stats.pbe.base} ana, ${stats.pbe.chromas} chroma, ${stats.pbe.forms} form) | canlıya geçen: ${stats.pbe.transitionedToLive}`);
-  console.log(`rainbow/        : ${stats.rainbow.enabled} aktif | pending: ${stats.rainbow.pending} | missing: ${stats.rainbow.missing}`);
-  console.log(`classic/        : ${stats.classic.enabled} aktif (${stats.classic.base} ana, ${stats.classic.chromas} chroma) | pending: ${stats.classic.pending}`);
-  console.log(`Legacy (Pasif)  : ${stats.skins.legacyTotalFiles} yerel dosya devre dışı (yeni kaynakta karşılığı olmayan: ${legacyOnlyIds.length} -> [${legacyOnlyIds.join(', ')}])`);
-  console.log(`Değişim (Diff)  : +${addedKeys.length} yeni, ~${changedKeys.length} değişen girdi (Patch değişti mi: ${patchChanged})`);
+  await writeFile(PATHS.manifest, JSON.stringify(manifest, null, 2) + '\n');
+  if (writeReport) await writeFile(PATHS.syncReport, JSON.stringify(report, null, 2) + '\n');
+  console.log('[prepare-fantome]', JSON.stringify({ ...report, addedSample: undefined, changedSample: undefined,
+    unindexed: unindexed.length, ambiguities: ambiguities.length }));
+  return manifest;
 }
 
-const isMain = process.argv[1] && process.argv[1].endsWith('prepare-fantome.mjs');
-if (isMain) {
-  main().catch(err => {
-    console.error('[prepare-fantome] HATA:', err.message);
-    process.exit(1);
+if (process.argv[1]?.endsWith('prepare-fantome.mjs')) {
+  prepareFantome({ writeReport: process.argv.includes('--write-report') }).catch(error => {
+    console.error('[prepare-fantome] HATA:', error.message);
+    process.exitCode = 1;
   });
 }

@@ -1,28 +1,19 @@
 name: Kaynak Repodan Skin Senkronizasyonu
 
 on:
-  # NOT: GitHub Actions 'schedule' tetikleyicisi yalnızca varsayılan branch (main)
-  # üzerinde çalışır. Bu branch main'e merge edildiğinde otomatik devreye girer.
   schedule:
-    - cron: '0 6,18 * * *'
-
+    - cron: '17 0,6,12,18 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (true: commit ve PR yapılmaz, sadece özet yazar)'
+        description: 'Doğrula ve derle, yayınlama'
         type: boolean
-        required: false
         default: false
       force_deploy:
-        description: 'Veri değişmese bile Pages deploy tetikle (dry_run=true ise yok sayılır)'
+        description: 'Veri değişmediyse de Pages dağıtımını yenile'
         type: boolean
-        required: false
         default: false
 
-# ÖNEMLİ YAPILANDIRMA:
-# Bu iş akışının otomatik Pull Request açabilmesi için GitHub depo ayarlarında:
-# Settings -> Actions -> General -> Workflow permissions bölümünde
-# "Allow GitHub Actions to create and approve pull requests" seçeneği MUTLAKA işaretli olmalıdır.
 permissions:
   contents: read
 
@@ -32,174 +23,123 @@ concurrency:
 
 jobs:
   sync:
-    name: Manifest ve Skin Verilerini Güncelle
+    name: Kataloğu oluştur ve doğrula
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    timeout-minutes: 20
     outputs:
-      should_deploy: ${{ steps.commit_or_pr.outputs.should_deploy }}
+      changed: ${{ steps.catalog.outputs.changed }}
     steps:
-      - name: Kaynak kodu al
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
-          fetch-depth: 1
-
-      - name: Node.js kur
-        uses: actions/setup-node@v7
+          persist-credentials: false
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
+      - run: npm ci
+      - run: npm run test:sync
 
-      - name: Bağımlılıkları yükle
-        run: npm ci
-
-      - name: Manifest oluştur (Git Trees API + Güvenlik Koruması)
+      - name: Kataloğu karşılaştır
+        id: catalog
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/prepare-fantome.mjs --enforce-safety --write-report
+          GITHUB_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          npm run sync-data -- --report="$RUNNER_TEMP/catalog-report.json"
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const r = JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/catalog-report.json', 'utf8'));
+          appendFileSync(process.env.GITHUB_OUTPUT, 'changed=' + Boolean(r.changed.length) + '\n');
+          const lines = [
+            '## Skin senkronizasyonu',
+            '',
+            '- Upstream: `' + r.revision + '`',
+            '- Patch: `' + r.patch + '`',
+            '- Manifest girdileri: +' + r.addedCount + ', değişen ' + r.changedCount + ', kaldırılan bağlantı ' + r.removedCount,
+            '- Live’a geçen PBE kayıtları: ' + r.promoted.length,
+            '- Belirsiz eşleşmeler: ' + r.ambiguities.length,
+            '- Paket boyutu uyuşmazlıkları: ' + r.indexConflicts,
+            '- İndekste bulunmayan dosyalar: ' + r.unindexed.length,
+            '- Değişen çıktılar: ' + (r.changed.join(', ') || 'yok')
+          ];
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          NODE
 
-      - name: Skin, PBE, Rainbow ve Classic verilerini güncelle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/update-skins.mjs
-
-      - name: Şema ve İndirme Linklerini Doğrula (Trees API + 20 Örneklem HEAD)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/check-links.mjs --new-only --sample=20
-
-      - name: Koleksiyon Veri Bütünlüğünü Doğrula (A-C Bölümleri ve Trees API)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run verify-collections
-
-      - name: Production Build Doğrulaması
+      - name: Üretim derlemesini doğrula
+        if: steps.catalog.outputs.changed == 'true' || inputs.dry_run
         run: npm run build
 
-      - name: Değişiklikleri Değerlendir ve Commit / PR Uygula
-        id: commit_or_pr
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CURRENT_BRANCH: ${{ github.ref_name }}
-          DRY_RUN: ${{ inputs.dry_run || false }}
-          FORCE_DEPLOY: ${{ inputs.force_deploy || false }}
+      - name: Katalog çıktılarını sakla
+        if: steps.catalog.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: verified-skin-catalog
+          if-no-files-found: error
+          retention-days: 3
+          path: |
+            public/data/fantome-manifest.json
+            public/data/skins.json
+            public/data/rainbow.json
+            public/data/classic.json
+
+      - name: Senkronizasyon raporunu sakla
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: skin-sync-report
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ runner.temp }}/catalog-report.json
+
+  publish:
+    name: Doğrulanmış kataloğu commit et
+    needs: sync
+    if: github.ref == 'refs/heads/main' && !inputs.dry_run && needs.sync.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: verified-skin-catalog
+          path: ${{ runner.temp }}/verified-skin-catalog
+      - name: Katalog commit'ini gönder
+        id: commit
+        shell: bash
         run: |
-          set -e
-
-          MODE="direct"
-          PATCH="unknown"
-          DELTA="0"
-
-          # Rapor dosyasından özet metrikleri oku ve GITHUB_STEP_SUMMARY'ye yaz
-          if [ -f "public/data/sync-report.json" ]; then
-            MODE=$(node -e '
-              const fs = require("fs");
-              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
-              process.stdout.write(r.patchChanged || r.totalDeltaCount > 100 ? "pr" : "direct");
-            ')
-            PATCH=$(node -e '
-              const fs = require("fs");
-              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
-              process.stdout.write(String(r.patch || "unknown").replace(/[^a-zA-Z0-9._-]/g, "-"));
-            ')
-            DELTA=$(node -e '
-              const fs = require("fs");
-              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
-              process.stdout.write(String(r.totalDeltaCount || 0));
-            ')
-            node -e '
-              const fs = require("fs");
-              const r = JSON.parse(fs.readFileSync("public/data/sync-report.json", "utf8"));
-              const lines = [
-                "## 🔄 Skin Senkronizasyon Özeti",
-                "",
-                `- **Yama:** \`${r.patch}\` (Önceki: \`${r.previousPatch || "yok"}\`, Değişti mi: \`${r.patchChanged}\`)`,
-                `- **Aktif Paket Sayısı:** \`${r.currentActiveCount}\` (Önceki: \`${r.previousActiveCount}\`)`,
-                `- **Yeni Eklenen:** \`${r.addedCount}\``,
-                `- **Güncellenen:** \`${r.updatedCount}\``,
-                `- **PBE → Canlıya Geçen:** \`${r.promotedCount}\``,
-                `- **Kaybolan (Grace Period):** \`${r.missingCount}\``,
-                `- **Devre Dışı Bırakılan:** \`${r.disabledCount}\``,
-                `- **Pending (Data Dragon Bekleyen):** \`${r.pendingCount}\``,
-                `- **Toplam Değişim (Delta):** \`${r.totalDeltaCount}\``
-              ];
-              if (r.addedSample && r.addedSample.length) {
-                lines.push("", "### Yeni Eklenen Örnekler", ...r.addedSample.slice(0, 15).map(x => `- \`${x}\``));
-              }
-              if (r.promoted && r.promoted.length) {
-                lines.push("", "### PBE → Canlıya Geçenler", ...r.promoted.slice(0, 15).map(x => `- \`${x}\``));
-              }
-              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
-            '
-          fi
-
-          # Geçici rapor dosyasını temizle (git'e girmesin)
-          rm -f public/data/sync-report.json
-
-          # Dry run kontrolü (öncelikli: hiçbir commit, PR veya deploy yapılmaz)
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "DRY RUN MODU: Commit, PR ve deploy adımları atlandı. Depoya hiçbir şey yazılmadı."
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "> ℹ️ **DRY RUN:** \`dry_run\` girdisi aktif olduğu için commit, PR ve deploy atlandı; sadece özet raporlandı." >> "$GITHUB_STEP_SUMMARY"
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for file in fantome-manifest.json skins.json rainbow.json classic.json; do
+            src="$RUNNER_TEMP/verified-skin-catalog/$file"
+            test -f "$src" && test ! -L "$src"
+            cp -- "$src" "public/data/$file"
+            git add -- "public/data/$file"
+          done
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "Catalog is already current."
             exit 0
           fi
-
-          CHANGED=$(git status --porcelain public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json)
-          if [ -z "$CHANGED" ]; then
-            echo "Veri dosyalarında değişiklik yok."
-            if [ "$FORCE_DEPLOY" = "true" ]; then
-              echo "force_deploy=true aktif: Veri değişikliği olmasa bile deploy çıktısı veriliyor."
-              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "İşlem tamamlandı, deploy yapılmayacak."
-              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-            fi
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add public/data/fantome-manifest.json public/data/skins.json public/data/rainbow.json public/data/classic.json
-
-          if [ "$MODE" = "direct" ]; then
-            echo "Küçük değişim (delta=$DELTA <= 100 ve yama aynı). Doğrudan commit atılıyor..."
-            git commit -m "chore(data): sync skins from Yimikami/LeagueSkins-Experimental"
-            git push origin "HEAD:${CURRENT_BRANCH}"
-            if [ "$CURRENT_BRANCH" = "main" ]; then
-              echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-            fi
-          else
-            PR_BRANCH="chore/sync-skins-${PATCH}"
-            echo "Büyük değişim veya yeni yama (delta=$DELTA, patch=$PATCH). PR açılıyor: $PR_BRANCH"
-            git checkout -B "$PR_BRANCH"
-            git commit -m "chore(data): sync skins from Yimikami/LeagueSkins-Experimental (patch ${PATCH})"
-            git push --force-with-lease origin "$PR_BRANCH"
-
-            EXISTING_PR=$(gh pr list --head "$PR_BRANCH" --base "$CURRENT_BRANCH" --json number --jq '.[0].number' || true)
-            if [ -z "$EXISTING_PR" ]; then
-              gh pr create \
-                --base "$CURRENT_BRANCH" \
-                --head "$PR_BRANCH" \
-                --title "chore(data): sync skins from Yimikami/LeagueSkins-Experimental (${PATCH})" \
-                --body "Otomatik skin senkronizasyonu büyük bir güncelleme veya yama değişimi tespit etti (\`delta=${DELTA}\`, \`patch=${PATCH}\`). Build ve link kontrolleri başarıyla geçti; onayınız bekleniyor."
-            else
-              echo "Mevcut PR #$EXISTING_PR güncellendi."
-            fi
-            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-          fi
+          git commit -m 'chore(data): synchronize the skin catalog'
+          git push origin HEAD:refs/heads/main
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   deploy:
-    name: GitHub Pages Yayınla (Doğrudan Güncelleme)
-    needs: sync
-    if: needs.sync.outputs.should_deploy == 'true' && github.ref == 'refs/heads/main'
+    name: GitHub Pages yayınla
+    needs: [sync, publish]
+    if: >-
+      always() && github.ref == 'refs/heads/main' && !inputs.dry_run &&
+      needs.sync.result == 'success' &&
+      (needs.publish.result == 'success' && needs.publish.outputs.commit != '' ||
+       needs.publish.result == 'skipped' && needs.sync.outputs.changed == 'false' && inputs.force_deploy)
     uses: ./.github/workflows/deploy-pages.yml
     with:
-      ref: main
+      ref: ${{ needs.publish.outputs.commit || github.sha }}
     permissions:
       contents: read
       pages: write
