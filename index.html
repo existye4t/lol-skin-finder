@@ -6,7 +6,7 @@
   <!-- Content-Security-Policy -->
   <!-- NOTE: Worker deploy edildiğinde, worker URL'ini connect-src'ye ekleyin.
        Örnek: connect-src 'self' https://your-worker.workers.dev ... -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com data:; connect-src 'self' https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com; script-src 'self' https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://cdn.discordapp.com https://raw.communitydragon.org https://ddragon.leagueoflegends.com https://img.youtube.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google data:; connect-src 'self' https://raw.githubusercontent.com https://lol-skin-finder-admin.existskins.workers.dev https://api.lanyard.rest https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src https://www.youtube.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://www.google.com;">
   <!-- Worker API URL - Production'da Cloudflare Worker URL'si ile güncellenmeli (CSP connect-src'ye de eklenmeli) -->
   <meta name="worker-api-url" content="https://lol-skin-finder-admin.existskins.workers.dev" />
 
@@ -173,6 +173,13 @@
     gtag("js", new Date());
     gtag("config", "G-S4N25T536G");
   </script>
+
+  <!-- Google AdSense -->
+  <script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7913714372580113"
+    crossorigin="anonymous"
+  ></script>
 
   <!-- STYLESHEET -->
   <link
@@ -566,6 +573,9 @@
               <button id="bug-report-button" class="community-button community-button-report" type="button" aria-haspopup="dialog" aria-controls="bug-report-modal">
                 <span aria-hidden="true">⚑</span><span class="lang-switch-text" data-i18n="bugReport">Hata Bildir</span>
               </button>
+              <button id="suggestion-button" class="community-button community-button-suggestion" type="button" aria-haspopup="dialog" aria-controls="suggestion-modal">
+                <span aria-hidden="true">💡</span><span class="lang-switch-text" data-i18n="suggestion">Öneri Yap</span>
+              </button>
               <!-- =========================================
                HOW TO USE BUTTON
                ========================================= -->
@@ -579,6 +589,42 @@
             <span aria-hidden="true">❓</span><span data-i18n="howToUseButton">Nasıl kullanılır?</span>
           </button>
             </div>
+
+      <div
+        id="collection-tabs"
+        class="collection-tabs"
+        role="tablist"
+        data-i18n-aria-label="collectionTabsAria"
+        aria-label="Koleksiyonlar"
+      >
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab is-active"
+          data-collection="skins"
+          aria-selected="true"
+        >
+          <span data-i18n="tabSkins">Skinler</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab"
+          data-collection="rainbow"
+          aria-selected="false"
+        >
+          <span data-i18n="tabRainbow">Rainbow</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="collection-tab"
+          data-collection="classic"
+          aria-selected="false"
+        >
+          <span data-i18n="tabClassic">Classic</span>
+        </button>
+      </div>
 
       <div class="search-row">
 
@@ -796,7 +842,7 @@
       </div>
 
       <div
-        class="quick-searches"
+        id="search-examples" class="quick-searches"
         data-i18n-aria-label="quickSearchesAriaLabel"
         aria-label="Örnek aramalar"
       >
@@ -978,6 +1024,23 @@
         >
           Veriler yükleniyor…
         </p>
+
+        <!-- Single-champion toolbar area (shown by JS when only one champion is visible) -->
+        <div id="champion-pack-toolbar" class="champion-pack-toolbar" hidden>
+          <button
+            id="champion-pack-toolbar-btn"
+            class="champion-pack-toolbar-btn btn-secondary-metal"
+            type="button"
+          ></button>
+          <label id="champion-pack-toolbar-chroma-label" class="champion-pack-toolbar-chroma-label">
+            <input
+              id="champion-pack-toolbar-chroma-checkbox"
+              type="checkbox"
+              class="champion-pack-chroma-checkbox"
+            />
+            <span data-i18n="championPackIncludeChromas">Chroma'ları dahil et</span>
+          </label>
+        </div>
 
       </div>
 
@@ -1173,12 +1236,45 @@
           class="champion"
         ></p>
 
-        <h2 id="modal-skin-name"></h2>
+        <div class="modal-title-row">
+          <h2 id="modal-skin-name"></h2>
+          <span
+            id="modal-collection-badge"
+            class="skin-badge"
+            hidden
+          ></span>
+        </div>
 
         <p
           id="modal-skin-id"
           class="modal-id"
         ></p>
+
+        <p
+          id="modal-pbe-warning"
+          class="modal-pbe-notice"
+          data-i18n="pbeWarningNotice"
+          hidden
+        ></p>
+
+        <div class="modal-collection-links">
+          <button
+            id="modal-rainbow-link"
+            class="modal-rainbow-link"
+            type="button"
+            hidden
+          >
+            <span data-i18n="rainbowVersionLink">Rainbow sürümü →</span>
+          </button>
+          <button
+            id="modal-classic-link"
+            class="modal-rainbow-link modal-classic-link"
+            type="button"
+            hidden
+          >
+            <span data-i18n="classicVersionLink">Classic sürümü →</span>
+          </button>
+        </div>
 
         <button
           id="modal-favorite"
@@ -1203,6 +1299,9 @@
 
         </button>
 
+        <!-- Champion Pack Download Block (populated by JS) -->
+        <div id="champion-pack-block" class="champion-pack-block" hidden></div>
+
       </div>
 
       <section
@@ -1221,6 +1320,11 @@
         <div
           id="download-list"
           class="download-list"
+        ></div>
+        <div
+          id="modal-special-packages"
+          class="modal-special-packages"
+          hidden
         ></div>
 
       </section>
@@ -1241,6 +1345,7 @@
     <p class="community-kicker">GERİ BİLDİRİM</p>
     <h2 id="bug-report-modal-title">Hata bildir</h2>
     <p class="community-description">Sorunu kısa ve net anlat; mümkünse tekrar üretme adımlarını ekle.</p>
+    <p class="community-info" data-i18n-html="bugReportInfo"></p>
     <form id="bug-report-form" class="community-form">
       <label>Başlık<input id="bug-report-title" name="title" maxlength="120" required placeholder="Örn. Skin görseli açılmıyor" /></label>
       <label>Açıklama<textarea id="bug-report-description" name="description" maxlength="2000" required placeholder="Ne oldu, ne bekliyordun?"></textarea></label>
@@ -1252,6 +1357,7 @@
             <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
           </svg>
           <span class="bug-report-drop-zone-text">Resim seçmek için tıkla veya sürükle bırak</span>
+          <span class="bug-report-drop-zone-hint">PNG, JPG, WEBP • maks. 8MB</span>
         </div>
         <div id="bug-report-file-preview" class="bug-report-file-preview" hidden>
           <img id="bug-report-preview-img" alt="Önizleme" />
@@ -1262,6 +1368,40 @@
       <label>İlgili skin <span>(opsiyonel)</span><select id="bug-report-skin" name="skinId"><option value="">Skin seçme</option></select></label>
       <p id="bug-report-status" class="community-form-status" aria-live="polite"></p>
       <button class="community-submit" type="submit">Bildirimi gönder <span aria-hidden="true">→</span></button>
+    </form>
+  </dialog>
+
+  <dialog id="suggestion-modal" class="community-modal" aria-labelledby="suggestion-modal-title">
+    <button class="community-modal-close" type="button" data-close-community-modal aria-label="Kapat">×</button>
+    <p class="community-kicker">TOPLULUK</p>
+    <h2 id="suggestion-modal-title">Öneri yap</h2>
+    <p class="community-description">Sitenin daha iyi olması için bir önerin var mı? Paylaş!</p>
+    <p class="community-info" data-i18n-html="suggestionInfo"></p>
+    <form id="suggestion-form" class="community-form">
+      <label>İsim <span>(opsiyonel)</span><input id="suggestion-name" name="name" maxlength="100" placeholder="Adın (opsiyonel)" /></label>
+      <label>Başlık<input id="suggestion-title" name="title" maxlength="120" required placeholder="Örn. Karanlık tema eklensin" /></label>
+      <label>Önerin<textarea id="suggestion-description" name="description" maxlength="2000" required placeholder="Önerini detaylandır..."></textarea></label>
+      <label>Fotoğraf <span>(opsiyonel, maks. 8MB)</span></label>
+      <div id="suggestion-drop-zone" class="suggestion-drop-zone" tabindex="0" role="button" aria-label="Resim seç">
+        <input id="suggestion-image" name="image" type="file" accept="image/*" hidden />
+        <div class="suggestion-drop-zone-content">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          <span class="suggestion-drop-zone-text">Resim seçmek için tıkla veya sürükle bırak</span>
+          <span class="suggestion-drop-zone-hint">PNG, JPG, WEBP • maks. 8MB</span>
+        </div>
+        <div id="suggestion-file-preview" class="suggestion-file-preview" hidden>
+          <img id="suggestion-preview-img" alt="Önizleme" />
+          <button id="suggestion-remove-image" type="button" class="suggestion-remove-image" aria-label="Resmi kaldır">×</button>
+        </div>
+      </div>
+      <label>Video linki <span>(opsiyonel — Streamable, YouTube vb.)</span><input id="suggestion-video-link" name="videoLink" type="url" maxlength="2048" placeholder="https://..." /></label>
+      <p id="suggestion-status" class="community-form-status" aria-live="polite"></p>
+      <div class="suggestion-actions">
+        <button class="suggestion-cancel community-button" type="button" data-close-community-modal>Vazgeç</button>
+        <button class="community-submit suggestion-submit" type="submit">Öneriyi gönder <span aria-hidden="true">→</span></button>
+      </div>
     </form>
   </dialog>
 

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-26T15:08:12.335Z",
+  "updatedAt": "2026-10-07T13:15:04.150Z",
   "overrides": {
     "7061": {
       "id": "7061",
@@ -151,6 +151,105 @@
       "championId": "Aphelios",
       "modifiedAt": "2026-08-28T09:31:40.649Z",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_40.jpg",
+      "customFantome": true
+    },
+    "523041": {
+      "id": "523041",
+      "name": "HEARTSTEEL Live My Life Aphelios",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:11:41.622Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_41.jpg",
+      "customFantome": true
+    },
+    "523042": {
+      "id": "523042",
+      "name": "HEARTSTEEL Live My Life Aphelios (Yakut)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Ruby)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:13:23.051Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_42.jpg",
+      "customFantome": true
+    },
+    "523043": {
+      "id": "523043",
+      "name": "HEARTSTEEL Live My Life Aphelios (Tanzanit)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Tanzanite)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:13:38.035Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_43.jpg",
+      "customFantome": true
+    },
+    "523044": {
+      "id": "523044",
+      "name": "HEARTSTEEL Live My Life Aphelios (İnci Beyazı)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Pearl)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:15:02.509Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_44.jpg",
+      "customFantome": true
+    },
+    "523045": {
+      "id": "523045",
+      "name": "HEARTSTEEL Live My Life Aphelios (Kedigözü)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Catseye)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:13:13.809Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_45.jpg",
+      "customFantome": true
+    },
+    "523046": {
+      "id": "523046",
+      "name": "HEARTSTEEL Live My Life Aphelios (Fıstık Yeşili)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Peridot)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:14:37.946Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_46.jpg",
+      "customFantome": true
+    },
+    "523047": {
+      "id": "523047",
+      "name": "HEARTSTEEL Live My Life Aphelios (Obsidiyen)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Obsidian)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:13:48.039Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_47.jpg",
+      "customFantome": true
+    },
+    "523048": {
+      "id": "523048",
+      "name": "HEARTSTEEL Live My Life Aphelios (Pembe Kuvars)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Rose Quartz)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:14:00.845Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_48.jpg",
+      "customFantome": true
+    },
+    "523049": {
+      "id": "523049",
+      "name": "HEARTSTEEL Live My Life Aphelios (Deniz Mavisi)",
+      "nameEn": "HEARTSTEEL Live My Life Aphelios (Aquamarine)",
+      "champion": "Aphelios",
+      "championEn": "Aphelios",
+      "championId": "Aphelios",
+      "modifiedAt": "2026-10-07T13:14:48.567Z",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aphelios_49.jpg",
       "customFantome": true
     }
   },
