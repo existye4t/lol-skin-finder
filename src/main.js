@@ -1303,12 +1303,10 @@ function getSkinImageSources(skin) {
 
   // Yerel images/skins dosyaları bilinen 1x1 placeholder'lardır. Buraya
   // özellikle dahil edilmez; yalnızca Riot CDN URL'leri kullanılabilir.
-  const sources = [...new Set([
-    loadingScreenUrl,      // 1st priority: loading screen (portrait, character-focused)
-    dataDragonUrl,         // 2nd priority: splash art (fallback)
-    skin?.image,           // 3rd priority: original image from JSON
-    skin?.imageFallback    // 4th priority: community dragon fallback
-  ].filter(isRemoteImageUrl))];
+  const metadata = [skin?.image, skin?.imageFallback];
+  const live = [loadingScreenUrl, dataDragonUrl];
+  const sources = [...new Set((skin?.isPbe ? [...metadata, ...live] : [...live, ...metadata])
+    .filter(isRemoteImageUrl))];
 
   if (cacheKey) {
     imageSourceCache.set(cacheKey, sources);
@@ -1338,12 +1336,10 @@ function getModalImageSources(skin) {
     ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
     : '';
 
-  const sources = [...new Set([
-    dataDragonUrl,         // 1st priority: splash art (full art, character may be off-center but we use contain)
-    loadingScreenUrl,      // 2nd priority: loading screen (portrait, character-focused)
-    skin?.image,           // 3rd priority: original image from JSON
-    skin?.imageFallback    // 4th priority: community dragon fallback
-  ].filter(isRemoteImageUrl))];
+  const metadata = [skin?.image, skin?.imageFallback];
+  const live = [dataDragonUrl, loadingScreenUrl];
+  const sources = [...new Set((skin?.isPbe ? [...metadata, ...live] : [...live, ...metadata])
+    .filter(isRemoteImageUrl))];
 
   if (cacheKey) {
     imageSourceCache.set(cacheKey, sources);

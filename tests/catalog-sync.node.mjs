@@ -5,7 +5,7 @@ import { publishedSkinDownload } from '../bot/src/skin-downloads.js';
 import { verifyPackageBytes, verifyRainbowIdentity } from '../scripts/fantome-package.mjs';
 import { indexedDownloads } from '../scripts/prepare-fantome.mjs';
 import { reconcileDownloads } from '../scripts/reconcile-downloads.mjs';
-import { fetchWithRetry, requireTree } from '../scripts/sync-source.mjs';
+import { fetchWithRetry, readSourceDirectories, requireTree } from '../scripts/sync-source.mjs';
 import { catalogIdentityErrors } from '../scripts/verify-collections.mjs';
 
 const first = { c: 'skins', id: 1001, champ: 'Annie', type: 'base', name: 'Fixture', path: 'skins/Annie/Fixture.fantome' };
@@ -148,6 +148,22 @@ test('package download must have matching ZIP structure, length and digests', ()
   bytes[12] = 1;
   assert.throws(() => verifyPackageBytes(bytes, entry), /Digest mismatch/);
   assert.throws(() => verifyPackageBytes(Buffer.alloc(64), entry), /Invalid .fantome ZIP/);
+});
+
+test('a failing or truncated recursive tree is replaced by complete pinned subtrees', async () => {
+  const targets = [{ path: 'skins', sha: 'parent' }];
+  const splits = [];
+  const tree = await readSourceDirectories(targets, async (sha, recursive) => {
+    if (sha === 'parent' && recursive) throw Object.assign(new Error('HTTP 500'), { status: 500 });
+    if (sha === 'parent') return { truncated: false, tree: [{ path: 'Annie', type: 'tree', sha: 'child' }] };
+    if (recursive) return { truncated: true, tree: [blob('incomplete.fantome')] };
+    return { truncated: false, tree: [blob('complete.fantome')] };
+  }, path => splits.push(path));
+  assert.deepEqual(splits, ['skins', 'skins/Annie']);
+  assert.deepEqual(tree.filter(node => node.type === 'blob').map(node => node.path), ['skins/Annie/complete.fantome']);
+  await assert.rejects(readSourceDirectories(targets, async () => {
+    throw Object.assign(new Error('HTTP 403'), { status: 403 });
+  }), /HTTP 403/);
 });
 
 test('Rainbow package identity comes from the embedded champion and skin number', () => {
