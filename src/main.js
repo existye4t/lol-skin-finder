@@ -3547,8 +3547,7 @@ const CHROMA_HEX_MAP = {
   light: '#fef08a'
 };
 
-function getChromaColorAndImage(item, baseSkin) {
-  const isMainSkin = item === baseSkin;
+function getChromaColor(item) {
   const chroma = item.chroma || item;
 
   // 1) Renk tespiti: chroma.colors ilk hex rengi
@@ -3563,7 +3562,7 @@ function getChromaColorAndImage(item, baseSkin) {
   }
 
   // Renk dizisi yoksa ve chroma ise bilinen chroma renk haritasından eşle
-  if (!hexColor && !isMainSkin) {
+  if (!hexColor && item.parentSkinId) {
     const itemDisplayName = getLocalizedSkinName(item);
     const chromaName = (
       itemDisplayName.match(/\(([^)]+)\)$/)?.[1] || itemDisplayName
@@ -3576,30 +3575,37 @@ function getChromaColorAndImage(item, baseSkin) {
     }
   }
 
-  // 2) Önizleme görseli (background-image)
-  let previewUrl =
-    chroma?.chromaPath ||
-    item?.chromaPath ||
-    chroma?.previewUrl ||
-    item?.previewUrl ||
-    '';
+  return hexColor;
+}
 
-  if (previewUrl && previewUrl.startsWith('/lol-game-data/assets/')) {
-    previewUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/${previewUrl.replace(/^\/lol-game-data\/assets\//i, '')}`;
-  }
+function createDownloadPreview(item, color = '') {
+  const preview = document.createElement('span');
+  preview.className = 'download-dot chroma-preview';
+  preview.setAttribute('aria-hidden', 'true');
+  if (color) preview.style.setProperty('--preview-color', color);
 
-  if (!previewUrl) {
-    if (isMainSkin) {
-      previewUrl = item.imageFallback || item.image || '';
-    } else {
-      const champKey = Math.floor(Number(item.id) / 1000);
-      if (champKey && item.id) {
-        previewUrl = `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/${champKey}/${item.id}.png`;
-      }
-    }
-  }
+  const isChroma = Boolean(item.parentSkinId);
+  preview.classList.toggle('is-chroma', isChroma);
+  const sources = [...new Set([
+    item.previewUrl,
+    item.imageFallback,
+    isChroma ? '' : item.image
+  ].filter(isRemoteImageUrl))];
+  if (!sources.length) return preview;
 
-  return { hexColor, previewUrl };
+  const image = document.createElement('img');
+  image.alt = '';
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  let sourceIndex = 0;
+  image.addEventListener('error', () => {
+    sourceIndex += 1;
+    if (sourceIndex < sources.length) image.src = sources[sourceIndex];
+    else image.remove();
+  });
+  image.src = sources[0];
+  preview.appendChild(image);
+  return preview;
 }
 
 /* =========================================
@@ -4379,29 +4385,11 @@ activeModalGroup = group;
         /\(([^)]+)\)$/
       )?.[1];
 
-    const dot = document.createElement('div');
-    dot.className = 'download-dot chroma-preview';
-
-    const { hexColor, previewUrl } =
-      getChromaColorAndImage(item, skin);
-
-    if (hexColor) {
-      dot.style.backgroundColor = hexColor;
-    }
-
-    if (previewUrl) {
-      dot.style.backgroundImage = `url("${previewUrl}")`;
-    }
-
-    if (!hasFile) {
-      dot.style.opacity = '0.35';
-    }
-
-    element.appendChild(dot);
-
     const textSpan = document.createElement('span');
     textSpan.className = 'download-item-text chroma-name';
-    const isChromaItem = item !== skin;
+    const isChromaItem = Boolean(item.parentSkinId);
+    const hexColor = isChromaItem ? getChromaColor(item) : '';
+    element.appendChild(createDownloadPreview(item, hexColor));
     const isRainbowActive = activeCollection === 'rainbow' || skin.collection === 'rainbow';
     const isClassicActive = activeCollection === 'classic' || skin.collection === 'classic';
 
@@ -4525,13 +4513,7 @@ activeModalGroup = group;
         element.setAttribute('aria-disabled', 'true');
       }
 
-      const dot = document.createElement('div');
-      dot.className = 'download-dot chroma-preview';
-      const previewUrl = skin.imageFallback || skin.image || '';
-      if (previewUrl) {
-        dot.style.backgroundImage = `url("${previewUrl}")`;
-      }
-      element.appendChild(dot);
+      element.appendChild(createDownloadPreview(skin));
 
       const formBadge = document.createElement('span');
       formBadge.className = 'download-item-type-badge';
