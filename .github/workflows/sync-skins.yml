@@ -41,7 +41,7 @@ jobs:
       should_deploy: ${{ steps.commit_or_pr.outputs.should_deploy }}
     steps:
       - name: Kaynak kodu al
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
