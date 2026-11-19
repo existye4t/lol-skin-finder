@@ -1,8 +1,8 @@
 {
-  "version": "16.22.1",
-  "patch": "16.22",
-  "pbePatch": "16.23",
-  "updatedAt": "2026-11-05T10:05:05.022Z",
+  "version": "16.23.1",
+  "patch": "16.23",
+  "pbePatch": "16.24",
+  "updatedAt": "2026-11-19T04:39:30.828Z",
   "skins": [
     {
       "id": "876045",
@@ -24699,21 +24699,22 @@
       "nameEn": "DJ Sona Ultimate Remix",
       "championEn": "Sona",
       "championId": "Sona",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/sona/skins/skin77/images/sona_splash_centered_77.skins_sona_skin77.jpg",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/sona/skins/skin77/images/sona_splash_centered_77.skins_sona_skin77.jpg",
-      "isPbe": true,
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Sona_77.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/sona/skins/skin77/images/sona_splash_centered_77.skins_sona_skin77.jpg",
       "forms": [
         {
           "id": "37077_f1",
           "name": "DJ Sona Ultimate Remix (Pink)",
           "nameEn": "DJ Sona Ultimate Remix (Pink)",
-          "isPbe": true
+          "isPbe": true,
+          "downloadUnavailable": true
         },
         {
           "id": "37077_f2",
           "name": "DJ Sona Ultimate Remix (Yellow)",
           "nameEn": "DJ Sona Ultimate Remix (Yellow)",
-          "isPbe": true
+          "isPbe": true,
+          "downloadUnavailable": true
         }
       ]
     },
@@ -49586,7 +49587,8 @@
       "championEn": "Seraphine",
       "championId": "Seraphine",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Seraphine_3.jpg",
-      "imageFallback": ""
+      "imageFallback": "",
+      "formOf": "147001"
     },
     {
       "id": "147002",
@@ -49599,7 +49601,8 @@
       "championEn": "Seraphine",
       "championId": "Seraphine",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Seraphine_2.jpg",
-      "imageFallback": ""
+      "imageFallback": "",
+      "formOf": "147001"
     },
     {
       "id": "28006",
@@ -54863,6 +54866,140 @@
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/syndra/skins/skin04/images/syndra_splash_centered_4.jpg"
     },
     {
+      "id": "106038",
+      "skinNum": 38,
+      "name": "Kartopu Savaşı Volibear",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin38/images/volibear_splash_centered_38.skins_volibear_skin38.jpg",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin38/images/volibear_splash_centered_38.skins_volibear_skin38.jpg",
+      "isPbe": true
+    },
+    {
+      "id": "106045",
+      "skinNum": 45,
+      "name": "Kartopu Savaşı Volibear (İnci Beyazı)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (İnci Beyazı)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Pearl)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin45/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin45/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106044",
+      "skinNum": 44,
+      "name": "Kartopu Savaşı Volibear (Obsidiyen)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Obsidiyen)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Obsidian)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin44/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin44/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106043",
+      "skinNum": 43,
+      "name": "Kartopu Savaşı Volibear (Pembe Kuvars)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Pembe Kuvars)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Rose Quartz)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin43/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin43/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106040",
+      "skinNum": 40,
+      "name": "Kartopu Savaşı Volibear (Safir)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Safir)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Sapphire)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin40/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin40/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106042",
+      "skinNum": 42,
+      "name": "Kartopu Savaşı Volibear (Tanzanit)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Tanzanit)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Tanzanite)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin42/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin42/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106041",
+      "skinNum": 41,
+      "name": "Kartopu Savaşı Volibear (Turuncu)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Turuncu)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Citrine)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin41/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin41/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106039",
+      "skinNum": 39,
+      "name": "Kartopu Savaşı Volibear (Yakut)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Yakut)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Ruby)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin39/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin39/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
+      "id": "106046",
+      "skinNum": 46,
+      "name": "Kartopu Savaşı Volibear (Zümrüt)",
+      "champion": "Volibear",
+      "nameTr": "Kartopu Savaşı Volibear (Zümrüt)",
+      "championTr": "Volibear",
+      "nameEn": "Snow Day Volibear (Emerald)",
+      "championEn": "Volibear",
+      "championId": "Volibear",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin46/chromapreview.chroma_volibear_polarbear.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/volibear/skins/skin46/chromapreview.chroma_volibear_polarbear.png",
+      "parentSkinId": "106038",
+      "isPbe": true
+    },
+    {
       "id": "115004",
       "skinNum": 4,
       "name": "Kartopu Savaşı Ziggs",
@@ -56777,6 +56914,140 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Milio_23.jpg",
       "imageFallback": "",
       "parentSkinId": "902020"
+    },
+    {
+      "id": "267069",
+      "skinNum": 69,
+      "name": "Kış Mucizesi Nami",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin69/images/nami_splash_centered_69.skins_nami_skin69.jpg",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin69/images/nami_splash_centered_69.skins_nami_skin69.jpg",
+      "isPbe": true
+    },
+    {
+      "id": "267072",
+      "skinNum": 72,
+      "name": "Kış Mucizesi Nami (Ametist)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Ametist)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Amethyst)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin72/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin72/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267076",
+      "skinNum": 76,
+      "name": "Kış Mucizesi Nami (İnci Beyazı)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (İnci Beyazı)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Pearl)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin76/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin76/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267071",
+      "skinNum": 71,
+      "name": "Kış Mucizesi Nami (Kedigözü)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Kedigözü)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Catseye)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin71/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin71/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267077",
+      "skinNum": 77,
+      "name": "Kış Mucizesi Nami (Obsidiyen)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Obsidiyen)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Obsidian)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin77/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin77/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267075",
+      "skinNum": 75,
+      "name": "Kış Mucizesi Nami (Pembe Kuvars)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Pembe Kuvars)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Rose Quartz)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin75/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin75/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267074",
+      "skinNum": 74,
+      "name": "Kış Mucizesi Nami (Turkuvaz)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Turkuvaz)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Turquoise)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin74/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin74/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267070",
+      "skinNum": 70,
+      "name": "Kış Mucizesi Nami (Yakut)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Yakut)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Ruby)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin70/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin70/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
+    },
+    {
+      "id": "267073",
+      "skinNum": 73,
+      "name": "Kış Mucizesi Nami (Zümrüt)",
+      "champion": "Nami",
+      "nameTr": "Kış Mucizesi Nami (Zümrüt)",
+      "championTr": "Nami",
+      "nameEn": "Winter Wonder Nami (Emerald)",
+      "championEn": "Nami",
+      "championId": "Nami",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin73/chromapreview.chroma_nami_winter.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/nami/skins/skin73/chromapreview.chroma_nami_winter.png",
+      "parentSkinId": "267069",
+      "isPbe": true
     },
     {
       "id": "518001",
@@ -67237,6 +67508,21 @@
       "imageFallback": "",
       "parentSkinId": "40008",
       "hasClassic": true
+    },
+    {
+      "id": "40074",
+      "skinNum": 74,
+      "name": "Kutsal Kılıç Janna (Yeldoğan)",
+      "champion": "Janna",
+      "nameTr": "Kutsal Kılıç Janna (Yeldoğan)",
+      "championTr": "Janna",
+      "nameEn": "Sacred Sword Janna (Windborn)",
+      "championEn": "Janna",
+      "championId": "Janna",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin74/chromapreview.chroma_janna_poetry.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/janna/skins/skin74/chromapreview.chroma_janna_poetry.png",
+      "parentSkinId": "40008",
+      "isPbe": true
     },
     {
       "id": "16002",
@@ -77952,7 +78238,8 @@
       "championEn": "Ahri",
       "championId": "Ahri",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_86.jpg",
-      "imageFallback": ""
+      "imageFallback": "",
+      "formOf": "103085"
     },
     {
       "id": "145071",
@@ -77965,7 +78252,8 @@
       "championEn": "Kai'Sa",
       "championId": "Kaisa",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kaisa_71.jpg",
-      "imageFallback": ""
+      "imageFallback": "",
+      "formOf": "145070"
     },
     {
       "id": "18080",
@@ -77979,6 +78267,7 @@
       "championId": "Tristana",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Tristana_80.jpg",
       "imageFallback": "",
+      "formOf": "18079",
       "customFantome": true
     },
     {
@@ -110560,6 +110849,155 @@
       "parentSkinId": "107049"
     },
     {
+      "id": "92073",
+      "skinNum": 73,
+      "name": "Şanlı Riven",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin73/images/riven_splash_centered_73.skins_riven_skin73.jpg",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin73/images/riven_splash_centered_73.skins_riven_skin73.jpg",
+      "isPbe": true
+    },
+    {
+      "id": "92076",
+      "skinNum": 76,
+      "name": "Şanlı Riven (Altın)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Altın)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Gold)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin76/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin76/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92074",
+      "skinNum": 74,
+      "name": "Şanlı Riven (Bronz)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Bronz)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Bronze)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin74/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin74/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92079",
+      "skinNum": 79,
+      "name": "Şanlı Riven (Elmas)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Elmas)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Diamond)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin79/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin79/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92075",
+      "skinNum": 75,
+      "name": "Şanlı Riven (Gümüş)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Gümüş)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Silver)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin75/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin75/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92077",
+      "skinNum": 77,
+      "name": "Şanlı Riven (Platin)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Platin)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Platinum)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin77/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin77/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92082",
+      "skinNum": 82,
+      "name": "Şanlı Riven (Şampiyonluk)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Şampiyonluk)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Challenger)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin82/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin82/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92080",
+      "skinNum": 80,
+      "name": "Şanlı Riven (Ustalık)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Ustalık)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Master)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin80/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin80/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92081",
+      "skinNum": 81,
+      "name": "Şanlı Riven (Üstatlık)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Üstatlık)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Grandmaster)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin81/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin81/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
+      "id": "92078",
+      "skinNum": 78,
+      "name": "Şanlı Riven (Zümrüt)",
+      "champion": "Riven",
+      "nameTr": "Şanlı Riven (Zümrüt)",
+      "championTr": "Riven",
+      "nameEn": "Victorious Riven (Emerald)",
+      "championEn": "Riven",
+      "championId": "Riven",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin78/chromapreview.chroma_riven_victorious.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/riven/skins/skin78/chromapreview.chroma_riven_victorious.png",
+      "parentSkinId": "92073",
+      "isPbe": true
+    },
+    {
       "id": "13004",
       "skinNum": 4,
       "name": "Şanlı Ryze",
@@ -113960,9 +114398,8 @@
       "nameEn": "Cafe Cuties Neeko",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_50.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg"
     },
     {
       "id": "518057",
@@ -113974,10 +114411,9 @@
       "nameEn": "Cafe Cuties Neeko (Jasper)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin57/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin57/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_57.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518052",
@@ -113989,10 +114425,9 @@
       "nameEn": "Cafe Cuties Neeko (Aquamarine)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin52/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin52/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_52.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518058",
@@ -114004,10 +114439,9 @@
       "nameEn": "Cafe Cuties Neeko (Peridot)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin58/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin58/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_58.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518054",
@@ -114019,10 +114453,9 @@
       "nameEn": "Cafe Cuties Neeko (Pearl)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin54/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin54/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_54.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518056",
@@ -114034,10 +114467,9 @@
       "nameEn": "Cafe Cuties Neeko (Catseye)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin56/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin56/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_56.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518053",
@@ -114049,10 +114481,9 @@
       "nameEn": "Cafe Cuties Neeko (Obsidian)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin53/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin53/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_53.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518055",
@@ -114064,10 +114495,9 @@
       "nameEn": "Cafe Cuties Neeko (Rose Quartz)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin55/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin55/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_55.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "518051",
@@ -114079,10 +114509,9 @@
       "nameEn": "Cafe Cuties Neeko (Ruby)",
       "championEn": "Neeko",
       "championId": "Neeko",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin51/chromapreview.chroma_neeko_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin51/chromapreview.chroma_neeko_cafecuties.png",
-      "parentSkinId": "518050",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_51.jpg",
+      "imageFallback": "",
+      "parentSkinId": "518050"
     },
     {
       "id": "78033",
@@ -114730,9 +115159,8 @@
       "nameEn": "Cafe Cuties Zoe",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_45.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg"
     },
     {
       "id": "142049",
@@ -114744,10 +115172,9 @@
       "nameEn": "Cafe Cuties Zoe (Amethyst)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin49/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin49/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_49.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142052",
@@ -114759,10 +115186,9 @@
       "nameEn": "Cafe Cuties Zoe (Pearl)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin52/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin52/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_52.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142047",
@@ -114774,10 +115200,9 @@
       "nameEn": "Cafe Cuties Zoe (Catseye)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin47/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin47/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_47.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142053",
@@ -114789,10 +115214,9 @@
       "nameEn": "Cafe Cuties Zoe (Obsidian)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin53/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin53/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_53.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142051",
@@ -114804,10 +115228,9 @@
       "nameEn": "Cafe Cuties Zoe (Rose Quartz)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin51/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin51/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_51.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142050",
@@ -114819,10 +115242,9 @@
       "nameEn": "Cafe Cuties Zoe (Sapphire)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin50/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin50/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_50.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142046",
@@ -114834,10 +115256,9 @@
       "nameEn": "Cafe Cuties Zoe (Ruby)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin46/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin46/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_46.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "142048",
@@ -114849,10 +115270,9 @@
       "nameEn": "Cafe Cuties Zoe (Emerald)",
       "championEn": "Zoe",
       "championId": "Zoe",
-      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin48/chromapreview.chroma_zoe_cafecuties.png",
-      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin48/chromapreview.chroma_zoe_cafecuties.png",
-      "parentSkinId": "142045",
-      "isPbe": true
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_48.jpg",
+      "imageFallback": "",
+      "parentSkinId": "142045"
     },
     {
       "id": "17000",
@@ -128889,6 +129309,140 @@
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/base/images/yorick_splash_centered_0.jpg"
     },
     {
+      "id": "83059",
+      "skinNum": 59,
+      "name": "Yorick Baba",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin59/images/yorick_splash_centered_59.skins_yorick_skin59.jpg",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin59/images/yorick_splash_centered_59.skins_yorick_skin59.jpg",
+      "isPbe": true
+    },
+    {
+      "id": "83066",
+      "skinNum": 66,
+      "name": "Yorick Baba (İnci Beyazı)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (İnci Beyazı)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Pearl)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin66/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin66/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83062",
+      "skinNum": 62,
+      "name": "Yorick Baba (Kedigözü)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Kedigözü)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Catseye)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin62/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin62/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83065",
+      "skinNum": 65,
+      "name": "Yorick Baba (Obsidiyen)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Obsidiyen)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Obsidian)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin65/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin65/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83064",
+      "skinNum": 64,
+      "name": "Yorick Baba (Pembe Kuvars)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Pembe Kuvars)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Rose Quartz)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin64/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin64/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83061",
+      "skinNum": 61,
+      "name": "Yorick Baba (Safir)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Safir)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Sapphire)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin61/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin61/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83063",
+      "skinNum": 63,
+      "name": "Yorick Baba (Tanzanit)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Tanzanit)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Tanzanite)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin63/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin63/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83060",
+      "skinNum": 60,
+      "name": "Yorick Baba (Yakut)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Yakut)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Ruby)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin60/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin60/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
+      "id": "83067",
+      "skinNum": 67,
+      "name": "Yorick Baba (Zümrüt)",
+      "champion": "Yorick",
+      "nameTr": "Yorick Baba (Zümrüt)",
+      "championTr": "Yorick",
+      "nameEn": "Santa Yorick (Emerald)",
+      "championEn": "Yorick",
+      "championId": "Yorick",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin67/chromapreview.chroma_yorick_santa.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/yorick/skins/skin67/chromapreview.chroma_yorick_santa.png",
+      "parentSkinId": "83059",
+      "isPbe": true
+    },
+    {
       "id": "119003",
       "skinNum": 3,
       "name": "Yorumcu Draven",
@@ -129064,6 +129618,21 @@
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Irelia_11.jpg",
       "imageFallback": "",
       "parentSkinId": "39006"
+    },
+    {
+      "id": "39073",
+      "skinNum": 73,
+      "name": "Yüce Kılıç Irelia (Bulut Sisi)",
+      "champion": "Irelia",
+      "nameTr": "Yüce Kılıç Irelia (Bulut Sisi)",
+      "championTr": "Irelia",
+      "nameEn": "Divine Sword Irelia (Cloudmist)",
+      "championEn": "Irelia",
+      "championId": "Irelia",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/irelia/skins/skin73/chromapreview.chroma_irelia_poetry.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/irelia/skins/skin73/chromapreview.chroma_irelia_poetry.png",
+      "parentSkinId": "39006",
+      "isPbe": true
     },
     {
       "id": "39009",
@@ -129808,6 +130377,21 @@
       "hasClassic": true
     },
     {
+      "id": "16072",
+      "skinNum": 72,
+      "name": "Yücelik Yolu Soraka (Müreffeh)",
+      "champion": "Soraka",
+      "nameTr": "Yücelik Yolu Soraka (Müreffeh)",
+      "championTr": "Soraka",
+      "nameEn": "Immortal Journey Soraka (Halcyon)",
+      "championEn": "Soraka",
+      "championId": "Soraka",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/soraka/skins/skin72/chromapreview.chroma_soraka_poetry.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/soraka/skins/skin72/chromapreview.chroma_soraka_poetry.png",
+      "parentSkinId": "16037",
+      "isPbe": true
+    },
+    {
       "id": "16042",
       "skinNum": 42,
       "name": "Yücelik Yolu Soraka (Obsidiyen)",
@@ -130490,6 +131074,21 @@
       "championId": "Fiora",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Fiora_22.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/fiora/skins/skin22/images/fiora_splash_centered_22.jpg"
+    },
+    {
+      "id": "114109",
+      "skinNum": 109,
+      "name": "Yükselen Kılıç Fiora (Şaşaalı)",
+      "champion": "Fiora",
+      "nameTr": "Yükselen Kılıç Fiora (Şaşaalı)",
+      "championTr": "Fiora",
+      "nameEn": "Soaring Sword Fiora (Aureate)",
+      "championEn": "Fiora",
+      "championId": "Fiora",
+      "image": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/fiora/skins/skin109/chromapreview.chroma_fiora_poetry.png",
+      "imageFallback": "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/characters/fiora/skins/skin109/chromapreview.chroma_fiora_poetry.png",
+      "parentSkinId": "114022",
+      "isPbe": true
     },
     {
       "id": "51039",
