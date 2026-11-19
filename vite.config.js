@@ -173,6 +173,84 @@ function adminDevApiPlugin(adminPassword) {
           return;
         }
 
+        if (req.method === 'POST' && url.pathname === '/api/suggestions') {
+          const chunks = [];
+          req.on('data', (chunk) => { chunks.push(chunk); });
+          req.on('end', async () => {
+            try {
+              const bodyBuffer = Buffer.concat(chunks);
+              const headers = new Headers();
+              for (const [key, value] of Object.entries(req.headers)) {
+                if (value) headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+              }
+              const webRequest = new Request(`http://${req.headers.host}${req.url}`, {
+                method: req.method,
+                headers,
+                body: bodyBuffer.length > 0 ? bodyBuffer : undefined
+              });
+              const formData = await webRequest.formData();
+
+              const name = String(formData.get('name') || '').trim().slice(0, 100);
+              const title = String(formData.get('title') || '').trim().slice(0, 120);
+              const description = String(formData.get('description') || '').trim().slice(0, 2000);
+              const videoLink = String(formData.get('videoLink') || '').trim().slice(0, 2048);
+              const imageFile = formData.get('image');
+
+              if (!title || !description) return sendJson(400, { error: 'Başlık ve öneri zorunludur.' });
+              if (videoLink && !/^https?:\/\//i.test(videoLink)) return sendJson(400, { error: 'Video linki geçerli bir http(s) URL olmalıdır.' });
+
+              if (imageFile && imageFile.size > 0) {
+                if (imageFile.size > 8 * 1024 * 1024) return sendJson(413, { error: 'Dosya çok büyük. Maksimum 8MB.' });
+                if (!String(imageFile.type || '').startsWith('image/')) return sendJson(400, { error: 'Sadece resim dosyası yüklenebilir.' });
+              }
+
+              const webhookUrl = process.env.SUGGESTION_WEBHOOK_URL;
+              if (webhookUrl) {
+                const fields = [];
+                fields.push({ name: 'Başlık', value: title.slice(0, 1024) });
+                fields.push({ name: 'Öneri', value: description.slice(0, 1024) });
+                if (name) fields.push({ name: 'Gönderen', value: name.slice(0, 1024), inline: true });
+                if (videoLink) fields.push({ name: 'Video', value: videoLink.slice(0, 1024) });
+
+                const embed = {
+                  title: '💡 Yeni Öneri',
+                  color: 5814783,
+                  fields: fields,
+                  footer: { text: 'Exist LOL Skin Finder • Öneri' },
+                  timestamp: new Date().toISOString()
+                };
+
+                if (imageFile && imageFile.size > 0) {
+                  embed.image = { url: `attachment://${imageFile.name || 'suggestion.png'}` };
+                  const discordForm = new FormData();
+                  discordForm.append('payload_json', JSON.stringify({ embeds: [embed] }));
+                  discordForm.append('files[0]', imageFile, imageFile.name || 'suggestion.png');
+                  const discordRes = await fetch(webhookUrl, { method: 'POST', body: discordForm });
+                  if (!discordRes.ok) {
+                    console.error('[Vite Dev] Suggestion webhook error:', discordRes.status);
+                    return sendJson(502, { error: 'Öneri Discord\'a gönderilemedi.' });
+                  }
+                } else {
+                  const discordRes = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                  });
+                  if (!discordRes.ok) {
+                    console.error('[Vite Dev] Suggestion webhook error:', discordRes.status);
+                    return sendJson(502, { error: 'Öneri Discord\'a gönderilemedi.' });
+                  }
+                }
+              } else {
+                console.log('[Vite Dev] SUGGESTION_WEBHOOK_URL ayarlı değil — dev modunda başarı simüle ediliyor.');
+              }
+
+              return sendJson(200, { success: true });
+            } catch (error) { console.error('[Vite Admin] Suggestion hatası:', error); return sendJson(500, { error: 'İşlem başarısız.' }); }
+          });
+          return;
+        }
+
         if (req.method === 'POST' && url.pathname === '/api/admin/updates') {
           if (!verifyToken(req)) {
             return sendJson(401, { error: 'Bu işlem için yetkilendirme gerekli.' });

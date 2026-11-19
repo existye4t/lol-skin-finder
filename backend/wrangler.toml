@@ -12,3 +12,4 @@ REPO_BRANCH = "main"
 # - ADMIN_PASSWORD: Your strong admin password
 # - JWT_SECRET: A 32+ character random string for signing admin session tokens
 # - BUG_REPORT_WEBHOOK_URL: Discord webhook URL for receiving bug reports (public endpoint, no auth)
+# - SUGGESTION_WEBHOOK_URL: Discord webhook URL for receiving user suggestions (separate from bug reports)

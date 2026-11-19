@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Derlenecek Git ref / branch / commit (boşsa tetikleyen commit kullanılır)'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -20,6 +27,8 @@ jobs:
     steps:
       - name: Kaynak kodu al
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || '' }}
       - name: Node.js kur
         uses: actions/setup-node@v6
         with:
@@ -30,7 +39,7 @@ jobs:
       - name: Siteyi derle
         run: npm run build
       - name: GitHub Pages paketi oluştur
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
   deploy:

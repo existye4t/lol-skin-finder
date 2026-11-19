@@ -27,22 +27,22 @@ https://existye4t.github.io/lol-skin-finder/
 
 ---
 
-## 🧩 Veri Kaynağı
+## 🧩 Veri Kaynağı ve Koleksiyonlar (16.22+)
 
-Skin verileri Riot Games'in resmi **Data Dragon** yayınlarından oluşturulur.
+Skin verileri ve `.fantome` paket bağlantıları iki ana kaynaktan senkronize edilir:
 
-`npm run update-data` komutu güncel sürümü tespit eder, şampiyonların skin bilgilerini indirir ve uygulamanın hızlı arama yapabilmesi için `public/data/skins.json` dosyasını oluşturur.
+1. **Riot Games Data Dragon & CommunityDragon** — Canlı sunucu ve PBE skin/chroma meta verileri, Türkçe ve İngilizce yerelleştirmeler.
+2. **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)** — `.fantome` paketlerinin tamamı doğrudan bu kaynak repodan indirilir (bu repoya yeni `.fantome` ikili dosyaları kopyalanmaz).
 
-Riot Skin ID sistemi, şampiyon anahtarı ve üç haneli skin numarasının birleştirilmesiyle oluşturulur.
+### Koleksiyonlar
+* **Skinler (`skins/` + `PBE/`)** — Canlı sunucudaki tüm şampiyon skinleri, chromalar, form/varyant paketleri ve `PBE` etiketli önizleme skinleri aynı sekmede listelenir. Bir PBE skini canlı sunucuya çıktığında `PBE` rozeti otomatik olarak kalkar.
+* **Rainbow (`rainbow/`)** — Oyun içinde `Ctrl + 5` kısayoluyla chroma değiştirmeyi sağlayan Rainbow paketleri (yalnızca Rainbow sekmesinde aranır; ayrıca desteklenen skinlerin detay penceresinde `Rainbow sürümü →` bağlantısıyla erişilir).
+* **Classic (`classic/`)** — League Classic modu için hazırlanmış özel şampiyon skin ve chroma paketleri (yalnızca Classic sekmesinde aranır).
 
-Örneğin:
-
-```text
-Twitch = 29
-Omega Squad = 004
-
-Riot Skin ID = 29004
-```
+> **Önemli Uyarılar:**
+> * Kaynak repodaki paketler otomatik olarak üretilmektedir ve tek tek test edilmemiştir; bazı skinlerde veya formlarda oyun içi görsel/ses sorunları yaşanabilir.
+> * **PBE** etiketli içerikler önizleme sürümüdür; canlı sunucuya çıkmadan önce değişebilir veya kararsız çalışabilir.
+> * Kaynak paket altyapısı ve araçları için [Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental), [bettie9/Sunshine](https://github.com/bettie9/Sunshine) ve [CommunityDragon](https://www.communitydragon.org/) projelerine teşekkürler.
 
 ---
 
@@ -84,31 +84,49 @@ lol-skin-finder/
 
 ---
 
-## 🔄 Veri Güncelleme
+## 🔄 Veri Güncelleme ve Manifest Sistemi
 
-Yeni League of Legends skinleri yayınlandığında veri dosyasını yeniden oluşturmak için:
+Yeni `.fantome` dosyaları repoya kopyalanmaz. Bunun yerine `scripts/prepare-fantome.mjs` GitHub Git Trees API üzerinden kaynak repoyu klonlamadan tarayarak `public/data/fantome-manifest.json` dosyasını üretir. Eski yerel `public/fantome/*.fantome` dosyaları silinmez (ENABLE_LEGACY_FANTOME bayrağı yalnızca manifest üretiminde kaynak repoda karşılığı bulunmayan 6 sahipsiz girdiyi [ID: 234994–234999] kontrol eder).
+
+Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
 
 ```bash
-npm run update-data
+npm run sync-data
 ```
 
-komutunu çalıştırman yeterlidir.
+Komutları ayrı ayrı çalıştırmak için:
 
-Bu işlem Riot Data Dragon üzerinden güncel skin verilerini alarak uygulamanın kullandığı `skins.json` dosyasını yeniler.
+```bash
+# 1. Kaynak repodan Git Trees API + indekslerle fantome-manifest.json üret
+npm run prepare-fantome
+
+# 2. Data Dragon + CommunityDragon + manifest ile skins.json, rainbow.json, classic.json üret
+npm run update-data
+
+# 3. Şema, Trees API varlık kontrolü, URL encode ve örneklem HEAD doğrulaması
+npm run check-links
+```
+
+> **GitHub Actions Ayarı Gereksinimi:** `.github/workflows/sync-skins.yml` iş akışının büyük değişikliklerde veya yama geçişlerinde otomatik Pull Request açabilmesi için depo ayarlarında **Settings → Actions → General → Workflow permissions** altında **"Allow GitHub Actions to create and approve pull requests"** seçeneği işaretlenmelidir. `workflow_dispatch` üzerinden `dry_run: true` seçildiğinde ise repo üzerinde hiçbir commit/PR oluşturulmaz, yalnızca özet loglanır. `force_deploy: true` seçildiğinde ise veri değişikliği olmasa dahi GitHub Pages deploy akışı canlı olarak tetiklenir (`dry_run: true` önceliklidir).
 
 ---
 
-## 📥 Fantome Dosyaları
+## 🛑 Geri Alma (Rollback) Prosedürü
 
-Uygulama desteklenen skinler için `.fantome` dosyalarını da gösterebilir.
+Herhangi bir beklenmeyen durumda sistemi hızla önceki kararlı duruma döndürmek için:
 
-```bash
-npm run prepare-fantome
-```
+1. **Merge'i Geri Alma (Gerçek Rollback):**
+   Frontend ve manifest sistemini tek adımda eski yerel `public/fantome/*.fantome` yapısına döndürmenin kesin ve doğrudan yolu merge commit'ini geri almaktır (yerel fantome arşivi depoda eksiksiz korunmaktadır):
+   ```bash
+   git revert -m 1 <merge-commit-hash>
+   git push origin main
+   ```
 
-komutu, belirtilen skin arşivindeki Fantome dosyalarını uygulamanın kullandığı yapıya hazırlar.
+2. **Otomatik Senkronizasyonu Durdurma:**
+   GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
 
-Bir skin için ilgili Fantome dosyası mevcutsa detay ekranındaki indirme seçeneği aktif hale gelir.
+3. **Manifest Üretimi Legacy Bayrağı:**
+   `scripts/config.mjs` içerisindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca manifest üretim scriptini (`prepare-fantome.mjs`) etkiler; kaynak repoda karşılığı bulunmayan 6 adet eski yerel dosya girdisinin (ID: 234994–234999) manifest'te `enabled` işaretlenmesini belirler (depodaki 9.096 eski yerel dosyadan 9.090'ı yeni kaynakta birebir mevcuttur; yalnızca bu 6 dosya kaynakta yer almamaktadır). Frontend çalışma zamanında eski yerel servise anında dönüş sağlamaz.
 
 ---
 
