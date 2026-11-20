@@ -19,6 +19,33 @@ function holdRequest(page, pathname) {
   return { routed, release, requests };
 }
 
+test('top-right controls stay at the top of the document when scrolling', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(site, { waitUntil: 'domcontentloaded' });
+  const actions = page.locator('.top-actions');
+  const settings = page.locator('#appearance-toggle');
+
+  for (const width of [1440, 375]) {
+    await page.setViewportSize({ width, height: 820 });
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await expect(settings).toBeInViewport({ ratio: 1 });
+    const initial = await actions.boundingBox();
+    expect(initial.y).toBeGreaterThanOrEqual(0);
+    expect(initial.x + initial.width).toBeLessThanOrEqual(width);
+
+    await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(400);
+    await expect(actions).not.toBeInViewport();
+    const documentTop = await actions.evaluate(el => el.getBoundingClientRect().top + window.scrollY);
+    expect(documentTop).toBeGreaterThanOrEqual(0);
+    expect(documentTop).toBeLessThan(64);
+  }
+
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await settings.click();
+  await expect(page.locator('#appearance-dialog')).toBeVisible();
+});
+
 test('Discord footer clears the results and scroll button across collections and screen sizes', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const invite = 'https://discord.gg/fixture';

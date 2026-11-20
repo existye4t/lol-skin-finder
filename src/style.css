@@ -630,7 +630,7 @@ a:focus-visible,
 }
 
 .top-actions {
-  position: fixed;
+  position: absolute;
   z-index: 100;
   top: 24px;
   right: 28px;
