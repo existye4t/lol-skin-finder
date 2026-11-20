@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { skinShareCollection } from '../src/skin-share.js';
 import {
-  catalogFiles, collections, escapeHtml, previewSources, shareArtDirectory, shareArtFile, shareArtWidth, shareArtHeight
+  catalogFiles, escapeHtml, previewSources, shareArtDirectory, shareArtFile, shareArtWidth, shareArtHeight,
+  shareCardText, shareLanguages
 } from './skin-share-pages.mjs';
 
 const width = shareArtWidth;
@@ -40,14 +41,14 @@ const favicon = await sharp(await readFile(new URL('../favicon.png', import.meta
 const wordmark = await renderText('Exist Skins', { size: 14, weight: 'semibold', color: '#e9e9ed', spacing: 240 });
 const rule = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${px(1)}" height="${px(310)}"><rect width="100%" height="100%" fill="#27272b"/></svg>`);
 
-async function cardLayers(skin, collection) {
-  const name = (skin.nameTr || skin.name || skin.nameEn).trim();
+async function cardLayers(skin, collection, lang) {
+  const { name, collectionLabel } = shareCardText(skin, collection, lang);
   let title;
   for (const size of [40, 36, 32, 28, 24]) {
     title = await renderText(name, { size, weight: 'semibold', color: '#f3f3f5', spacing: -570 });
     if (title.info.width <= textWidth && title.info.height <= px(126)) break;
   }
-  const meta = await renderText(`${collections[collection]}  /  Riot ID ${skin.id}`, {
+  const meta = await renderText(`${collectionLabel}  /  Riot ID ${skin.id}`, {
     size: 12, weight: 'medium', color: '#b5b5bd', spacing: 170
   });
   return [
@@ -82,15 +83,15 @@ async function fetchArtwork(url) {
 async function encodeCard(composite, maxCardSize) {
   const { data, info } = await composite.raw().toBuffer({ resolveWithObject: true });
   const encoder = sharp(data, { raw: { width, height, channels: info.channels } });
-  let jpeg;
-  for (const quality of [88, 84, 80, 76, 72, 68, 64, 60, 56, 52]) {
-    jpeg = await encoder.clone().jpeg({ quality, chromaSubsampling: '4:4:4', mozjpeg: true }).toBuffer();
-    if (jpeg.length <= maxCardSize) break;
+  let webp;
+  for (const quality of [86, 80, 72, 60, 48]) {
+    webp = await encoder.clone().webp({ quality, smartSubsample: true, effort: 3 }).toBuffer();
+    if (webp.length <= maxCardSize) break;
   }
-  return jpeg;
+  return webp;
 }
 
-async function makeCard(skin, collection, output) {
+async function makeCards(skin, collection, variants) {
   for (const url of previewSources(skin)) {
     const bytes = await fetchArtwork(url);
     if (!bytes) continue;
@@ -106,11 +107,14 @@ async function makeCard(skin, collection, output) {
     } catch {
       continue;
     }
-    const composite = sharp({ create: { width, height, channels: 3, background: '#111113' } })
-      .composite([{ input: image, left: artworkLeft, top: artworkInset }, ...await cardLayers(skin, collection)]);
-    const card = await encodeCard(composite, (skin.parentSkinId ? 58 : 78) * 1024);
-    await writeFile(output + '.tmp', card);
-    await rename(output + '.tmp', output);
+    for (const [art, lang] of variants) {
+      const composite = sharp({ create: { width, height, channels: 3, background: '#111113' } })
+        .composite([{ input: image, left: artworkLeft, top: artworkInset }, ...await cardLayers(skin, collection, lang)]);
+      const card = await encodeCard(composite, (skin.parentSkinId ? 25 : 45) * 1024);
+      const output = resolve(shareArtDirectory, art);
+      await writeFile(output + '.tmp', card);
+      await rename(output + '.tmp', output);
+    }
     return true;
   }
   return false;
@@ -125,20 +129,24 @@ for (const file of catalogFiles) {
     const collection = skinShareCollection(skin);
     if (!/^[0-9]+$/.test(skin.id) || (ids.size && !ids.has(skin.id))) continue;
     if (collection !== file && !(collection === 'pbe' && file === 'skins')) continue;
-    const art = shareArtFile(skin, collection);
-    if (!cached.has(art)) jobs.push({ skin, collection, art });
+    const variants = new Map(shareLanguages
+      .map(lang => [shareArtFile(skin, collection, lang), lang])
+      .filter(([art]) => !cached.has(art)));
+    if (variants.size) jobs.push({ skin, collection, variants });
   }
 }
 
 let next = 0;
 let completed = 0;
+let generated = 0;
 await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, async () => {
   while (next < jobs.length) {
-    const { skin, collection, art } = jobs[next++];
-    if (!await makeCard(skin, collection, resolve(shareArtDirectory, art))) missing.push(`${collection}/${skin.id}`);
+    const { skin, collection, variants } = jobs[next++];
+    if (await makeCards(skin, collection, variants)) generated += variants.size;
+    else missing.push(`${collection}/${skin.id}`);
     completed += 1;
     if (completed % 500 === 0) console.log(`[share-art] ${completed}/${jobs.length} checked.`);
   }
 }));
-console.log(`[share-art] Added ${completed - missing.length} images; ${missing.length} without reachable artwork; ${cached.size} cached files.`);
+console.log(`[share-art] Added ${generated} images; ${missing.length} skins without reachable artwork; ${cached.size} cached files.`);
 if (missing.length) console.warn('[share-art] Unavailable examples:', missing.slice(0, 20).join(', '));
