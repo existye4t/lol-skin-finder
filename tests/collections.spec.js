@@ -66,7 +66,15 @@ test('shared URLs expose crawler metadata and select the right collection and sk
     const html = await preview.text();
     expect(html).toContain('<meta property="og:site_name" content="Exist Skins">');
     expect(html).toContain(`Riot ID ${id}`);
-    expect(html.match(/property="og:image" content="([^"]+)"/)?.[1]).toMatch(imagePattern);
+    const image = html.match(/property="og:image" content="([^"]+)"/)?.[1];
+    if (image?.includes('/share-art/')) {
+      const artwork = await request.get(new URL(image).pathname.replace(/^\/lol-skin-finder\//, site));
+      expect(artwork.status()).toBe(200);
+      expect(artwork.headers()['content-type']).toMatch(/^image\/jpeg/);
+      expect(html).toContain('<meta property="og:image:width" content="720">');
+    } else {
+      expect(image).toMatch(imagePattern);
+    }
     await page.goto(link, { waitUntil: 'domcontentloaded' });
     await expect(page).toHaveURL(`${site}?collection=${collection}&skin=${id}`);
     await expect(page.getByRole('tab', { name: tab, exact: true })).toHaveAttribute('aria-selected', 'true');
@@ -91,7 +99,7 @@ test('copy link writes the exact collection and ID and offers a selectable URL i
   await page.goto(`${site}?collection=rainbow&skin=103015&utm_source=example`, { waitUntil: 'domcontentloaded' });
   const copy = page.getByRole('button', { name: 'Bağlantıyı kopyala' });
   await copy.click();
-  const href = `${site}share/rainbow/103015.html`;
+  const href = `${site}share/rainbow/103015.html?preview=2`;
   expect(await page.evaluate(() => window.copiedSkinUrl)).toBe(href);
   await expect(page.locator('#modal-share-status')).toHaveText('Bağlantı kopyalandı.');
 
