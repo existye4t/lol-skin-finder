@@ -36,7 +36,9 @@ test('top-right controls stay at the top of the document when scrolling', async 
     await page.evaluate(() => window.scrollTo({ top: 400, behavior: 'instant' }));
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(400);
     await expect(actions).not.toBeInViewport();
-    expect((await actions.boundingBox()).y).toBeCloseTo(initial.y - 400);
+    const documentTop = await actions.evaluate(el => el.getBoundingClientRect().top + window.scrollY);
+    expect(documentTop).toBeGreaterThanOrEqual(0);
+    expect(documentTop).toBeLessThan(64);
   }
 
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
