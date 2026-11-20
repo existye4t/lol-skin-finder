@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-19T20:43:50.788Z",
-  "sourceRevision": "bf11ee2e2e76320c463904183a6acbaec5a0b11d",
-  "baseUrl": "https://raw.githubusercontent.com/Yimikami/LeagueSkins-Experimental/bf11ee2e2e76320c463904183a6acbaec5a0b11d/",
+  "generatedAt": "2026-11-20T20:28:15.236Z",
+  "sourceRevision": "46275c7c7af7cc6bbf362de23290859ce7901b15",
+  "baseUrl": "https://raw.githubusercontent.com/Yimikami/LeagueSkins-Experimental/46275c7c7af7cc6bbf362de23290859ce7901b15/",
   "sourceRepo": "Yimikami/LeagueSkins-Experimental",
   "sourceBranch": "main",
   "legacyBasePath": "/fantome/",
@@ -116808,8 +116808,8 @@
       "path": "skins/Caitlyn/Arcane Enforcer Caitlyn.fantome",
       "status": "enabled",
       "enabled": true,
-      "blobSha": "d987907fbb77e2e7a99a9fc707bf88a249dd24a1",
-      "bytes": 486838
+      "blobSha": "3efa06d3828a90da119489d5a4ea59e2520b1bb1",
+      "bytes": 28915
     },
     "skins:51029": {
       "c": "skins",
