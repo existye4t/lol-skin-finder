@@ -1,6 +1,7 @@
 import './style.css';
 import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders';
 import { downloadZip } from 'client-zip';
+import { skinShareCollection, skinSharePath } from './skin-share.js';
 
 const APPEARANCE_STORAGE_KEY = 'exist-lol-skin-appearance';
 const APPEARANCE_VALUES = ['mono', 'gold', 'neon'];
@@ -4112,11 +4113,7 @@ modalShareButton?.addEventListener('click', async () => {
   const skin = group?.primary;
   if (!skin) return;
 
-  const url = new URL(location.href);
-  url.search = '';
-  url.hash = '';
-  url.searchParams.set('collection', skin.isPbe ? 'pbe' : (skin.collection || 'skins'));
-  url.searchParams.set('skin', skin.id);
+  const url = new URL(skinSharePath(skinShareCollection(skin), skin.id), new URL('./', location.href));
 
   try {
     await navigator.clipboard.writeText(url.href);

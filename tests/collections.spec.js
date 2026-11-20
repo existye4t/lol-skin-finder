@@ -49,21 +49,34 @@ test('Riot ID search finds one exact skin or chroma without fuzzy hits', async (
   await expect(options.first()).toContainText('Yıldönümü Ahri');
 });
 
-test('shared URLs select the right collection and skin, including a chroma', async ({ page }) => {
+test('shared URLs expose crawler metadata and select the right collection and skin', async ({ page, request }) => {
   const modal = page.locator('#skin-modal');
-  for (const [collection, tab, id] of [
-    ['skins', 'Skinler', '103060'],
-    ['pbe', 'PBE', pbeChroma?.id],
-    ['rainbow', 'Rainbow', '103015'],
-    ['classic', 'Classic', '60062031']
+  for (const [collection, tab, id, imagePattern] of [
+    ['skins', 'Skinler', '99007', /Lux_7\.jpg/],
+    ['skins', 'Skinler', '103060', /skin60\/chromapreview/],
+    ['pbe', 'PBE', pbeChroma?.id, /raw\.communitydragon\.org\/pbe\//],
+    ['rainbow', 'Rainbow', '103015', /Ahri_15\.jpg/],
+    ['classic', 'Classic', '60062031', /communitydragon\.org\/16\.21\//]
   ]) {
     if (!id) continue;
-    await page.goto(`${site}?collection=${collection}&skin=${id}`, { waitUntil: 'domcontentloaded' });
+    const folder = collection === 'pbe' ? 'skins' : collection;
+    const link = `${site}share/${folder}/${id}.html`;
+    const preview = await request.get(link, { headers: { 'user-agent': 'Discordbot/2.0' }, maxRedirects: 0 });
+    expect(preview.status()).toBe(200);
+    const html = await preview.text();
+    expect(html).toContain('<meta property="og:site_name" content="Exist Skins">');
+    expect(html).toContain(`Riot ID ${id}`);
+    expect(html.match(/property="og:image" content="([^"]+)"/)?.[1]).toMatch(imagePattern);
+    await page.goto(link, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(`${site}?collection=${collection}&skin=${id}`);
     await expect(page.getByRole('tab', { name: tab, exact: true })).toHaveAttribute('aria-selected', 'true');
     await expect(modal).toBeVisible();
     await expect(modal.locator('#modal-skin-id')).toContainText(id);
     await expect(page.locator('#results .skin-card')).toHaveCount(1);
   }
+
+  const home = await request.get(site);
+  expect(await home.text()).toMatch(/property="og:image"\s+content="[^"]+\/preview-v2\.png"/);
 });
 
 test('copy link writes the exact collection and ID and offers a selectable URL if blocked', async ({ page }) => {
@@ -78,7 +91,7 @@ test('copy link writes the exact collection and ID and offers a selectable URL i
   await page.goto(`${site}?collection=rainbow&skin=103015&utm_source=example`, { waitUntil: 'domcontentloaded' });
   const copy = page.getByRole('button', { name: 'Bağlantıyı kopyala' });
   await copy.click();
-  const href = `${site}?collection=rainbow&skin=103015`;
+  const href = `${site}share/rainbow/103015.html`;
   expect(await page.evaluate(() => window.copiedSkinUrl)).toBe(href);
   await expect(page.locator('#modal-share-status')).toHaveText('Bağlantı kopyalandı.');
 
