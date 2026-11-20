@@ -71,7 +71,8 @@ test('shared URLs expose crawler metadata and select the right collection and sk
     if (image?.includes('/share-art/')) {
       const artwork = await request.get(new URL(image).pathname.replace(/^\/lol-skin-finder\//, site));
       expect(artwork.status()).toBe(200);
-      expect(artwork.headers()['content-type']).toMatch(/^image\/jpeg/);
+      expect(artwork.headers()['content-type']).toMatch(/^image\/webp/);
+      expect(html).toContain('<meta property="og:image:type" content="image/webp">');
       expect(html).toContain('<meta property="og:image:width" content="1200">');
       expect(html).toContain('<meta property="og:image:height" content="630">');
     } else {
@@ -101,7 +102,7 @@ test('copy link writes the exact collection and ID and offers a selectable URL i
   await page.goto(`${site}?collection=rainbow&skin=103015&utm_source=example`, { waitUntil: 'domcontentloaded' });
   const copy = page.getByRole('button', { name: 'Bağlantıyı kopyala' });
   await copy.click();
-  const href = `${site}share/rainbow/103015.html?preview=4`;
+  const href = `${site}share/rainbow/103015.html?preview=5`;
   expect(await page.evaluate(() => window.copiedSkinUrl)).toBe(href);
   await expect(page.locator('#modal-share-status')).toHaveText('Bağlantı kopyalandı.');
 
@@ -111,6 +112,46 @@ test('copy link writes the exact collection and ID and offers a selectable URL i
   await expect(fallback).toBeVisible();
   await expect(fallback).toBeFocused();
   await expect(fallback).toHaveValue(href);
+});
+
+test('copied skin links serve card text in the language selected when copying', async ({ page, request }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { async writeText(value) { window.copiedSkinUrl = value; } }
+    });
+  });
+  const images = [];
+  for (const [lang, path, name, label, copyLabel] of [
+    ['tr', '238038.html', 'Arş Hükümdarı Zed', 'Skinler', 'Bağlantıyı kopyala'],
+    ['en', '238038.en.html', 'Empyrean Zed', 'Skins', 'Copy link']
+  ]) {
+    await page.goto(site, { waitUntil: 'domcontentloaded' });
+    await page.locator('#lang-switch').click();
+    await page.locator(`#lang-menu [data-lang="${lang}"]`).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', lang);
+    await page.goto(`${site}?collection=skins&skin=238038`, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: copyLabel }).click();
+    const copied = await page.evaluate(() => window.copiedSkinUrl);
+    expect(copied).toBe(`${site}share/skins/${path}?preview=5`);
+
+    const preview = await request.get(copied, { headers: { 'user-agent': 'Discordbot/2.0' }, maxRedirects: 0 });
+    expect(preview.status()).toBe(200);
+    const html = await preview.text();
+    expect(html).toContain(`<html lang="${lang}">`);
+    expect(html).toContain(`<meta property="og:title" content="${name}">`);
+    expect(html).toContain(` • ${label} • Riot ID 238038`);
+    images.push(html.match(/property="og:image" content="([^"]+)"/)?.[1]);
+
+    await page.goto(copied, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(`${site}?collection=skins&skin=238038`);
+    await expect(page.locator('#modal-skin-id')).toContainText('238038');
+  }
+
+  if (images.some(image => image?.includes('/share-art/'))) {
+    expect(images[0]).toMatch(/\/share-art\/[0-9a-f]+\.webp$/);
+    expect(images[1]).toMatch(/\/share-art\/[0-9a-f]+\.webp$/);
+    expect(images[0]).not.toBe(images[1]);
+  }
 });
 
 test('top-right controls stay at the top of the document when scrolling', async ({ page }) => {

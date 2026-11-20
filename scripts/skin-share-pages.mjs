@@ -5,7 +5,8 @@ import { sharePreviewVersion, skinShareCollection, skinSharePath } from '../src/
 
 const site = 'https://existye4t.github.io/lol-skin-finder/';
 const brand = 'Exist Skins';
-export const collections = { skins: 'Skinler', pbe: 'PBE', rainbow: 'Rainbow', classic: 'Classic' };
+const collections = { pbe: 'PBE', rainbow: 'Rainbow', classic: 'Classic' };
+export const shareLanguages = ['tr', 'en'];
 export const catalogFiles = ['skins', 'rainbow', 'classic'];
 export const shareArtDirectory = 'work/share-art';
 export const shareArtWidth = 1200;
@@ -25,27 +26,37 @@ export function previewSources(skin) {
   }))];
 }
 
-export function shareArtFile(skin, collection) {
-  const identity = [sharePreviewVersion, collection, skin.id, skin.nameTr || skin.name || skin.nameEn, previewSources(skin)];
-  return createHash('sha256').update(JSON.stringify(identity)).digest('hex').slice(0, 24) + '.jpg';
+export function shareCardText(skin, collection, lang) {
+  const english = lang === 'en';
+  return {
+    name: (english ? skin.nameEn || skin.nameTr || skin.name : skin.nameTr || skin.name || skin.nameEn).trim(),
+    collectionLabel: collection === 'skins' ? (english ? 'Skins' : 'Skinler') : collections[collection]
+  };
 }
 
-function renderSharePage(skin, collection, path, brandedArt = '') {
-  const name = skin.nameTr || skin.name || skin.nameEn;
-  const champion = skin.championTr || skin.champion || skin.championEn;
+export function shareArtFile(skin, collection, lang) {
+  const identity = [sharePreviewVersion, skin.id, shareCardText(skin, collection, lang), previewSources(skin)];
+  return createHash('sha256').update(JSON.stringify(identity)).digest('hex').slice(0, 24) + '.webp';
+}
+
+function renderSharePage(skin, collection, path, lang, brandedArt = '') {
+  const { name, collectionLabel } = shareCardText(skin, collection, lang);
+  const champion = lang === 'en'
+    ? skin.championEn || skin.championTr || skin.champion
+    : skin.championTr || skin.champion || skin.championEn;
   const title = escapeHtml(name);
-  const description = escapeHtml(`${champion} • ${collections[collection]} • Riot ID ${skin.id}`);
+  const description = escapeHtml(`${champion} • ${collectionLabel} • Riot ID ${skin.id}`);
   const image = escapeHtml(brandedArt ? new URL(`share-art/${brandedArt}`, site).href
     : previewSources(skin)[0] || new URL('preview-v2.png', site).href);
   const brandedMetadata = brandedArt
-    ? `\n  <meta property="og:image:width" content="${shareArtWidth}">\n  <meta property="og:image:height" content="${shareArtHeight}">`
+    ? `\n  <meta property="og:image:type" content="image/webp">\n  <meta property="og:image:width" content="${shareArtWidth}">\n  <meta property="og:image:height" content="${shareArtHeight}">`
     : '';
   const shareUrl = new URL(path, site);
   if (brandedArt) shareUrl.searchParams.set('preview', sharePreviewVersion);
   const canonical = escapeHtml(shareUrl.href);
   const target = escapeHtml(`../../?${new URLSearchParams({ collection, skin: skin.id })}`);
   return `<!doctype html>
-<html lang="tr">
+<html lang="${lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -69,7 +80,7 @@ function renderSharePage(skin, collection, path, brandedArt = '') {
   <main>
     <p>${brand}</p>
     <h1>${title}</h1>
-    <a id="open-skin" href="${target}">Skin detayını aç</a>
+    <a id="open-skin" href="${target}">${lang === 'en' ? 'Open skin details' : 'Skin detayını aç'}</a>
   </main>
   <script>location.replace(document.getElementById('open-skin').href);</script>
 </body>
@@ -85,6 +96,7 @@ export function skinSharePages(dataDir) {
     async writeBundle({ dir }) {
       let count = 0;
       let brandedCount = 0;
+      const copiedImages = new Set();
       const artwork = new Set(await readdir(shareArtDirectory).catch(error => {
         if (error.code !== 'ENOENT') throw error;
         return [];
@@ -99,26 +111,32 @@ export function skinSharePages(dataDir) {
             if (collection !== file && !(collection === 'pbe' && file === 'skins')) {
               throw new Error(`Unexpected collection for share skin ${skin.id} in ${file}.json`);
             }
-            const fileName = skinSharePath(collection, skin.id);
-            const art = shareArtFile(skin, collection);
-            const branded = artwork.has(art);
-            if (branded) {
-              await copyFile(resolve(shareArtDirectory, art), resolve(dir, 'share-art', art));
-              brandedCount += 1;
+            for (const lang of shareLanguages) {
+              const fileName = skinSharePath(collection, skin.id, lang);
+              const art = shareArtFile(skin, collection, lang);
+              const branded = artwork.has(art);
+              if (branded) {
+                brandedCount += 1;
+                if (!copiedImages.has(art)) {
+                  copiedImages.add(art);
+                  await copyFile(resolve(shareArtDirectory, art), resolve(dir, 'share-art', art));
+                }
+              }
+              await writeFile(resolve(dir, fileName), renderSharePage(skin, collection, fileName, lang, branded ? art : ''));
             }
-            await writeFile(resolve(dir, fileName), renderSharePage(skin, collection, fileName, branded ? art : ''));
           }));
         }
-        count += skins.length;
+        count += skins.length * shareLanguages.length;
       }
-      console.log(`[skin-share-pages] Generated ${count} share pages with ${brandedCount} branded images.`);
+      console.log(`[skin-share-pages] Generated ${count} share pages, ${brandedCount} branded, using ${copiedImages.size} unique images.`);
     },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const path = req.url.split('?')[0];
-        const match = /^\/share\/(skins|rainbow|classic)\/([0-9]+)\.html$/.exec(path);
+        const match = /^\/share\/(skins|rainbow|classic)\/([0-9]+)(\.en)?\.html$/.exec(path);
         if (!match || !['GET', 'HEAD'].includes(req.method)) return next();
-        const [, file, id] = match;
+        const [, file, id, english] = match;
+        const lang = english ? 'en' : 'tr';
         try {
           const skins = await readCatalog(file);
           const skin = skins.find(item => String(item.id) === id);
@@ -127,7 +145,7 @@ export function skinSharePages(dataDir) {
             return res.end();
           }
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
-          res.end(req.method === 'HEAD' ? undefined : renderSharePage(skin, skinShareCollection(skin), path.slice(1)));
+          res.end(req.method === 'HEAD' ? undefined : renderSharePage(skin, skinShareCollection(skin), path.slice(1), lang));
         } catch (error) {
           next(error);
         }

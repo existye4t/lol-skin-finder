@@ -4113,7 +4113,7 @@ modalShareButton?.addEventListener('click', async () => {
   const skin = group?.primary;
   if (!skin) return;
 
-  const url = new URL(skinSharePath(skinShareCollection(skin), skin.id), new URL('./', location.href));
+  const url = new URL(skinSharePath(skinShareCollection(skin), skin.id, currentLang), new URL('./', location.href));
   url.searchParams.set('preview', sharePreviewVersion);
 
   try {
