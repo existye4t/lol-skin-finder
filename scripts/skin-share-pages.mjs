@@ -76,6 +76,9 @@ export function skinSharePages(dataDir) {
         for (let offset = 0; offset < skins.length; offset += 64) {
           await Promise.all(skins.slice(offset, offset + 64).map(skin => {
             const collection = skinShareCollection(skin);
+            if (collection !== file && !(collection === 'pbe' && file === 'skins')) {
+              throw new Error(`Unexpected collection for share skin ${skin.id} in ${file}.json`);
+            }
             const fileName = skinSharePath(collection, skin.id);
             return writeFile(resolve(dir, fileName), renderSharePage(skin, collection, fileName));
           }));
