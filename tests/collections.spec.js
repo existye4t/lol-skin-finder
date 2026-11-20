@@ -19,6 +19,77 @@ function holdRequest(page, pathname) {
   return { routed, release, requests };
 }
 
+test('Riot ID search finds one exact skin or chroma without fuzzy hits', async ({ page }) => {
+  await page.goto(site, { waitUntil: 'domcontentloaded' });
+  const search = page.locator('#search');
+  const cards = page.locator('#results .skin-card');
+  const result = id => cards.filter({ has: page.locator(`.favorite-button[data-skin-id="${id}"]`) });
+
+  await search.fill('103015');
+  await expect(result('103015')).toBeVisible();
+  await expect(cards).toHaveCount(1);
+
+  await search.fill('Riot Skin ID: 103060');
+  await expect(result('103060')).toBeVisible();
+  await expect(cards).toHaveCount(1);
+  await expect(cards.first()).toContainText('Yıldönümü Ahri');
+
+  await search.fill('10301');
+  await expect(page.locator('#empty')).toBeVisible();
+  await expect(cards).toHaveCount(0);
+
+  await search.fill('Ahri');
+  await expect(result('103015')).toBeVisible();
+  expect(await cards.count()).toBeGreaterThan(1);
+
+  await page.locator('#command-palette-trigger').click();
+  await page.locator('#command-palette-input').fill('103060');
+  const options = page.locator('#command-palette-results [role=option]');
+  await expect(options).toHaveCount(1);
+  await expect(options.first()).toContainText('Yıldönümü Ahri');
+});
+
+test('shared URLs select the right collection and skin, including a chroma', async ({ page }) => {
+  const modal = page.locator('#skin-modal');
+  for (const [collection, tab, id] of [
+    ['skins', 'Skinler', '103060'],
+    ['pbe', 'PBE', pbeChroma?.id],
+    ['rainbow', 'Rainbow', '103015'],
+    ['classic', 'Classic', '60062031']
+  ]) {
+    if (!id) continue;
+    await page.goto(`${site}?collection=${collection}&skin=${id}`, { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('tab', { name: tab, exact: true })).toHaveAttribute('aria-selected', 'true');
+    await expect(modal).toBeVisible();
+    await expect(modal.locator('#modal-skin-id')).toContainText(id);
+    await expect(page.locator('#results .skin-card')).toHaveCount(1);
+  }
+});
+
+test('copy link writes the exact collection and ID and offers a selectable URL if blocked', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { async writeText(value) {
+        if (window.rejectClipboard) throw new Error('Clipboard blocked');
+        window.copiedSkinUrl = value;
+      } }
+    });
+  });
+  await page.goto(`${site}?collection=rainbow&skin=103015&utm_source=example`, { waitUntil: 'domcontentloaded' });
+  const copy = page.getByRole('button', { name: 'Bağlantıyı kopyala' });
+  await copy.click();
+  const href = `${site}?collection=rainbow&skin=103015`;
+  expect(await page.evaluate(() => window.copiedSkinUrl)).toBe(href);
+  await expect(page.locator('#modal-share-status')).toHaveText('Bağlantı kopyalandı.');
+
+  await page.evaluate(() => { window.rejectClipboard = true; });
+  await copy.click();
+  const fallback = page.locator('#modal-share-url');
+  await expect(fallback).toBeVisible();
+  await expect(fallback).toBeFocused();
+  await expect(fallback).toHaveValue(href);
+});
+
 test('top-right controls stay at the top of the document when scrolling', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(site, { waitUntil: 'domcontentloaded' });

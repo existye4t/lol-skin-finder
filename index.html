@@ -1217,10 +1217,19 @@
           ></span>
         </div>
 
-        <p
-          id="modal-skin-id"
-          class="modal-id"
-        ></p>
+        <div class="modal-share-row">
+          <p id="modal-skin-id" class="modal-id"></p>
+          <button id="modal-share" class="btn-secondary-metal modal-share" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M10 13.5a4 4 0 0 0 5.66.16l3.5-3.5a4 4 0 0 0-5.66-5.66l-2 2M14 10.5a4 4 0 0 0-5.66-.16l-3.5 3.5a4 4 0 0 0 5.66 5.66l2-2" />
+            </svg>
+            <span data-i18n="copySkinLink">Bağlantıyı kopyala</span>
+          </button>
+        </div>
+        <p id="modal-share-status" class="modal-share-status" role="status"></p>
+        <input id="modal-share-url" class="modal-share-url" type="url" readonly hidden
+               data-i18n-aria-label="copySkinLink" aria-label="Bağlantıyı kopyala" />
 
         <p
           id="modal-pbe-warning"
