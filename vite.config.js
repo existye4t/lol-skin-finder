@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
+import { skinSharePages } from './scripts/skin-share-pages.mjs';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
@@ -919,7 +920,8 @@ export default defineConfig(({ mode }) => {
     base: './',
 
     plugins: [
-      adminDevApiPlugin(adminPassword)
+      adminDevApiPlugin(adminPassword),
+      skinSharePages(DATA_DIR)
     ],
 
     build: {
