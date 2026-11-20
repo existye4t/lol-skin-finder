@@ -4,14 +4,18 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { skinShareCollection } from '../src/skin-share.js';
-import { catalogFiles, collections, escapeHtml, previewSources, shareArtDirectory, shareArtFile } from './skin-share-pages.mjs';
+import {
+  catalogFiles, collections, escapeHtml, previewSources, shareArtDirectory, shareArtFile, shareArtWidth, shareArtHeight
+} from './skin-share-pages.mjs';
 
-const width = 720;
-const height = 378;
-const artworkLeft = 308;
-const artworkInset = 12;
-const textLeft = 34;
-const textWidth = 252;
+const width = shareArtWidth;
+const height = shareArtHeight;
+const px = value => Math.round(value * width / 720);
+const artworkLeft = px(308);
+const artworkInset = px(12);
+const textLeft = px(34);
+const textWidth = px(252);
+const iconSize = px(42);
 const ids = new Set(process.argv.slice(2));
 const concurrency = 24;
 const missing = [];
@@ -20,8 +24,8 @@ const fontfile = fileURLToPath(new URL('./fonts/Inter.ttf', import.meta.url));
 function renderText(value, { size, weight, color, spacing = 0 }) {
   return sharp({
     text: {
-      text: `<span foreground="${color}" weight="${weight}" letter_spacing="${spacing}">${escapeHtml(value)}</span>`,
-      font: `Inter ${size}`,
+      text: `<span foreground="${color}" weight="${weight}" letter_spacing="${px(spacing)}">${escapeHtml(value)}</span>`,
+      font: `Inter ${px(size)}`,
       fontfile,
       width: textWidth,
       dpi: 72,
@@ -32,26 +36,26 @@ function renderText(value, { size, weight, color, spacing = 0 }) {
 }
 
 const favicon = await sharp(await readFile(new URL('../favicon.png', import.meta.url)))
-  .resize(42, 42).png().toBuffer();
+  .resize(iconSize, iconSize).png().toBuffer();
 const wordmark = await renderText('Exist Skins', { size: 14, weight: 'semibold', color: '#e9e9ed', spacing: 240 });
-const rule = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="310"><rect width="1" height="310" fill="#27272b"/></svg>');
+const rule = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${px(1)}" height="${px(310)}"><rect width="100%" height="100%" fill="#27272b"/></svg>`);
 
 async function cardLayers(skin, collection) {
   const name = (skin.nameTr || skin.name || skin.nameEn).trim();
   let title;
   for (const size of [40, 36, 32, 28, 24]) {
     title = await renderText(name, { size, weight: 'semibold', color: '#f3f3f5', spacing: -570 });
-    if (title.info.width <= textWidth && title.info.height <= 126) break;
+    if (title.info.width <= textWidth && title.info.height <= px(126)) break;
   }
   const meta = await renderText(`${collections[collection]}  /  Riot ID ${skin.id}`, {
     size: 12, weight: 'medium', color: '#b5b5bd', spacing: 170
   });
   return [
-    { input: rule, left: artworkLeft - 12, top: 34 },
-    { input: favicon, left: textLeft, top: 33 },
-    { input: wordmark.data, left: textLeft + 55, top: 33 + Math.floor((42 - wordmark.info.height) / 2) },
-    { input: title.data, left: textLeft, top: 184 - Math.floor(title.info.height / 2) },
-    { input: meta.data, left: textLeft, top: 324 }
+    { input: rule, left: artworkLeft - artworkInset, top: px(34) },
+    { input: favicon, left: textLeft, top: px(33) },
+    { input: wordmark.data, left: textLeft + px(55), top: px(33) + Math.floor((iconSize - wordmark.info.height) / 2) },
+    { input: title.data, left: textLeft, top: px(184) - Math.floor(title.info.height / 2) },
+    { input: meta.data, left: textLeft, top: px(324) }
   ];
 }
 
@@ -75,6 +79,17 @@ async function fetchArtwork(url) {
   return null;
 }
 
+async function encodeCard(composite, maxCardSize) {
+  const { data, info } = await composite.raw().toBuffer({ resolveWithObject: true });
+  const encoder = sharp(data, { raw: { width, height, channels: info.channels } });
+  let jpeg;
+  for (const quality of [88, 84, 80, 76, 72, 68, 64, 60, 56, 52]) {
+    jpeg = await encoder.clone().jpeg({ quality, chromaSubsampling: '4:4:4', mozjpeg: true }).toBuffer();
+    if (jpeg.length <= maxCardSize) break;
+  }
+  return jpeg;
+}
+
 async function makeCard(skin, collection, output) {
   for (const url of previewSources(skin)) {
     const bytes = await fetchArtwork(url);
@@ -84,16 +99,16 @@ async function makeCard(skin, collection, output) {
       image = await sharp(bytes, { limitInputPixels: 16000000 })
         .resize(width - artworkLeft - artworkInset, height - 2 * artworkInset, {
           fit: skin.parentSkinId ? 'contain' : 'cover',
+          kernel: sharp.kernel.lanczos3,
           background: '#111113'
         })
         .png().toBuffer();
     } catch {
       continue;
     }
-    const card = await sharp({ create: { width, height, channels: 3, background: '#111113' } })
-      .composite([{ input: image, left: artworkLeft, top: artworkInset }, ...await cardLayers(skin, collection)])
-      .jpeg({ quality: 74, mozjpeg: true })
-      .toBuffer();
+    const composite = sharp({ create: { width, height, channels: 3, background: '#111113' } })
+      .composite([{ input: image, left: artworkLeft, top: artworkInset }, ...await cardLayers(skin, collection)]);
+    const card = await encodeCard(composite, (skin.parentSkinId ? 58 : 78) * 1024);
     await writeFile(output + '.tmp', card);
     await rename(output + '.tmp', output);
     return true;

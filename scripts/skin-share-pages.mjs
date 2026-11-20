@@ -8,6 +8,8 @@ const brand = 'Exist Skins';
 export const collections = { skins: 'Skinler', pbe: 'PBE', rainbow: 'Rainbow', classic: 'Classic' };
 export const catalogFiles = ['skins', 'rainbow', 'classic'];
 export const shareArtDirectory = 'work/share-art';
+export const shareArtWidth = 1200;
+export const shareArtHeight = 630;
 const imageHosts = new Set(['ddragon.leagueoflegends.com', 'raw.communitydragon.org']);
 const htmlEntities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
@@ -35,7 +37,9 @@ function renderSharePage(skin, collection, path, brandedArt = '') {
   const description = escapeHtml(`${champion} • ${collections[collection]} • Riot ID ${skin.id}`);
   const image = escapeHtml(brandedArt ? new URL(`share-art/${brandedArt}`, site).href
     : previewSources(skin)[0] || new URL('preview-v2.png', site).href);
-  const brandedMetadata = brandedArt ? '\n  <meta property="og:image:width" content="720">\n  <meta property="og:image:height" content="378">' : '';
+  const brandedMetadata = brandedArt
+    ? `\n  <meta property="og:image:width" content="${shareArtWidth}">\n  <meta property="og:image:height" content="${shareArtHeight}">`
+    : '';
   const shareUrl = new URL(path, site);
   if (brandedArt) shareUrl.searchParams.set('preview', sharePreviewVersion);
   const canonical = escapeHtml(shareUrl.href);
