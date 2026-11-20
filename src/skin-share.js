@@ -1,4 +1,4 @@
-export const sharePreviewVersion = '2';
+export const sharePreviewVersion = '3';
 
 export function skinShareCollection(skin) {
   return skin.isPbe ? 'pbe' : (skin.collection || 'skins');

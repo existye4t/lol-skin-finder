@@ -1,50 +1,58 @@
 import { mkdir, readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { skinShareCollection } from '../src/skin-share.js';
 import { catalogFiles, collections, escapeHtml, previewSources, shareArtDirectory, shareArtFile } from './skin-share-pages.mjs';
 
 const width = 720;
 const height = 378;
-const artworkLeft = 278;
+const artworkLeft = 308;
+const artworkInset = 12;
+const textLeft = 34;
+const textWidth = 252;
 const ids = new Set(process.argv.slice(2));
 const concurrency = 24;
 const missing = [];
+const fontfile = fileURLToPath(new URL('./fonts/Inter.ttf', import.meta.url));
 
-function titleLines(name, capacity) {
-  const lines = [''];
-  for (const word of name.trim().split(/\s+/)) {
-    const line = lines.at(-1);
-    if (line && line.length + word.length + 1 > capacity) lines.push(word);
-    else lines[lines.length - 1] = line ? `${line} ${word}` : word;
-  }
-  const visible = lines.slice(0, 3).map(line => line.length > capacity + 3 ? line.slice(0, capacity) + '…' : line);
-  if (lines.length > 3) visible[2] = visible[2].slice(0, capacity - 1) + '…';
-  return visible;
+function renderText(value, { size, weight, color, spacing = 0 }) {
+  return sharp({
+    text: {
+      text: `<span foreground="${color}" weight="${weight}" letter_spacing="${spacing}">${escapeHtml(value)}</span>`,
+      font: `Inter ${size}`,
+      fontfile,
+      width: textWidth,
+      dpi: 72,
+      wrap: 'word',
+      rgba: true
+    }
+  }).png().toBuffer({ resolveWithObject: true });
 }
 
-function brandOverlay(skin, collection) {
-  const name = skin.nameTr || skin.name || skin.nameEn;
-  const fontSize = name.length > 18 ? 29 : 36;
-  const title = titleLines(name, fontSize === 36 ? 18 : 21).map((line, index) =>
-    `<tspan x="34" y="${153 + index * (fontSize + 7)}">${escapeHtml(line)}</tspan>`
-  ).join('');
-  return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-  <defs><linearGradient id="fade"><stop stop-color="#0b0b0d"/><stop offset="1" stop-color="#0b0b0d" stop-opacity="0"/></linearGradient></defs>
-  <path d="M0 0h278v378H0z" fill="#0b0b0d"/>
-  <rect x="278" width="130" height="378" fill="url(#fade)"/>
-  <rect x="1" y="1" width="718" height="376" rx="13" fill="none" stroke="#fff" stroke-opacity=".15"/>
-  <g font-family="DejaVu Sans, Arial, sans-serif">
-    <rect x="34" y="33" width="36" height="36" rx="9" fill="#f4f4f5"/>
-    <path d="M44 42h16v3H47v4h10v3H47v5h13v3H44z" fill="#0b0b0d"/>
-    <text x="81" y="56" font-size="13" font-weight="700" letter-spacing="2" fill="#f4f4f5">EXIST SKINS</text>
-    <text x="34" y="108" font-size="12" font-weight="700" letter-spacing="1.7" fill="#acacb4">${collections[collection].toUpperCase()}</text>
-    <text font-size="${fontSize}" font-weight="700" fill="#f5f5f7">${title}</text>
-    <path d="M34 295h195" stroke="#36363b"/>
-    <text x="34" y="326" font-size="12" letter-spacing="1" fill="#aaaab2">RIOT ID ${skin.id}</text>
-  </g>
-</svg>`);
+const favicon = await sharp(await readFile(new URL('../favicon.png', import.meta.url)))
+  .resize(42, 42).png().toBuffer();
+const wordmark = await renderText('Exist Skins', { size: 14, weight: 'semibold', color: '#e9e9ed', spacing: 240 });
+const rule = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="310"><rect width="1" height="310" fill="#27272b"/></svg>');
+
+async function cardLayers(skin, collection) {
+  const name = (skin.nameTr || skin.name || skin.nameEn).trim();
+  let title;
+  for (const size of [40, 36, 32, 28, 24]) {
+    title = await renderText(name, { size, weight: 'semibold', color: '#f3f3f5', spacing: -570 });
+    if (title.info.width <= textWidth && title.info.height <= 126) break;
+  }
+  const meta = await renderText(`${collections[collection]}  /  Riot ID ${skin.id}`, {
+    size: 12, weight: 'medium', color: '#b5b5bd', spacing: 170
+  });
+  return [
+    { input: rule, left: artworkLeft - 12, top: 34 },
+    { input: favicon, left: textLeft, top: 33 },
+    { input: wordmark.data, left: textLeft + 55, top: 33 + Math.floor((42 - wordmark.info.height) / 2) },
+    { input: title.data, left: textLeft, top: 184 - Math.floor(title.info.height / 2) },
+    { input: meta.data, left: textLeft, top: 324 }
+  ];
 }
 
 async function fetchArtwork(url) {
@@ -74,16 +82,16 @@ async function makeCard(skin, collection, output) {
     let image;
     try {
       image = await sharp(bytes, { limitInputPixels: 16000000 })
-        .resize(width - artworkLeft, height, {
+        .resize(width - artworkLeft - artworkInset, height - 2 * artworkInset, {
           fit: skin.parentSkinId ? 'contain' : 'cover',
-          background: '#0b0b0d'
+          background: '#111113'
         })
         .png().toBuffer();
     } catch {
       continue;
     }
-    const card = await sharp({ create: { width, height, channels: 3, background: '#0b0b0d' } })
-      .composite([{ input: image, left: artworkLeft, top: 0 }, { input: brandOverlay(skin, collection) }])
+    const card = await sharp({ create: { width, height, channels: 3, background: '#111113' } })
+      .composite([{ input: image, left: artworkLeft, top: artworkInset }, ...await cardLayers(skin, collection)])
       .jpeg({ quality: 74, mozjpeg: true })
       .toBuffer();
     await writeFile(output + '.tmp', card);

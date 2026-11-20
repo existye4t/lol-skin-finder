@@ -24,7 +24,7 @@ export function previewSources(skin) {
 }
 
 export function shareArtFile(skin, collection) {
-  const identity = [2, collection, skin.id, skin.nameTr || skin.name || skin.nameEn, previewSources(skin)];
+  const identity = [sharePreviewVersion, collection, skin.id, skin.nameTr || skin.name || skin.nameEn, previewSources(skin)];
   return createHash('sha256').update(JSON.stringify(identity)).digest('hex').slice(0, 24) + '.jpg';
 }
 
