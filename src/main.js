@@ -6446,15 +6446,8 @@ function applyDiscordProfile(profile) {
     discordContact.setAttribute('type', 'button');
   }
 
-  // Update footer Discord profile (main section)
-  const footerProfile = document.querySelector('.discord-profile');
-  const footerProfileImg = footerProfile?.querySelector('.discord-profile-avatar img');
-  const footerProfileName = footerProfile?.querySelector('.discord-profile-info strong');
-  if (footerProfileName) footerProfileName.textContent = nick;
-  if (footerProfileImg) {
-    footerProfileImg.src = avatarUrl;
-    footerProfileImg.alt = `${nick} Discord profil fotoğrafı`;
-  }
+  if (discordContactElements.footerName) discordContactElements.footerName.textContent = nick;
+  if (discordContactElements.footerAvatar) discordContactElements.footerAvatar.src = avatarUrl;
 
   // Update Discord modal profile (in dialog)
   const modalProfile = document.querySelector('#discord-modal .discord-profile');
@@ -6466,8 +6459,8 @@ function applyDiscordProfile(profile) {
     modalProfileImg.alt = `${nick} Discord profil fotoğrafı`;
   }
 
-  // Update Discord modal join links
-  document.querySelectorAll('#discord-modal-join, #discord-invite-small, #discord-invite').forEach(link => {
+  // Update Discord join links
+  document.querySelectorAll('#discord-modal-join, #discord-footer-join, #discord-invite').forEach(link => {
     link.href = discordUrl;
   });
 
@@ -6492,18 +6485,6 @@ function updateStatusIndicators(status) {
   if (topStatusDot) {
     topStatusDot.style.background = color;
     topStatusDot.setAttribute('data-status', status);
-  }
-  // Footer profile status dot
-  const footerAvatar = document.querySelector('.discord-profile .discord-profile-avatar');
-  if (footerAvatar) {
-    let statusDot = footerAvatar.querySelector('.status-dot');
-    if (!statusDot) {
-      statusDot = document.createElement('span');
-      statusDot.className = 'status-dot';
-      footerAvatar.appendChild(statusDot);
-    }
-    statusDot.style.background = color;
-    statusDot.setAttribute('data-status', status);
   }
   // Modal profile status dot
   const modalAvatar = document.querySelector('#discord-modal .discord-profile-avatar');
@@ -6904,10 +6885,6 @@ setFavoriteFilter(false);
 
 switchCollection('skins');
 
-loadDiscordProfile().catch((error) => {
-  console.error('loadDiscordProfile failed:', error);
-});
-
 /* =========================================
    DISCORD PRESENCE (LANYARD API)
    ========================================= */
@@ -6925,14 +6902,17 @@ const discordContactElements = {
   statusDot: document.querySelector('.discord-contact-status-dot'),
   statusText: document.querySelector('.discord-contact-status-text'),
 
-  // Footer .discord-profile (outside any dialog, in main page flow)
-  footerName: document.querySelector('main .discord-profile .discord-profile-info strong'),
-  footerAvatar: document.querySelector('main .discord-profile .discord-profile-avatar img'),
+  footerName: document.querySelector('#catalog-footer .catalog-footer-identity strong'),
+  footerAvatar: document.querySelector('#catalog-footer .catalog-footer-avatar'),
 
   // Modal .discord-profile (inside #discord-modal dialog)
   modalName: document.querySelector('#discord-modal .discord-profile-info strong'),
   modalAvatar: document.querySelector('#discord-modal .discord-profile-avatar img'),
 };
+
+loadDiscordProfile().catch((error) => {
+  console.error('loadDiscordProfile failed:', error);
+});
 
 const STATUS_LABELS = {
   online: { tr: 'Çevrimiçi', en: 'Online' },
@@ -7006,14 +6986,13 @@ function updateDiscordUI(presence) {
     discordContactElements.nameInProfile.textContent = discord_user.username;
   }
 
-  // Update footer .discord-profile
+  // Update footer profile
   if (discordContactElements.footerAvatar && discord_user) {
     const avatarHash = discord_user.avatar;
     const avatarUrl = avatarHash
       ? `https://cdn.discordapp.com/avatars/${discord_user.id}/${avatarHash}.png?size=128`
       : `https://cdn.discordapp.com/embed/avatars/${Number(discord_user.discriminator) % 5}.png`;
     discordContactElements.footerAvatar.src = avatarUrl;
-    discordContactElements.footerAvatar.alt = `${discord_user.username} avatar`;
   }
   if (discordContactElements.footerName && discord_user) {
     discordContactElements.footerName.textContent = discord_user.username;
@@ -7066,13 +7045,12 @@ function setDiscordFallback() {
     discordContactElements.avatar.alt = `${fallbackName} avatar`;
   }
 
-  // Footer .discord-profile
+  // Footer profile
   if (discordContactElements.footerName) {
     discordContactElements.footerName.textContent = fallbackName;
   }
   if (discordContactElements.footerAvatar) {
     discordContactElements.footerAvatar.src = fallbackAvatar;
-    discordContactElements.footerAvatar.alt = `${fallbackName} avatar`;
   }
 
   // Modal .discord-profile

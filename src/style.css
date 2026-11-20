@@ -1595,6 +1595,90 @@ kbd {
   min-height: var(--result-card-height);
 }
 
+.catalog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-block: clamp(32px, 5vw, 56px) 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.catalog-footer-profile {
+  display: flex;
+  flex: 1 1 160px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.catalog-footer-avatar {
+  display: block;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-elevated);
+  object-fit: cover;
+}
+
+.catalog-footer-identity {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.catalog-footer-identity span {
+  color: var(--text-secondary);
+}
+
+.catalog-footer-identity strong {
+  color: var(--text-primary);
+}
+
+.catalog-footer-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+
+.catalog-footer-join:hover {
+  border-color: var(--text-secondary);
+  background: var(--card-hover);
+}
+
+.catalog-footer-join:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 3px;
+}
+
+.catalog-footer-join svg {
+  flex: none;
+}
+
+@media (max-width: 480px) {
+  .catalog-footer > * {
+    flex-basis: 100%;
+  }
+}
+
 .skin-card {
   position: relative;
   min-height: 310px;
