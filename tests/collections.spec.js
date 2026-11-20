@@ -21,6 +21,7 @@ function holdRequest(page, pathname) {
 
 test('Riot ID search finds one exact skin or chroma without fuzzy hits', async ({ page }) => {
   await page.goto(site, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#results')).toHaveAttribute('aria-busy', 'false', { timeout: 20_000 });
   const search = page.locator('#search');
   const cards = page.locator('#results .skin-card');
   const result = id => cards.filter({ has: page.locator(`.favorite-button[data-skin-id="${id}"]`) });
