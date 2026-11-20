@@ -99,7 +99,7 @@ test('copy link writes the exact collection and ID and offers a selectable URL i
   await page.goto(`${site}?collection=rainbow&skin=103015&utm_source=example`, { waitUntil: 'domcontentloaded' });
   const copy = page.getByRole('button', { name: 'Bağlantıyı kopyala' });
   await copy.click();
-  const href = `${site}share/rainbow/103015.html?preview=2`;
+  const href = `${site}share/rainbow/103015.html?preview=3`;
   expect(await page.evaluate(() => window.copiedSkinUrl)).toBe(href);
   await expect(page.locator('#modal-share-status')).toHaveText('Bağlantı kopyalandı.');
 
