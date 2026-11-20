@@ -327,6 +327,21 @@ const TRANSLATIONS = {
     en: 'Join Discord'
   },
 
+  copySkinLink: {
+    tr: 'Bağlantıyı kopyala',
+    en: 'Copy link'
+  },
+
+  skinLinkCopied: {
+    tr: 'Bağlantı kopyalandı.',
+    en: 'Link copied.'
+  },
+
+  copySkinLinkManually: {
+    tr: 'Seçili bağlantıyı kopyalayabilirsin.',
+    en: 'Copy the selected link.'
+  },
+
   discordHint: {
     tr: 'Yardım etmek için buradayım.',
     en: 'I\u2019m here to help.'
@@ -1165,6 +1180,9 @@ const popularSection = document.querySelector('#popular-section');
 const popularGrid = document.querySelector('#popular-grid');
 
 const modal = document.querySelector('#skin-modal');
+const modalShareButton = document.querySelector('#modal-share');
+const modalShareStatus = document.querySelector('#modal-share-status');
+const modalShareUrl = document.querySelector('#modal-share-url');
 const downloadList =
   document.querySelector('#download-list');
 
@@ -1311,9 +1329,9 @@ function getSkinImageSources(skin) {
 
   // Yerel images/skins dosyaları bilinen 1x1 placeholder'lardır. Buraya
   // özellikle dahil edilmez; yalnızca Riot CDN URL'leri kullanılabilir.
-  const metadata = [skin?.image, skin?.imageFallback];
+  const metadata = skin?.parentSkinId ? [skin.imageFallback, skin.image] : [skin?.image, skin?.imageFallback];
   const live = [loadingScreenUrl, dataDragonUrl];
-  const sources = [...new Set((skin?.isPbe ? [...metadata, ...live] : [...live, ...metadata])
+  const sources = [...new Set(((skin?.isPbe || skin?.parentSkinId) ? [...metadata, ...live] : [...live, ...metadata])
     .filter(isRemoteImageUrl))];
 
   if (cacheKey) {
@@ -1344,9 +1362,9 @@ function getModalImageSources(skin) {
     ? `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${skin.championId}_${skin.skinNum}.jpg`
     : '';
 
-  const metadata = [skin?.image, skin?.imageFallback];
+  const metadata = skin?.parentSkinId ? [skin.imageFallback, skin.image] : [skin?.image, skin?.imageFallback];
   const live = [dataDragonUrl, loadingScreenUrl];
-  const sources = [...new Set((skin?.isPbe ? [...metadata, ...live] : [...live, ...metadata])
+  const sources = [...new Set(((skin?.isPbe || skin?.parentSkinId) ? [...metadata, ...live] : [...live, ...metadata])
     .filter(isRemoteImageUrl))];
 
   if (cacheKey) {
@@ -2501,6 +2519,38 @@ function scoreNormalizedMatch(normalizedText, normalizedQuery) {
   return 300_000 - bestDistance * 50_000;
 }
 
+function parseSkinIdQuery(value) {
+  return /^(?:(?:riot\s+)?(?:skin\s+)?id\s*:?\s*)?([0-9]+)$/i.exec(value.trim())?.[1];
+}
+
+function findExactSkinGroup(id) {
+  let archiveMatch;
+  let formMatch;
+  for (const group of skinGroups) {
+    for (const skin of group.skins) {
+      if (skin.id === id) {
+        return skin === group.primary ? group : { ...group, primary: skin };
+      }
+      if (!archiveMatch && String(skin.liveSkinId) === id) archiveMatch = { ...group, primary: skin };
+      if (!formMatch && skin.forms?.some(form => String(form.id) === id)) formMatch = { ...group, primary: skin };
+    }
+  }
+  return archiveMatch ?? formMatch;
+}
+
+function searchCatalogGroups(query, exactId) {
+  if (exactId) {
+    const group = findExactSkinGroup(exactId);
+    return group ? [group] : [];
+  }
+  if (!query) return skinGroups;
+  return skinGroups
+    .map(group => ({ group, score: getGroupSearchScore(group, query) }))
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(({ group }) => group);
+}
+
 function getGroupSearchScore(
   group,
   normalizedQuery
@@ -3195,8 +3245,8 @@ function render() {
     return;
   }
 
-  const query =
-    normalize(search.value);
+  const query = normalize(search.value);
+  const exactId = parseSkinIdQuery(search.value);
   const favoriteActive = isFavoriteFilterActive();
   const championFilters = appliedChampionFilters;
 
@@ -3209,33 +3259,14 @@ function render() {
   }
 
   // Check cache first
-  const cacheKey = getSearchCacheKey(query, favoriteActive, championFilters);
+  const cacheKey = getSearchCacheKey(exactId ? `id:${exactId}` : query, favoriteActive, championFilters);
   const cached = getCachedSearchResult(cacheKey);
 
   let found;
   if (cached) {
     found = cached;
   } else {
-    // Compute search results
-    found =
-      skinGroups
-       .map((group) => ({
-         group,
-         score: getGroupSearchScore(
-           group,
-           query
-         )
-       }))
-       .filter(
-         ({ group, score }) =>
-           (!query || score > 0) &&
-           groupMatchesChampionFilter(group)
-       )
-       .sort(
-         (a, b) =>
-           b.score - a.score
-       )
-       .map(({ group }) => group);
+    found = searchCatalogGroups(query, exactId).filter(groupMatchesChampionFilter);
 
     /* ---------------------------------------
        Favori filtresi
@@ -3985,11 +4016,13 @@ function updatePackToolbarBtn() {
     singleChampionKey = [...championFilters][0];
   } else if (championFilters.size === 0 && query) {
     const visibleKeys = new Set();
-    for (const group of skinGroups) {
+    const exactId = parseSkinIdQuery(search.value);
+    const candidates = exactId ? searchCatalogGroups(query, exactId) : skinGroups;
+    for (const group of candidates) {
       if (
         (!favoriteActive || groupHasFavorite(group)) &&
         groupMatchesChampionFilter(group) &&
-        getGroupSearchScore(group, query) > 0
+        (exactId || getGroupSearchScore(group, query) > 0)
       ) {
         const k = group.primary._championKeys?.[0]
           ?? normalize(getLocalizedChampionName(group.primary, 'tr'));
@@ -4074,7 +4107,33 @@ function updatePackToolbarBtn() {
    SKIN MODALI
 ========================================= */
 
-function openModal(group, sourceEl, skipAnimation) {
+modalShareButton?.addEventListener('click', async () => {
+  const group = activeModalGroup;
+  const skin = group?.primary;
+  if (!skin) return;
+
+  const url = new URL(location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('collection', skin.isPbe ? 'pbe' : (skin.collection || 'skins'));
+  url.searchParams.set('skin', skin.id);
+
+  try {
+    await navigator.clipboard.writeText(url.href);
+    if (activeModalGroup !== group || !modal.open) return;
+    modalShareUrl.hidden = true;
+    modalShareStatus.textContent = t('skinLinkCopied');
+  } catch {
+    if (activeModalGroup !== group || !modal.open) return;
+    modalShareUrl.value = url.href;
+    modalShareUrl.hidden = false;
+    modalShareStatus.textContent = t('copySkinLinkManually');
+    modalShareUrl.focus();
+    modalShareUrl.select();
+  }
+});
+
+function openModal(group, sourceEl, skipAnimation, keepShareFeedback = false) {
   if (
     !modal ||
     !downloadList ||
@@ -4086,7 +4145,11 @@ function openModal(group, sourceEl, skipAnimation) {
   const skin =
     group.primary;
 
-activeModalGroup = group;
+  activeModalGroup = group;
+  if (!keepShareFeedback) {
+    modalShareStatus.textContent = '';
+    modalShareUrl.hidden = true;
+  }
 
   const modalImageBlur =
     document.querySelector(
@@ -4898,7 +4961,7 @@ function refreshOpenModal(group) {
   // Bu sadece bir içerik yenilemesi olduğundan açılış/kapanış geçişi atlanır.
   const sourceEl = lastModalSourceEl;
   closeSkinModal(true);
-  openModal(group, sourceEl, true);
+  openModal(group, sourceEl, true, true);
 }
 
 document
@@ -5911,8 +5974,10 @@ function scheduleSearchAnalytics() {
         lastTrackedSearch =
           normalizedTerm;
 
-        const resultCount =
-          skinGroups.filter(
+        const exactId = parseSkinIdQuery(term);
+        const resultCount = exactId
+          ? Number(Boolean(findExactSkinGroup(exactId)))
+          : skinGroups.filter(
             (group) =>
               groupMatchesSearch(
                 group,
@@ -6404,6 +6469,27 @@ collectionRetry.addEventListener('click', () => {
   switchCollection(activeCollection);
 });
 
+async function openInitialCollection() {
+  const { searchParams } = new URL(location.href);
+  const id = searchParams.get('skin');
+  const requestedCollection = searchParams.get('collection');
+  const hasSharedId = /^[0-9]+$/.test(id ?? '');
+  const collection = hasSharedId && Object.hasOwn(collectionStore, requestedCollection)
+    ? requestedCollection
+    : 'skins';
+  if (!await switchCollection(collection) || !hasSharedId) return;
+
+  let group = findExactSkinGroup(id);
+  if (!group && collection === 'pbe') {
+    if (!await switchCollection('skins')) return;
+    group = findExactSkinGroup(id);
+  }
+
+  search.value = id;
+  render();
+  if (group) openModal(group, null, true);
+}
+
 async function loadDiscordProfile() {
   try {
     const response = await fetch(assetUrl('data/discord-profile.json'), { cache: 'no-cache' });
@@ -6883,7 +6969,7 @@ updateFavoriteCount();
 
 setFavoriteFilter(false);
 
-switchCollection('skins');
+openInitialCollection();
 
 /* =========================================
    DISCORD PRESENCE (LANYARD API)
@@ -7189,17 +7275,7 @@ function initCommandPalette() {
       return;
     }
 
-    paletteMatches = skinGroups
-      .map((group) => ({
-        group,
-        score: getGroupSearchScore(
-          group,
-          query
-        )
-      }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(({ group }) => group);
+    paletteMatches = searchCatalogGroups(query, parseSkinIdQuery(paletteInput.value));
 
     paletteActiveIndex = 0;
 

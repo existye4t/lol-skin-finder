@@ -2259,6 +2259,46 @@ dialog::backdrop {
   padding: 8px 16px;
 }
 
+.modal-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.modal-share {
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+}
+
+.modal-share:focus-visible,
+.modal-share-url:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+.modal-share-status {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.modal-share-status:not(:empty) {
+  margin-top: 8px;
+}
+
+.modal-share-url:not([hidden]) {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
 .download-list-wrap {
   padding: 24px;
   border-left: 1px solid var(--border);
