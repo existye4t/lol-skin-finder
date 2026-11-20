@@ -19,6 +19,49 @@ function holdRequest(page, pathname) {
   return { routed, release, requests };
 }
 
+test('Discord footer clears the results and scroll button across collections and screen sizes', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const invite = 'https://discord.gg/fixture';
+  await page.route('**/data/discord-profile.json', route => route.fulfill({
+    json: { nick: 'existofficial', discordUrl: invite }
+  }));
+  await page.goto(site, { waitUntil: 'domcontentloaded' });
+  const footer = page.locator('#catalog-footer');
+  const join = footer.getByRole('link', { name: "Discord'a Katıl" });
+  const profile = footer.locator('.catalog-footer-profile');
+  const results = page.locator('#results');
+  await expect(footer).toHaveCount(1);
+  await expect(join).toHaveAttribute('href', invite);
+  await expect(page.locator('#discord-modal-join')).toHaveAttribute('href', invite);
+
+  for (const width of [1440, 375]) {
+    await page.setViewportSize({ width, height: 820 });
+    for (const collection of ['Skinler', 'PBE', 'Rainbow', 'Classic']) {
+      await page.getByRole('tab', { name: collection, exact: true }).click();
+      await page.locator('#search-examples button').first().click();
+      await expect(results.locator('.skin-card').first()).toBeVisible();
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const [gridBox, footerBox, profileBox, joinBox, topBox] = await Promise.all(
+        [results, footer, profile, join, page.locator('#scroll-to-top')].map(locator => locator.boundingBox())
+      );
+      expect(footerBox.y - gridBox.y - gridBox.height).toBeGreaterThanOrEqual(32);
+      expect(footerBox.x + footerBox.width).toBeLessThanOrEqual(width);
+      expect(footerBox.y + footerBox.height).toBeLessThan(topBox.y);
+      expect(joinBox.height).toBeGreaterThanOrEqual(44);
+      if (width === 375) {
+        expect(joinBox.y).toBeGreaterThan(profileBox.y + profileBox.height);
+      } else {
+        expect(joinBox.x).toBeGreaterThan(profileBox.x + profileBox.width);
+      }
+      await page.locator('#search').fill('');
+    }
+  }
+
+  await page.locator('#search').fill('9999999999999');
+  await expect(page.locator('#empty')).toBeVisible();
+  await expect(footer).toBeVisible();
+});
+
 test('cold tabs share a single live/PBE request and ignore late responses from other tabs', async ({ page }) => {
   const [skinsRequest, rainbowRequest, classicRequest] = ['skins', 'rainbow', 'classic'].map(
     name => holdRequest(page, `**/data/${name}.json`)
