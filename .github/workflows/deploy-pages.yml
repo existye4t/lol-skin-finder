@@ -46,6 +46,11 @@ jobs:
         run: npm run generate-share-art
       - name: Siteyi derle
         run: npm run build
+      - name: Pages paket boyutunu doğrula
+        run: |
+          bytes=$(du -sb dist | cut -f 1)
+          echo "Pages output: $bytes bytes"
+          test "$bytes" -lt 1000000000
       - name: GitHub Pages paketi oluştur
         uses: actions/upload-pages-artifact@v5
         with:
