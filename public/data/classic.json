@@ -1,7 +1,7 @@
 {
   "version": "16.23.1",
   "patch": "16.22",
-  "updatedAt": "2026-11-19T04:39:30.828Z",
+  "updatedAt": "2026-11-22T19:47:15.610Z",
   "totalChampions": 84,
   "count": 1803,
   "skins": [
@@ -11352,7 +11352,7 @@
       "championEn": "Gangplank",
       "championId": "Gangplank",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_gangplank/skins/skin301/images/jade_gangplank_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60041/60041301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_gangplank/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11367,7 +11367,7 @@
       "championEn": "Gangplank",
       "championId": "Gangplank",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_gangplank/skins/skin301/images/jade_gangplank_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60041/60041303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_gangplank/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60041301"
     },
@@ -11429,7 +11429,7 @@
       "championEn": "Kayle",
       "championId": "Kayle",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin302/images/jade_kayle_splash_centered_302.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60010/60010302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11444,7 +11444,7 @@
       "championEn": "Kayle",
       "championId": "Kayle",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin302/images/jade_kayle_splash_centered_302.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60010/60010304.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin304/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60010302"
     },
@@ -11460,7 +11460,7 @@
       "championEn": "Kayle",
       "championId": "Kayle",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin302/images/jade_kayle_splash_centered_302.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60010/60010303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60010302"
     },
@@ -11476,7 +11476,7 @@
       "championEn": "Kayle",
       "championId": "Kayle",
       "image": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin302/images/jade_kayle_splash_centered_302.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.22/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60010/60010305.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kayle/skins/skin305/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60010302"
     },
@@ -11538,7 +11538,7 @@
       "championEn": "Ahri",
       "championId": "Ahri",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ahri/skins/skin301/images/jade_ahri_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60103/60103302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ahri/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60103301"
     },
@@ -11585,7 +11585,7 @@
       "championEn": "Alistar",
       "championId": "Alistar",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin301/images/jade_alistar_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60012/60012301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11600,7 +11600,7 @@
       "championEn": "Alistar",
       "championId": "Alistar",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin301/images/jade_alistar_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60012/60012302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60012301"
     },
@@ -11616,7 +11616,7 @@
       "championEn": "Alistar",
       "championId": "Alistar",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin301/images/jade_alistar_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60012/60012303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60012301"
     },
@@ -11632,7 +11632,7 @@
       "championEn": "Alistar",
       "championId": "Alistar",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin301/images/jade_alistar_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60012/60012304.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_alistar/skins/skin304/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60012301"
     },
@@ -11648,7 +11648,7 @@
       "championEn": "Annie",
       "championId": "Annie",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin301/images/jade_annie_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60001/60001301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11663,7 +11663,7 @@
       "championEn": "Annie",
       "championId": "Annie",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin301/images/jade_annie_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60001/60001303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60001301"
     },
@@ -11679,7 +11679,7 @@
       "championEn": "Annie",
       "championId": "Annie",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin301/images/jade_annie_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60001/60001302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60001301"
     },
@@ -11695,7 +11695,7 @@
       "championEn": "Annie",
       "championId": "Annie",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin301/images/jade_annie_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60001/60001305.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_annie/skins/skin305/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60001301"
     },
@@ -11758,7 +11758,7 @@
       "championEn": "Dr. Mundo",
       "championId": "DrMundo",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_drmundo/skins/skin301/images/jade_drmundo_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60036/60036301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_drmundo/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11773,7 +11773,7 @@
       "championEn": "Dr. Mundo",
       "championId": "DrMundo",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_drmundo/skins/skin301/images/jade_drmundo_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60036/60036302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_drmundo/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60036301"
     },
@@ -11789,7 +11789,7 @@
       "championEn": "Evelynn",
       "championId": "Evelynn",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_evelynn/skins/skin301/images/jade_evelynn_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/28/28301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_evelynn/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11836,7 +11836,7 @@
       "championEn": "Ezreal",
       "championId": "Ezreal",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin301/images/jade_ezreal_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60081/60081301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -11851,7 +11851,7 @@
       "championEn": "Ezreal",
       "championId": "Ezreal",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin301/images/jade_ezreal_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60081/60081303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60081301"
     },
@@ -11867,7 +11867,7 @@
       "championEn": "Ezreal",
       "championId": "Ezreal",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin301/images/jade_ezreal_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60081/60081302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ezreal/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60081301"
     },
@@ -12024,7 +12024,7 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_garen/skins/skin301/images/jade_garen_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60086/60086301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_garen/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12039,7 +12039,7 @@
       "championEn": "Garen",
       "championId": "Garen",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_garen/skins/skin301/images/jade_garen_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60086/60086302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_garen/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60086301"
     },
@@ -12055,7 +12055,7 @@
       "championEn": "Heimerdinger",
       "championId": "Heimerdinger",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_heimerdinger/skins/skin301/images/jade_heimerdinger_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60074/60074301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_heimerdinger/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12070,7 +12070,7 @@
       "championEn": "Heimerdinger",
       "championId": "Heimerdinger",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_heimerdinger/skins/skin301/images/jade_heimerdinger_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60074/60074302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_heimerdinger/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60074301"
     },
@@ -12133,7 +12133,7 @@
       "championEn": "Jax",
       "championId": "Jax",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_jax/skins/skin301/images/jade_jax_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60024/60024301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_jax/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12164,7 +12164,7 @@
       "championEn": "Jax",
       "championId": "Jax",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_jax/skins/skin301/images/jade_jax_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60024/60024302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_jax/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60024301"
     },
@@ -12227,7 +12227,7 @@
       "championEn": "Karthus",
       "championId": "Karthus",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_karthus/skins/skin301/images/jade_karthus_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60030/60030301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_karthus/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12242,7 +12242,7 @@
       "championEn": "Karthus",
       "championId": "Karthus",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_karthus/skins/skin301/images/jade_karthus_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60030/60030302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_karthus/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60030301"
     },
@@ -12258,7 +12258,7 @@
       "championEn": "Kassadin",
       "championId": "Kassadin",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kassadin/skins/skin301/images/jade_kassadin_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60038/60038301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kassadin/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12273,7 +12273,7 @@
       "championEn": "Kassadin",
       "championId": "Kassadin",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kassadin/skins/skin301/images/jade_kassadin_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60038/60038302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_kassadin/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60038301"
     },
@@ -12289,7 +12289,7 @@
       "championEn": "Katarina",
       "championId": "Katarina",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_katarina/skins/skin301/images/jade_katarina_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60055/60055301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_katarina/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12304,7 +12304,7 @@
       "championEn": "Katarina",
       "championId": "Katarina",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_katarina/skins/skin301/images/jade_katarina_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60055/60055302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_katarina/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60055301"
     },
@@ -12320,7 +12320,7 @@
       "championEn": "Lee Sin",
       "championId": "LeeSin",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_leesin/skins/skin301/images/jade_leesin_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60064/60064301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_leesin/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12335,7 +12335,7 @@
       "championEn": "Lee Sin",
       "championId": "LeeSin",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_leesin/skins/skin301/images/jade_leesin_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60064/60064302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_leesin/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60064301"
     },
@@ -12382,7 +12382,7 @@
       "championEn": "Master Yi",
       "championId": "MasterYi",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_masteryi/skins/skin301/images/jade_masteryi_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60011/60011301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_masteryi/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12397,7 +12397,7 @@
       "championEn": "Master Yi",
       "championId": "MasterYi",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_masteryi/skins/skin301/images/jade_masteryi_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60011/60011302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_masteryi/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60011301"
     },
@@ -12444,7 +12444,7 @@
       "championEn": "Morgana",
       "championId": "Morgana",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_morgana/skins/skin301/images/jade_morgana_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60025/60025301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_morgana/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12459,7 +12459,7 @@
       "championEn": "Morgana",
       "championId": "Morgana",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_morgana/skins/skin301/images/jade_morgana_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60025/60025302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_morgana/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60025301"
     },
@@ -12475,7 +12475,7 @@
       "championEn": "Nasus",
       "championId": "Nasus",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nasus/skins/skin301/images/jade_nasus_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60075/60075301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nasus/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12490,7 +12490,7 @@
       "championEn": "Nasus",
       "championId": "Nasus",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nasus/skins/skin301/images/jade_nasus_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60075/60075302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nasus/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60075301"
     },
@@ -12506,7 +12506,7 @@
       "championEn": "Nidalee",
       "championId": "Nidalee",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nidalee/skins/skin301/images/jade_nidalee_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60076/60076301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nidalee/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12521,7 +12521,7 @@
       "championEn": "Nidalee",
       "championId": "Nidalee",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nidalee/skins/skin301/images/jade_nidalee_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60076/60076302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nidalee/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60076301"
     },
@@ -12537,7 +12537,7 @@
       "championEn": "Nunu & Willump",
       "championId": "Nunu",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nunu/skins/skin301/images/jade_nunu_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60020/60020301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nunu/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12568,7 +12568,7 @@
       "championEn": "Nunu & Willump",
       "championId": "Nunu",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nunu/skins/skin301/images/jade_nunu_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60020/60020302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_nunu/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60020301"
     },
@@ -12584,7 +12584,7 @@
       "championEn": "Pantheon",
       "championId": "Pantheon",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_pantheon/skins/skin301/images/jade_pantheon_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60080/60080301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_pantheon/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12599,7 +12599,7 @@
       "championEn": "Pantheon",
       "championId": "Pantheon",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_pantheon/skins/skin301/images/jade_pantheon_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60080/60080302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_pantheon/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60080301"
     },
@@ -12646,7 +12646,7 @@
       "championEn": "Ryze",
       "championId": "Ryze",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ryze/skins/skin301/images/jade_ryze_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60013/60013301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ryze/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12661,7 +12661,7 @@
       "championEn": "Ryze",
       "championId": "Ryze",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ryze/skins/skin301/images/jade_ryze_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60013/60013302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_ryze/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60013301"
     },
@@ -12771,7 +12771,7 @@
       "championEn": "Sion",
       "championId": "Sion",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin301/images/jade_sion_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60014/60014301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12786,7 +12786,7 @@
       "championEn": "Sion",
       "championId": "Sion",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin301/images/jade_sion_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60014/60014302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60014301"
     },
@@ -12802,7 +12802,7 @@
       "championEn": "Sion",
       "championId": "Sion",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin301/images/jade_sion_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin302/chromapreview.project_jade_16_18.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_sion/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60014301"
     },
@@ -12818,7 +12818,7 @@
       "championEn": "Skarner",
       "championId": "Skarner",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_skarner/skins/base/images/jade_skarner_rework_splash_centered_0.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60072/60072301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_skarner/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12833,7 +12833,7 @@
       "championEn": "Skarner",
       "championId": "Skarner",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_skarner/skins/base/images/jade_skarner_rework_splash_centered_0.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60072/60072302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_skarner/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60072301"
     },
@@ -12849,7 +12849,7 @@
       "championEn": "Soraka",
       "championId": "Soraka",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_soraka/skins/skin301/images/jade_soraka_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60016/60016301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_soraka/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12864,7 +12864,7 @@
       "championEn": "Soraka",
       "championId": "Soraka",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_soraka/skins/skin301/images/jade_soraka_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60016/60016302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_soraka/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60016301"
     },
@@ -12880,7 +12880,7 @@
       "championEn": "Taric",
       "championId": "Taric",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_taric/skins/skin301/images/jade_taric_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60044/60044301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_taric/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12895,7 +12895,7 @@
       "championEn": "Taric",
       "championId": "Taric",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_taric/skins/skin301/images/jade_taric_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60044/60044302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_taric/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60044301"
     },
@@ -12911,7 +12911,7 @@
       "championEn": "Teemo",
       "championId": "Teemo",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_teemo/skins/skin301/images/jade_teemo_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60017/60017301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_teemo/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12926,7 +12926,7 @@
       "championEn": "Teemo",
       "championId": "Teemo",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_teemo/skins/skin301/images/jade_teemo_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60017/60017302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_teemo/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60017301"
     },
@@ -12942,7 +12942,7 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin301/images/jade_tristana_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60018/60018301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -12957,7 +12957,7 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin301/images/jade_tristana_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60018/60018302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60018301"
     },
@@ -12973,7 +12973,7 @@
       "championEn": "Tristana",
       "championId": "Tristana",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin301/images/jade_tristana_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60018/60018303.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_tristana/skins/skin303/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60018301"
     },
@@ -12989,7 +12989,7 @@
       "championEn": "Twisted Fate",
       "championId": "TwistedFate",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twistedfate/skins/skin301/images/jade_twistedfate_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60004/60004301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twistedfate/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -13004,7 +13004,7 @@
       "championEn": "Twisted Fate",
       "championId": "TwistedFate",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twistedfate/skins/skin301/images/jade_twistedfate_splash_centered_301.project_jade_16_16.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60004/60004302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twistedfate/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60004301"
     },
@@ -13020,7 +13020,7 @@
       "championEn": "Twitch",
       "championId": "Twitch",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twitch/skins/skin301/images/jade_twitch_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60029/60029301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twitch/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -13035,7 +13035,7 @@
       "championEn": "Twitch",
       "championId": "Twitch",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twitch/skins/skin301/images/jade_twitch_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60029/60029302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_twitch/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60029301"
     },
@@ -13051,7 +13051,7 @@
       "championEn": "Warwick",
       "championId": "Warwick",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_warwick/skins/skin301/images/jade_warwick_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60019/60019301.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_warwick/skins/skin301/chromapreview.chromaassetmigration.png",
       "collection": "classic"
     },
     {
@@ -13082,7 +13082,7 @@
       "championEn": "Warwick",
       "championId": "Warwick",
       "image": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_warwick/skins/skin301/images/jade_warwick_splash_centered_301.project_jade.jpg",
-      "imageFallback": "https://raw.communitydragon.org/16.21/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/60019/60019302.png",
+      "imageFallback": "https://raw.communitydragon.org/16.23/plugins/rcp-be-lol-game-data/global/default/assets/characters/jade_warwick/skins/skin302/chromapreview.chromaassetmigration.png",
       "collection": "classic",
       "parentSkinId": "60019301"
     },
