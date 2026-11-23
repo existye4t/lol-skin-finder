@@ -6,7 +6,7 @@
 
 <br />
 
-<h1>LoL Skin Bulucu</h1>
+<h1>LoL Skin Finder</h1>
 
 <p>
   <strong>League of Legends skinlerini, chromalarını, PBE, Rainbow ve Classic koleksiyonlarını tek yerde keşfet — doğrudan <code>.fantome</code> veya şampiyon paketi (<code>.zip</code>) olarak indir.</strong>
