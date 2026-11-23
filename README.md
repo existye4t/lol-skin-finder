@@ -1,215 +1,240 @@
-# LoL Skin Bulucu
+<div align="center">
 
-League of Legends skinlerini hızlı ve modern bir arayüz üzerinden keşfetmek, aramak ve detaylarını görüntülemek için geliştirilmiş açık kaynaklı web uygulaması.
+<a href="https://existye4t.github.io/lol-skin-finder/">
+  <img src="./public/preview-v2.png" alt="Exist LoL Skin Finder" width="100%" />
+</a>
 
-## 🌐 Demo
+<br />
 
-**Canlı Site:**
-https://existye4t.github.io/lol-skin-finder/
+<h1>LoL Skin Bulucu</h1>
+
+<p>
+  <strong>League of Legends skinlerini, chromalarını, PBE, Rainbow ve Classic koleksiyonlarını tek yerde keşfet — doğrudan <code>.fantome</code> veya şampiyon paketi (<code>.zip</code>) olarak indir.</strong>
+</p>
+
+<p>
+  <a href="https://existye4t.github.io/lol-skin-finder/">
+    <img src="https://img.shields.io/badge/Canlı_Site-existye4t.github.io-111111?style=flat-square&logo=githubpages&logoColor=white" alt="Canlı Site" />
+  </a>
+  <a href="https://github.com/existye4t/lol-skin-finder/actions/workflows/deploy-pages.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/existye4t/lol-skin-finder/deploy-pages.yml?branch=main&style=flat-square&label=Pages" alt="Pages Deploy Durumu" />
+  </a>
+  <a href="https://github.com/existye4t/lol-skin-finder/actions/workflows/sync-skins.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/existye4t/lol-skin-finder/sync-skins.yml?branch=main&style=flat-square&label=Skin%20Sync" alt="Skin Senkronizasyon Durumu" />
+  </a>
+  <a href="https://discord.gg/rvRxbf8B9N">
+    <img src="https://img.shields.io/badge/Discord-Topluluk-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord Topluluğu" />
+  </a>
+  <img src="https://img.shields.io/badge/Dil-TR%20%7C%20EN-18181b?style=flat-square" alt="Türkçe ve İngilizce" />
+</p>
+
+<p>
+  <a href="#-özellikler">Özellikler</a> ·
+  <a href="#-koleksiyonlar-ve-veri-kaynağı">Koleksiyonlar</a> ·
+  <a href="#-yerel-kurulum-ve-komutlar">Kurulum</a> ·
+  <a href="#-veri-senkronizasyonu">Senkronizasyon</a> ·
+  <a href="#-ekosistem-ve-proje-yapısı">Proje Yapısı</a> ·
+  <a href="#-klavye-kısayolları">Kısayollar</a>
+</p>
+
+</div>
 
 ---
 
 ## ✨ Özellikler
 
-* **Anlık skin arama** — Skin adı, şampiyon adı veya Riot Skin ID ile hızlı arama
-* **Akıllı arama** — Türkçe karakter ve aksan farklılıklarını göz ardı eder
-* **Şampiyon filtreleme** — İstediğin şampiyonları seçerek sonuçları daralt
-* **Favoriler** — Beğendiğin skinleri tarayıcı üzerinde favorilerine kaydet
-* **Chroma desteği** — Skinlerin mevcut chroma seçeneklerini görüntüle
-* **Skin detayları** — Skin görselleri, şampiyon bilgisi ve Riot Skin ID bilgilerini görüntüle
-* **Fantome desteği** — Mevcut `.fantome` dosyalarını doğrudan indirme
-* **Hızlı arama paleti** — `Ctrl + K` / `Cmd + K` ile klavye üzerinden skin ara
-* **Türkçe / İngilizce** — Arayüz dili ve skin/şampiyon isimleri arasında geçiş yap
-* **Tema seçenekleri** — Siyah-beyaz, Hextech Altın ve Arcane Neon görünümleri
-* **Responsive tasarım** — Masaüstü ve farklı ekran boyutlarına uyumlu arayüz
-* **Erişilebilirlik desteği** — Klavye kullanımı, ARIA etiketleri ve reduced-motion desteği
-* **Önbelleksiz güncel veri yükleme** — Skin verileri uygulama tarafından güncellenebilir
+Framework yükü olmadan **Vanilla JavaScript + Vite** mimarisiyle hız ve akıcılık odağında geliştirilmiştir.
+
+| Kategori | Neler Sunar? |
+| :--- | :--- |
+| **Anlık & Akıllı Arama** | Skin adı, şampiyon adı veya Riot Skin ID ile anında arama; Türkçe karakter ve aksan farklılıklarını otomatik yok sayar. |
+| **Hızlı Arama Paleti** | `Ctrl + K` / `Cmd + K` ile açılan puanlamalı arama paleti; tamamen klavyeyle gezilebilir. |
+| **`.fantome` & Şampiyon Paketi** | Tekil skin/chroma `.fantome` dosyalarını doğrudan indirme veya seçili şampiyonun tüm skinlerini (isteğe bağlı chromalarla) tarayıcıda tek bir `.zip` paketi hâlinde indirme (`client-zip`). |
+| **Chroma & Form Desteği** | Tüm chroma seçeneklerini, özel form/varyant paketlerini ve detay görsellerini tek pencerede görüntüleme. |
+| **Özel Paylaşım Kartları** | Her skin için dile özel (`TR`/`EN`) paylaşım bağlantıları ve zengin önizleme (Open Graph / Discord) kartları. |
+| **Favoriler & Filtreleme** | Çoklu şampiyon filtreleme ve tarayıcıda kalıcı favori skin listesi. |
+| **3 Görünüm & Shader Efekti** | **Siyah-Beyaz**, **Hextech Altın** ve **Arcane Neon** temaları + `@paper-design/shaders` akışkan arka planı. |
+| **Çift Dil (TR / EN)** | Arayüz metinleri, şampiyon adları ve skin isimleri arasında anında dil geçişi. |
+| **Erişilebilir & Responsive** | Masaüstü/mobil uyumlu tasarım, ARIA etiketleri, klavye desteği ve `prefers-reduced-motion` uyumluluğu. |
 
 ---
 
-## 🧩 Veri Kaynağı ve Koleksiyonlar (16.22+)
+## 🧩 Koleksiyonlar ve Veri Kaynağı
 
-Skin verileri ve `.fantome` paket bağlantıları iki ana kaynaktan senkronize edilir:
+Katalog verileri ve `.fantome` indirme bağlantıları iki ana kaynaktan **günde 4 kez otomatik** senkronize edilir:
 
-1. **Riot Games Data Dragon & CommunityDragon** — Canlı sunucu ve PBE skin/chroma meta verileri, Türkçe ve İngilizce yerelleştirmeler.
-2. **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)** — `.fantome` paketlerinin tamamı doğrudan bu kaynak repodan indirilir (bu repoya yeni `.fantome` ikili dosyaları kopyalanmaz).
+1. **Riot Games Data Dragon & CommunityDragon** — Canlı sunucu (Live) ve PBE skin/chroma meta verileri, Türkçe ve İngilizce yerelleştirmeler.
+2. **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)** — `.fantome` paketlerinin tamamı doğrudan bu kaynak repodan indirilir (bu repoya yeni ikili dosya kopyalanmaz).
 
-### Koleksiyonlar
-* **Skinler (`skins/` + `PBE/`)** — Canlı sunucudaki tüm şampiyon skinleri, chromalar, form/varyant paketleri ve `PBE` etiketli önizleme skinleri aynı sekmede listelenir. Bir PBE skini canlı sunucuya çıktığında `PBE` rozeti otomatik olarak kalkar.
-* **Rainbow (`rainbow/`)** — Oyun içinde `Ctrl + 5` kısayoluyla chroma değiştirmeyi sağlayan Rainbow paketleri (yalnızca Rainbow sekmesinde aranır; ayrıca desteklenen skinlerin detay penceresinde `Rainbow sürümü →` bağlantısıyla erişilir).
-* **Classic (`classic/`)** — League Classic modu için hazırlanmış özel şampiyon skin ve chroma paketleri (yalnızca Classic sekmesinde aranır).
+| Koleksiyon | Kaynak Dizini | Açıklama |
+| :--- | :--- | :--- |
+| **Skinler (Live + PBE)** | `skins/` + `PBE/` | Canlı sunucudaki tüm skinler, chromalar, form/varyant paketleri ve `PBE` rozetli önizlemeler aynı sekmede listelenir. Bir PBE skini canlıya geçtiğinde rozet otomatik kalkar. |
+| **Rainbow** | `rainbow/` | Oyun içinde `Ctrl + 5` ile chroma değiştirmeyi sağlayan Rainbow paketleri. Rainbow sekmesinden veya desteklenen skinlerin detayındaki `Rainbow sürümü →` bağlantısından erişilir. |
+| **Classic** | `classic/` | League Classic modu için hazırlanmış özel şampiyon skin ve chroma paketleri (Classic sekmesinde aranır). |
 
-> **Önemli Uyarılar:**
-> * Kaynak repodaki paketler otomatik olarak üretilmektedir ve tek tek test edilmemiştir; bazı skinlerde veya formlarda oyun içi görsel/ses sorunları yaşanabilir.
+> [!WARNING]
+> * Kaynak repodaki paketler otomatik olarak üretilir ve tek tek test edilmez; bazı skinlerde veya formlarda oyun içi görsel/ses sorunları oluşabilir.
 > * **PBE** etiketli içerikler önizleme sürümüdür; canlı sunucuya çıkmadan önce değişebilir veya kararsız çalışabilir.
-> * Kaynak paket altyapısı ve araçları için [Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental), [bettie9/Sunshine](https://github.com/bettie9/Sunshine) ve [CommunityDragon](https://www.communitydragon.org/) projelerine teşekkürler.
 
 ---
 
-## 🖥️ Teknolojiler
+## ⚙️ Veri Senkronizasyonu
 
-* HTML
-* CSS
-* JavaScript
-* Vite
-* Paper Design Shaders
-* Playwright
-
-Proje framework ağırlıklı bir yapı yerine vanilla JavaScript/CSS tabanlı hafif bir frontend mimarisi kullanır. Vite geliştirme ve production build sürecini yönetir.
-
----
-
-## 📦 Proje Yapısı
-
-```text
-lol-skin-finder/
-├── public/
-│   ├── data/
-│   ├── fantome/
-│   └── images/
-├── src/
-│   ├── main.js
-│   └── style.css
-├── scripts/
-│   ├── update-skins.mjs
-│   └── prepare-fantome.mjs
-├── admin/
-├── backend/
-├── bot/
-├── assets/
-├── index.html
-├── package.json
-└── README.md
+```mermaid
+flowchart LR
+    A["Data Dragon & CommunityDragon"] --> C["sync-data.mjs"]
+    B["LeagueSkins-Experimental"] --> C
+    C --> D["Manifest & Katalog JSON"]
+    D --> E["Link & Şema Doğrulama"]
+    E --> F["Vite Build + Share Pages"]
+    F --> G["GitHub Pages"]
 ```
 
----
+GitHub Actions (`sync-skins.yml`), her gün **00:17, 06:17, 12:17 ve 18:17 UTC** saatlerinde çalışarak kataloğu güncel tutar, doğrular ve değişiklik varsa tek commit ile `main` dalına yazarak Pages dağıtımını tetikler.
 
-## 🔄 Veri Güncelleme ve Manifest Sistemi
+<details>
+<summary><strong>Teknik detaylar: Manifest üretimi, doğrulama ve manuel komutlar</strong></summary>
 
-Senkronizasyon Yimikami’nin indekslerini ve Git ağacını aynı commit üzerinden okur. Data Dragon ve CommunityDragon katalog kayıtlarının kimliğini, dilini ve Live/PBE durumunu belirler. İndirilebilir paketler kategori, şampiyon, skin ve varyant kimliğiyle eşlenir. Bir dosya taşınmışsa aynı şampiyon altında tek bir eşleşmesi olan önceki Git blob’u yeniden kullanılabilir. Eksik veya belirsiz bağlantılar katalog kayıtlarında devre dışı gösterilir.
+<br />
 
-Tüm veri ve manifest dosyalarını tek adımda senkronize etmek ve doğrulamak için:
+Senkronizasyon, kaynak reponun indekslerini ve Git ağacını aynı commit üzerinden okur. Paketler kategori, şampiyon, skin ve varyant kimliğiyle eşlenir. Taşınan dosyalar için aynı şampiyon altında tek eşleşmesi bulunan önceki Git blob'u yeniden kullanılabilir; eksik veya belirsiz bağlantılar katalogda devre dışı bırakılır.
 
+Rainbow indeksindeki boyut Git blob'undan farklıysa paket içindeki `META/build.json` dosyası şampiyon ve skin numarasıyla karşılaştırılır ve doğrulanmış sonuçlar aynı blob için yeniden kullanılır.
+
+**Tek adımda senkronizasyon ve test:**
 ```bash
-npm run sync-data
-npm run sync-data -- --dry-run
-npm run sync-data -- --download-samples
-npm run test:sync
+npm run sync-data                      # Tam senkronizasyon + doğrulama
+npm run sync-data -- --dry-run         # Dosya yazmadan doğrulama
+npm run sync-data -- --download-samples # Örneklem paket indirme testi
+npm run test:sync                      # Katalog senkronizasyon birim testleri
 ```
 
-Komutları ayrı ayrı çalıştırmak için:
-
+**Adım adım çalıştırma:**
 ```bash
-# 1. Kaynak repodan Git Trees API + indekslerle fantome-manifest.json üret
-npm run prepare-fantome
-
-# 2. Data Dragon + CommunityDragon + manifest ile skins.json, rainbow.json, classic.json üret
-npm run update-data
-
-# 3. Şema, Trees API varlık kontrolü, URL encode ve örneklem HEAD doğrulaması
-npm run check-links
+npm run prepare-fantome   # Git Trees API + indekslerle fantome-manifest.json üret
+npm run update-data       # Data Dragon + CommunityDragon + manifest ile JSON katalogları üret
+npm run check-links       # Şema, varlık kontrolü, URL encode ve HEAD doğrulaması
+npm run verify-collections # Koleksiyon tutarlılık kontrolü
 ```
 
-GitHub Actions her gün 00:17, 06:17, 12:17 ve 18:17 UTC’de çalışır. Doğrulanmış ve değişmiş katalog çıktıları tek commit ile `main` dalına yazılır ve mevcut Pages iş akışı bu commit’i yayınlar. Git push, arada gelen başka bir `main` değişikliği veya branch kuralı nedeniyle reddedilirse sonraki koşu güncel daldan başlar. `workflow_dispatch` ile `dry_run` doğrulama ve derlemeyi çalıştırır. `force_deploy`, doğrulanmış bir koşuda veri değişmemişse Pages dağıtımını yeniler.
+**Manuel Actions Tetikleme (`workflow_dispatch`):**
+* `dry_run`: Yalnızca doğrulama ve derleme çalıştırır, yayınlamaz.
+* `force_deploy`: Veri değişmese dahi doğrulanmış koşuda Pages dağıtımını yeniler.
 
-Rainbow indeksindeki boyut Git blob’undan farklıysa paket içindeki `META/build.json` şampiyon ve skin numarasıyla karşılaştırılır. Başarılı doğrulama aynı blob için tekrar kullanılır. Koşu raporunda eşleşmeyen yollar ve indeks uyuşmazlıkları yer alır.
+</details>
 
----
+<details>
+<summary><strong>🛑 Geri Alma (Rollback) Prosedürü</strong></summary>
 
-## 🛑 Geri Alma (Rollback) Prosedürü
+<br />
 
-Herhangi bir beklenmeyen durumda sistemi hızla önceki kararlı duruma döndürmek için:
-
-1. **Merge'i Geri Alma (Gerçek Rollback):**
-   Frontend ve manifest sistemini tek adımda eski yerel `public/fantome/*.fantome` yapısına döndürmenin kesin ve doğrudan yolu merge commit'ini geri almaktır (yerel fantome arşivi depoda eksiksiz korunmaktadır):
+1. **Merge'i Geri Alma (Tam Rollback):**
+   Frontend ve manifest yapısını önceki yerel `public/fantome/*.fantome` düzenine tek adımda döndürmek için ilgili merge commit'ini geri alabilirsiniz (yerel arşiv depoda korunmaktadır):
    ```bash
    git revert -m 1 <merge-commit-hash>
    git push origin main
    ```
 
 2. **Otomatik Senkronizasyonu Durdurma:**
-   GitHub arayüzünden **Actions → Kaynak Repodan Skin Senkronizasyonu → ... → Disable workflow** seçeneğine tıklayarak zamanlanmış otomatik senkronizasyonu durdurabilirsiniz.
+   GitHub üzerinden **Actions → Kaynak Repodan Skin Senkronizasyonu → `...` → Disable workflow** adımıyla zamanlanmış koşuları durdurabilirsiniz.
 
-3. **Manifest Üretimi Legacy Bayrağı:**
-   `scripts/config.mjs` içerisindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca manifest üretim scriptini (`prepare-fantome.mjs`) etkiler; kaynak repoda karşılığı bulunmayan 6 adet eski yerel dosya girdisinin (ID: 234994–234999) manifest'te `enabled` işaretlenmesini belirler (depodaki 9.096 eski yerel dosyadan 9.090'ı yeni kaynakta birebir mevcuttur; yalnızca bu 6 dosya kaynakta yer almamaktadır). Frontend çalışma zamanında eski yerel servise anında dönüş sağlamaz.
+3. **Legacy Manifest Bayrağı (`ENABLE_LEGACY_FANTOME`):**
+   `scripts/config.mjs` içindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca `prepare-fantome.mjs` çalışırken etkilidir; kaynak repoda karşılığı bulunmayan 6 eski yerel dosyanın (ID: `234994`–`234999`) manifest'te `enabled` olarak işaretlenip işaretlenmeyeceğini belirler (9.096 yerel dosyanın 9.090'ı kaynak repoda birebir mevcuttur).
+
+</details>
+
+---
+
+## 🚀 Yerel Kurulum ve Komutlar
+
+**Gereksinimler:** Node.js `20+` ve `npm`
+
+```bash
+# 1. Repoyu klonla
+git clone https://github.com/existye4t/lol-skin-finder.git
+cd lol-skin-finder
+
+# 2. Bağımlılıkları kur
+npm install
+
+# 3. Geliştirme sunucusunu başlat
+npm run dev
+```
+
+| Komut | Açıklama |
+| :--- | :--- |
+| `npm run dev` | Vite geliştirme sunucusunu (`127.0.0.1`) başlatır. |
+| `npm run build` | Production build alır ve statik çıktıları hazırlar. |
+| `npm run preview` | Alınan production build'i yerelde önizler. |
+| `npm test` | Uygulamayı derler ve Playwright E2E test paketini çalıştırır. |
+| `npm run sync-data` | Katalog, manifest ve bağlantı doğrulama hattını çalıştırır. |
+| `npm run generate-share-art` | Paylaşım sayfaları için görsel/kart üretimini çalıştırır. |
+| `npm run admin-server` | Yerel yönetim arayüzü geliştirme sunucusunu başlatır. |
+
+---
+
+## 📦 Ekosistem ve Proje Yapısı
+
+```text
+lol-skin-finder/
+├── src/                # Ana uygulama (main.js, style.css, skin-share.js)
+├── public/             # Katalog JSON'ları, statik görseller ve önizleme varlıkları
+├── scripts/            # Senkronizasyon, manifest, doğrulama ve paylaşım kartı araçları
+├── tests/              # Playwright E2E ve Node senkronizasyon testleri
+├── admin/              # Yönetim paneli arayüzü
+├── backend/            # Cloudflare Workers tabanlı güvenli GitHub API köprüsü
+├── bot/                # Topluluk Discord botu (detaylar için bot/README.md)
+└── .github/workflows/  # Otomatik senkronizasyon ve GitHub Pages dağıtım akışları
+```
+
+### Teknoloji Yığını
+
+![HTML5](https://img.shields.io/badge/HTML5-18181b?style=flat-square&logo=html5&logoColor=E34F26)
+![CSS3](https://img.shields.io/badge/CSS3-18181b?style=flat-square&logo=css3&logoColor=1572B6)
+![JavaScript](https://img.shields.io/badge/Vanilla_JS-18181b?style=flat-square&logo=javascript&logoColor=F7DF1E)
+![Vite](https://img.shields.io/badge/Vite-18181b?style=flat-square&logo=vite&logoColor=646CFF)
+![Playwright](https://img.shields.io/badge/Playwright-18181b?style=flat-square&logo=playwright&logoColor=2EAD33)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-18181b?style=flat-square&logo=cloudflareworkers&logoColor=F38020)
 
 ---
 
 ## ⌨️ Klavye Kısayolları
 
-| Kısayol    | İşlev                                 |
-| ---------- | ------------------------------------- |
-| `Ctrl + K` | Hızlı skin aramasını aç               |
-| `Cmd + K`  | macOS'ta hızlı aramayı aç             |
-| `Esc`      | Açık pencereyi / arama paletini kapat |
-
-Hızlı arama paleti mevcut arama algoritmasını kullanarak sonuçları puanlar ve klavye üzerinden skin seçimine izin verir.
+| Kısayol | İşlev |
+| :--- | :--- |
+| `Ctrl + K` / `Cmd + K` | Hızlı arama paletini aç |
+| `↑` / `↓` & `Enter` | Arama sonuçları arasında gezin ve seç |
+| `Esc` | Açık pencereyi veya arama paletini kapat |
 
 ---
 
-## 🎨 Görünüm
+## 🎨 Görünüm Temaları
 
-Uygulama içerisinde üç farklı görünüm bulunur:
+Seçilen tema tarayıcıda (`localStorage`) saklanır ve sonraki ziyaretlerde korunur:
 
-* **Siyah-Beyaz**
-* **Hextech Altın**
-* **Arcane Neon**
-
-Seçilen görünüm tarayıcıda saklanır ve sonraki ziyaretlerde korunur.
+* **Siyah-Beyaz** — Minimalist yüksek kontrastlı karanlık tema
+* **Hextech Altın** — Klasik League of Legends estetiği
+* **Arcane Neon** — Canlı neon vurgulu görünüm
 
 ---
 
-## 🌍 Dil Desteği
+## 🤝 Katkıda Bulunma ve Topluluk
 
-Arayüz şu anda:
+Hata bildirmek, yeni özellik önermek veya doğrudan koda katkıda bulunmak için [Issue](https://github.com/existye4t/lol-skin-finder/issues) ya da [Pull Request](https://github.com/existye4t/lol-skin-finder/pulls) açabilir; güncellemeler ve destek için Discord sunucumuza katılabilirsin:
 
-* 🇹🇷 Türkçe
-* 🇺🇸 İngilizce
+👉 **[Discord Topluluğuna Katıl](https://discord.gg/rvRxbf8B9N)**
 
-dillerini destekler.
-
-Skin ve şampiyon isimleri de seçilen dile göre yerelleştirilebilir.
+### Teşekkürler
+Kaynak paket altyapısı, veri kaynakları ve araçları için **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)**, **[bettie9/Sunshine](https://github.com/bettie9/Sunshine)** ve **[CommunityDragon](https://www.communitydragon.org/)** projelerine teşekkürler.
 
 ---
 
-## 🔒 Gizlilik
+## 🔒 Gizlilik ve ⚖️ Yasal Uyarı
 
-Uygulamanın temel skin arama ve görüntüleme işlevleri kullanıcı hesabı gerektirmez.
+* **Gizlilik:** Temel skin arama, favori ve indirme özellikleri kullanıcı hesabı gerektirmez. Google Analytics etkinleştirildiğinde yalnızca anonim ve toplu kullanım/arama/indirme istatistikleri ölçülür; kişisel hesap veya kimlik bilgisi tutulmaz.
+* **Yasal Uyarı:** *League of Legends* ve ilgili tüm oyun, şampiyon, skin ve görsel varlıklar **Riot Games, Inc.** mülkiyetindedir. Bu proje Riot Games tarafından geliştirilmemiş, onaylanmamış veya resmi olarak desteklenmemiş bağımsız ve açık kaynaklı bir topluluk projesidir.
 
-Projenin mevcut sürümünde Google Analytics etkinleştirildiğinde toplu ziyaret, arama ve indirme istatistikleri ölçülebilir; kişisel kullanıcı hesabı veya isim bilgisi tutulmadığı belirtilmektedir.
-
----
-
-## ⚖️ Yasal Uyarı
-
-League of Legends ve ilgili tüm oyun, şampiyon, skin ve görsel varlıklar Riot Games, Inc. ve ilgili hak sahiplerinin mülkiyetindedir.
-
-Bu proje Riot Games tarafından geliştirilmemiş veya resmi olarak desteklenmemiş bağımsız bir topluluk projesidir.
-
----
-
-## 🤝 Katkıda Bulunma
-
-Hata bildirmek, özellik önermek veya projeye katkıda bulunmak için GitHub üzerinden **Issue** veya **Pull Request** açabilirsin.
-
----
-
-## 💬 Discord
-
-Proje hakkında güncellemeler, hata bildirimleri ve topluluk desteği için Discord sunucusuna katılabilirsin.
-
-**Discord:**
-https://discord.com/rvRxbf8B9N
-
----
-
-## 📄 Lisans
-
-Bu proje açık kaynak olarak geliştirilmektedir.
-
----
-
-<p align="center">
-  <strong>Exist LOL Skin Finder</strong><br>
-  League of Legends skinlerini keşfetmenin daha hızlı yolu.
-</p>
+<div align="center">
+  <br />
+  <sub><strong>Exist LoL Skin Finder</strong> · League of Legends skinlerini keşfetmenin en hızlı yolu.</sub>
+</div>
