@@ -2,7 +2,7 @@
   "version": "16.23.1",
   "patch": "16.23",
   "pbePatch": "16.24",
-  "updatedAt": "2026-11-19T08:37:58.370Z",
+  "updatedAt": "2026-11-23T07:49:15.677Z",
   "skins": [
     {
       "id": "876045",
@@ -25341,7 +25341,8 @@
       "championEn": "Urgot",
       "championId": "Urgot",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_1.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin01/images/urgot_splash_centered_1.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin01/images/urgot_splash_centered_1.jpg",
+      "hasClassic": true
     },
     {
       "id": "131000",
@@ -26073,6 +26074,21 @@
           "nameEn": "DJ Sona Ultimate Remix (Yellow)",
           "isPbe": true,
           "downloadUnavailable": true
+        },
+        {
+          "id": "37986",
+          "name": "Yellow",
+          "nameEn": "Yellow"
+        },
+        {
+          "id": "37987",
+          "name": "Pink",
+          "nameEn": "Pink"
+        },
+        {
+          "id": "37988",
+          "name": "Blue",
+          "nameEn": "Blue"
         }
       ]
     },
@@ -49912,7 +49928,8 @@
       "championEn": "Udyr",
       "championId": "Udyr",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Udyr_2.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/udyr/skins/skin02/images/udyr_splash_centered_2.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/udyr/skins/skin02/images/udyr_splash_centered_2.jpg",
+      "hasClassic": true
     },
     {
       "id": "119048",
@@ -52538,7 +52555,8 @@
       "championEn": "Kai'Sa",
       "championId": "Kaisa",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kaisa_83.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kaisa/skins/skin83/images/kaisa_splash_centered_83.skins_kaisa_skin83.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kaisa/skins/skin83/images/kaisa_splash_centered_83.skins_kaisa_skin83.jpg",
+      "hasRainbow": true
     },
     {
       "id": "145090",
@@ -57466,7 +57484,8 @@
       "championEn": "Udyr",
       "championId": "Udyr",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Udyr_1.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/udyr/skins/skin01/images/udyr_splash_centered_1.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/udyr/skins/skin01/images/udyr_splash_centered_1.jpg",
+      "hasClassic": true
     },
     {
       "id": "126003",
@@ -57995,7 +58014,8 @@
       "championEn": "Urgot",
       "championId": "Urgot",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Urgot_2.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin02/images/urgot_splash_centered_2.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/urgot/skins/skin02/images/urgot_splash_centered_2.jpg",
+      "hasClassic": true
     },
     {
       "id": "38000",
@@ -78980,6 +79000,7 @@
       "championId": "Gragas",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Gragas_39.jpg",
       "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/gragas/skins/skin39/images/gragas_splash_centered_39.jpg",
+      "hasRainbow": true,
       "hasClassic": true
     },
     {
@@ -120483,7 +120504,8 @@
       "championEn": "Neeko",
       "championId": "Neeko",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_50.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg",
+      "hasRainbow": true
     },
     {
       "id": "518057",
@@ -121292,7 +121314,8 @@
       "championEn": "Zoe",
       "championId": "Zoe",
       "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_45.jpg",
-      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg"
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg",
+      "hasRainbow": true
     },
     {
       "id": "142049",

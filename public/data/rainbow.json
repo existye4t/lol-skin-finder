@@ -1,8 +1,8 @@
 {
   "version": "16.23.1",
-  "patch": "16.21",
-  "updatedAt": "2026-11-19T04:39:30.828Z",
-  "count": 562,
+  "patch": "16.23",
+  "updatedAt": "2026-11-23T07:49:15.677Z",
+  "count": 566,
   "skins": [
     {
       "id": "412002",
@@ -9476,6 +9476,59 @@
       ]
     },
     {
+      "id": "145083",
+      "skinNum": 83,
+      "name": "K/DA FIRESTARTER Kai'Sa",
+      "champion": "Kai'Sa",
+      "nameTr": "K/DA FIRESTARTER Kai'Sa",
+      "championTr": "Kai'Sa",
+      "nameEn": "K/DA FIRESTARTER Kai'Sa",
+      "championEn": "Kai'Sa",
+      "championId": "Kaisa",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Kaisa_83.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/kaisa/skins/skin83/images/kaisa_splash_centered_83.skins_kaisa_skin83.jpg",
+      "collection": "rainbow",
+      "cycleCount": 9,
+      "states": [
+        {
+          "id": "83",
+          "name": "Original"
+        },
+        {
+          "id": "84",
+          "name": "Ruby"
+        },
+        {
+          "id": "85",
+          "name": "Tanzanite"
+        },
+        {
+          "id": "86",
+          "name": "Sapphire"
+        },
+        {
+          "id": "87",
+          "name": "Emerald"
+        },
+        {
+          "id": "88",
+          "name": "Citrine"
+        },
+        {
+          "id": "89",
+          "name": "Turquoise"
+        },
+        {
+          "id": "90",
+          "name": "Pearl"
+        },
+        {
+          "id": "91",
+          "name": "Obsidian"
+        }
+      ]
+    },
+    {
       "id": "54027",
       "skinNum": 27,
       "name": "Kadim İlah Malphite",
@@ -14489,6 +14542,63 @@
         {
           "id": "13",
           "name": "Rose Quartz"
+        }
+      ]
+    },
+    {
+      "id": "79039",
+      "skinNum": 39,
+      "name": "Müzik Hayranı Gragas",
+      "champion": "Gragas",
+      "nameTr": "Müzik Hayranı Gragas",
+      "championTr": "Gragas",
+      "nameEn": "Music Fan Gragas",
+      "championEn": "Gragas",
+      "championId": "Gragas",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Gragas_39.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/gragas/skins/skin39/images/gragas_splash_centered_39.jpg",
+      "collection": "rainbow",
+      "cycleCount": 10,
+      "states": [
+        {
+          "id": "39",
+          "name": "Original"
+        },
+        {
+          "id": "40",
+          "name": "Ruby"
+        },
+        {
+          "id": "41",
+          "name": "Catseye"
+        },
+        {
+          "id": "42",
+          "name": "Sapphire"
+        },
+        {
+          "id": "43",
+          "name": "Emerald"
+        },
+        {
+          "id": "44",
+          "name": "Turquoise"
+        },
+        {
+          "id": "45",
+          "name": "Rose Quartz"
+        },
+        {
+          "id": "46",
+          "name": "Obsidian"
+        },
+        {
+          "id": "47",
+          "name": "Pearl"
+        },
+        {
+          "id": "49",
+          "name": "FIRESTARTER"
         }
       ]
     },
@@ -21640,6 +21750,59 @@
       ]
     },
     {
+      "id": "518050",
+      "skinNum": 50,
+      "name": "Tatlı Pastane Neeko",
+      "champion": "Neeko",
+      "nameTr": "Tatlı Pastane Neeko",
+      "championTr": "Neeko",
+      "nameEn": "Cafe Cuties Neeko",
+      "championEn": "Neeko",
+      "championId": "Neeko",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Neeko_50.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/neeko/skins/skin50/images/neeko_splash_centered_50.skins_neeko_skin50.jpg",
+      "collection": "rainbow",
+      "cycleCount": 9,
+      "states": [
+        {
+          "id": "50",
+          "name": "Original"
+        },
+        {
+          "id": "51",
+          "name": "Ruby"
+        },
+        {
+          "id": "52",
+          "name": "Aquamarine"
+        },
+        {
+          "id": "53",
+          "name": "Obsidian"
+        },
+        {
+          "id": "54",
+          "name": "Pearl"
+        },
+        {
+          "id": "55",
+          "name": "Rose Quartz"
+        },
+        {
+          "id": "56",
+          "name": "Catseye"
+        },
+        {
+          "id": "57",
+          "name": "Jasper"
+        },
+        {
+          "id": "58",
+          "name": "Peridot"
+        }
+      ]
+    },
+    {
       "id": "78033",
       "skinNum": 33,
       "name": "Tatlı Pastane Poppy",
@@ -21742,6 +21905,59 @@
         {
           "id": "31",
           "name": "Pearl"
+        }
+      ]
+    },
+    {
+      "id": "142045",
+      "skinNum": 45,
+      "name": "Tatlı Pastane Zoe",
+      "champion": "Zoe",
+      "nameTr": "Tatlı Pastane Zoe",
+      "championTr": "Zoe",
+      "nameEn": "Cafe Cuties Zoe",
+      "championEn": "Zoe",
+      "championId": "Zoe",
+      "image": "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Zoe_45.jpg",
+      "imageFallback": "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/characters/zoe/skins/skin45/images/zoe_splash_centered_45.skins_zoe_skin45.jpg",
+      "collection": "rainbow",
+      "cycleCount": 9,
+      "states": [
+        {
+          "id": "45",
+          "name": "Original"
+        },
+        {
+          "id": "46",
+          "name": "Ruby"
+        },
+        {
+          "id": "47",
+          "name": "Catseye"
+        },
+        {
+          "id": "48",
+          "name": "Emerald"
+        },
+        {
+          "id": "49",
+          "name": "Amethyst"
+        },
+        {
+          "id": "50",
+          "name": "Sapphire"
+        },
+        {
+          "id": "51",
+          "name": "Rose Quartz"
+        },
+        {
+          "id": "52",
+          "name": "Pearl"
+        },
+        {
+          "id": "53",
+          "name": "Obsidian"
         }
       ]
     },
