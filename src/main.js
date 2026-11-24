@@ -2,6 +2,7 @@ import './style.css';
 import { ShaderMount, liquidMetalFragmentShader } from '@paper-design/shaders';
 import { downloadZip } from 'client-zip';
 import { sharePreviewVersion, skinShareCollection, skinSharePath } from './skin-share.js';
+import { encodeSkinPackagePath, isSkinSourceManifest, validSkinPackagePath } from './skin-source.js';
 
 const APPEARANCE_STORAGE_KEY = 'exist-lol-skin-appearance';
 const APPEARANCE_VALUES = ['mono', 'gold', 'neon'];
@@ -659,11 +660,6 @@ const TRANSLATIONS = {
     en: 'Retry'
   },
 
-  legacyDisabledNote: {
-    tr: 'Bu skin yeni kaynakta bulunmadığı için indirmeye kapalıdır.',
-    en: 'This skin is disabled because it is not available in the new source.'
-  },
-
   metaRainbow: {
     tr: '{count} Rainbow paketi • Yama {version}',
     en: '{count} Rainbow packages • Patch {version}'
@@ -1187,7 +1183,6 @@ const modalShareUrl = document.querySelector('#modal-share-url');
 const downloadList =
   document.querySelector('#download-list');
 
-const fantomeFiles = new Set();
 
 /* =========================================
    FAVORİLER
@@ -1410,11 +1405,7 @@ function attachImageFallbackChain(imageEl, skin, onFinalFailure) {
    VERİLER & KOLEKSİYONLAR
 ========================================= */
 
-const DEFAULT_RAW_BASE_URL =
-  'https://raw.githubusercontent.com/Yimikami/LeagueSkins-Experimental/main/';
-
 let manifestData = null;
-let useLegacyLocalFantome = false;
 let activeCollection = 'skins';
 let collectionState = 'idle';
 let collectionRequest = 0;
@@ -1437,68 +1428,21 @@ let lastModalSourceEl = null;
 let searchTrackingTimer = null;
 let lastTrackedSearch = '';
 
-function buildManifestPathUrl(relativePath) {
-  if (!relativePath || typeof relativePath !== 'string') {
-    return '';
-  }
-  const base = String(manifestData?.baseUrl || DEFAULT_RAW_BASE_URL).replace(/\/+$/, '');
-  const encodedSegments = relativePath
-    .split('/')
-    .filter(Boolean)
-    .map((segment) => encodeURIComponent(segment));
-  return `${base}/${encodedSegments.join('/')}`;
-}
-
-function getManifestEntryForSkin(item, collection = activeCollection) {
-  if (!manifestData?.entries || !item?.id) {
-    return null;
-  }
-  const id = String(item.id);
-  const itemCol = item.collection || collection;
-  if (itemCol === 'rainbow') {
-    return manifestData.entries[`rainbow:${id}`] || null;
-  }
-  if (itemCol === 'classic') {
-    return manifestData.entries[`classic:${id}`] || null;
-  }
-  return manifestData.entries[`${item.isPbe ? 'pbe' : 'skins'}:${id}`] || null;
+function buildManifestPathUrl(entry, collection, championId) {
+  if (entry?.status !== 'enabled' || !entry.enabled || entry.c !== collection ||
+      entry.champ !== championId || !validSkinPackagePath(entry.path, collection)) return '';
+  return manifestData.baseUrl + encodeSkinPackagePath(entry.path);
 }
 
 function getFantomeDownloadUrl(item, collection = activeCollection) {
-  if (!item?.id) {
+  if (!manifestData || !item?.id) {
     return '';
   }
-  if (manifestData?.entries) {
-    const entry = getManifestEntryForSkin(item, collection);
-    if (entry && entry.enabled !== false && entry.path) {
-      return buildManifestPathUrl(entry.path);
-    }
-    if ((manifestData.config?.enableLegacyFantome || manifestData.legacyEnabled) && entry?.legacy && entry.enabled) {
-      return assetUrl(`fantome/${item.id}.fantome`);
-    }
-    return '';
-  }
-  if (useLegacyLocalFantome && fantomeFiles.has(String(item.id))) {
-    return assetUrl(`fantome/${item.id}.fantome`);
-  }
-  return '';
-}
-
-function syncFantomeFilesForCollection(collection = activeCollection) {
-  if (!manifestData?.entries) {
-    return;
-  }
-  fantomeFiles.clear();
-  for (const entry of Object.values(manifestData.entries)) {
-    if (!entry || entry.enabled === false) continue;
-    if (collection === 'skins') {
-      if ((entry.c || entry.collection) === 'skins' || (entry.c || entry.collection) === 'pbe') {
-        fantomeFiles.add(String(entry.id));
-      }
-    } else if ((entry.c || entry.collection) === collection) {
-      fantomeFiles.add(String(entry.id));
-    }
-  }
+  const category = item.collection || collection;
+  const sourceCollection = category === 'classic' || category === 'rainbow'
+    ? category : item.isPbe ? 'pbe' : 'skins';
+  const entry = manifestData.entries[`${sourceCollection}:${item.id}`];
+  return buildManifestPathUrl(entry, sourceCollection, item.championId);
 }
 
 let manifestLoadingPromise = null;
@@ -1517,12 +1461,12 @@ function ensureManifestLoaded(forceRetry = false) {
   }
   manifestLoadingPromise = (async () => {
     try {
-      const manifestResponse = await fetch(assetUrl('data/fantome-manifest.json'), { cache: 'no-cache' });
+      const manifestResponse = await fetch(assetUrl('data/fantome-manifest.json'), { cache: 'no-store' });
       if (manifestResponse.ok) {
-        manifestData = await manifestResponse.json();
+        const candidate = await manifestResponse.json();
+        if (!isSkinSourceManifest(candidate)) throw new Error('Unexpected skin download manifest');
+        manifestData = candidate;
         manifestLoadError = false;
-        useLegacyLocalFantome = Boolean(manifestData?.legacyEnabled);
-        syncFantomeFilesForCollection(activeCollection);
         if (typeof updatePackToolbarBtn === 'function') {
           updatePackToolbarBtn();
         }
@@ -1531,26 +1475,6 @@ function ensureManifestLoaded(forceRetry = false) {
     } catch (e) {
       console.warn('fantome-manifest.json yüklenemedi:', e);
     }
-    // Fallback to fantome-files.json
-    try {
-      const filesResponse = await fetch(assetUrl('data/fantome-files.json'), { cache: 'no-cache' });
-      if (filesResponse && filesResponse.ok) {
-        useLegacyLocalFantome = true;
-        manifestLoadError = false;
-        const files = await filesResponse.json();
-        if (Array.isArray(files)) {
-          files.forEach(addFantomeFile);
-        } else if (files && Array.isArray(files.files)) {
-          files.files.forEach(addFantomeFile);
-        }
-        syncFantomeFilesForCollection(activeCollection);
-        if (typeof updatePackToolbarBtn === 'function') {
-          updatePackToolbarBtn();
-        }
-        return manifestData;
-      }
-    } catch (e) {}
-
     manifestLoadError = true;
     manifestLoadingPromise = null;
     return null;
@@ -4537,11 +4461,7 @@ function openModal(group, sourceEl, skipAnimation, keepShareFeedback = false) {
         }
       );
     } else {
-      const manifestEntry = getManifestEntryForSkin(item);
-      element.title =
-        manifestEntry?.legacy
-          ? t('legacyDisabledNote')
-          : t('fileNotFound');
+      element.title = t('fileNotFound');
 
       element.setAttribute(
         'aria-disabled',
@@ -4561,7 +4481,9 @@ function openModal(group, sourceEl, skipAnimation, keepShareFeedback = false) {
     fragment.appendChild(subheading);
 
     skin.forms.forEach((form) => {
-      const formUrl = getFantomeDownloadUrl({ ...form, isPbe: form.isPbe || skin.isPbe }, 'skins');
+      const formUrl = getFantomeDownloadUrl({
+        ...form, championId: skin.championId, isPbe: form.isPbe || skin.isPbe
+      }, 'skins');
       const element = document.createElement(formUrl ? 'a' : 'div');
       element.className = 'download-item chroma-card' + (formUrl ? '' : ' unavailable');
       if (formUrl) {
@@ -4622,10 +4544,11 @@ function openModal(group, sourceEl, skipAnimation, keepShareFeedback = false) {
       // 1. Rainbow Paketi
       if (skin.hasRainbow) {
         const rainbowEntry = manifestData.entries['rainbow:' + skin.id];
-        if (rainbowEntry && rainbowEntry.path && rainbowEntry.enabled !== false) {
+        const rainbowUrl = buildManifestPathUrl(rainbowEntry, 'rainbow', skin.championId);
+        if (rainbowUrl) {
           const itemEl = document.createElement('a');
           itemEl.className = 'download-item-special';
-          itemEl.href = buildManifestPathUrl(rainbowEntry.path);
+          itemEl.href = rainbowUrl;
           itemEl.download = `${sanitizeFilename(skinDisplayName)} (Rainbow).fantome`;
           itemEl.setAttribute('aria-label', `${skinDisplayName} Rainbow paketi indir`);
 
@@ -4667,10 +4590,11 @@ function openModal(group, sourceEl, skipAnimation, keepShareFeedback = false) {
       if (skin.hasClassic) {
         const classicId = 60000000 + Number(skin.id);
         const classicEntry = manifestData.entries['classic:' + classicId];
-        if (classicEntry && classicEntry.path && classicEntry.enabled !== false) {
+        const classicUrl = buildManifestPathUrl(classicEntry, 'classic', skin.championId);
+        if (classicUrl) {
           const itemEl = document.createElement('a');
           itemEl.className = 'download-item-special';
-          itemEl.href = buildManifestPathUrl(classicEntry.path);
+          itemEl.href = classicUrl;
           itemEl.download = `${sanitizeFilename(skinDisplayName)} (Classic).fantome`;
           itemEl.setAttribute('aria-label', `${skinDisplayName} Classic paketi indir`);
 
@@ -6080,60 +6004,6 @@ document
   });
 
 /* =========================================
-   FANTOME ID VERİLERİNİ NORMALİZE ET
-========================================= */
-
-function addFantomeFile(value) {
-  if (
-    value === null ||
-    value === undefined
-  ) {
-    return;
-  }
-
-  /*
-   * JSON bazen:
-   * [29004, 29005]
-   *
-   * bazen:
-   * ["29004", "29005"]
-   *
-   * bazen de:
-   * [{ id: 29004 }]
-   */
-
-  if (
-    typeof value === 'object'
-  ) {
-    if ('id' in value) {
-      fantomeFiles.add(
-        String(value.id)
-      );
-    }
-
-    if ('skinId' in value) {
-      fantomeFiles.add(
-        String(value.skinId)
-      );
-    }
-
-    return;
-  }
-
-  const id =
-    String(value)
-      .trim()
-      .replace(
-        /\.fantome$/i,
-        ''
-      );
-
-  if (id) {
-    fantomeFiles.add(id);
-  }
-}
-
-/* =========================================
    SKIN GRUPLARINI OLUŞTUR
 ========================================= */
 
@@ -6413,7 +6283,6 @@ async function switchCollection(targetCollection) {
   collectionRetry.hidden = true;
   skins = store.skins;
   skinGroups = store.groups;
-  syncFantomeFilesForCollection(targetCollection);
   renderChampionFilterOptions();
   renderSearchExamples();
   if (collectionStore.skins.loaded && !popularRendered) renderPopular();

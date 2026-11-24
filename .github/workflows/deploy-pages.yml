@@ -36,6 +36,16 @@ jobs:
           cache: npm
       - name: Bağımlılıkları yükle
         run: npm ci
+      - name: Yayın manifestinin kaynağını doğrula
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { isSkinSourceManifest } from './src/skin-source.js';
+          const manifest = JSON.parse(readFileSync('public/data/fantome-manifest.json', 'utf8'));
+          if (!isSkinSourceManifest(manifest) || !Object.values(manifest.entries).some(e => e.enabled)) {
+            throw new Error('The Pages build requires a non-empty, commit-pinned LeagueSkins manifest');
+          }
+          NODE
       - name: Paylaşım görselleri önbelleği
         uses: actions/cache@v5
         with:

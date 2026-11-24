@@ -22,5 +22,5 @@ Environment variables (.env)
 
 Notes
 - The bot reads skins.json from the local repo if available, otherwise from GitHub raw.
-- Download links point to raw.githubusercontent.com constructed from repo/branch/path.
+- Download links use the published manifest’s commit-pinned bettie9/LeagueSkins paths.
 - The bot does not hardcode tokens; use environment variables.

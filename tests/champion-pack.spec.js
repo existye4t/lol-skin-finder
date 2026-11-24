@@ -13,13 +13,12 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const FANTOME_DIR = path.join(ROOT, 'public', 'fantome');
 const SKINS_JSON = path.join(ROOT, 'public', 'data', 'skins.json');
 const MANIFEST_JSON = path.join(ROOT, 'public', 'data', 'fantome-manifest.json');
-const FILES_JSON = path.join(ROOT, 'public', 'data', 'fantome-files.json');
 const manifest = JSON.parse(fs.readFileSync(MANIFEST_JSON, 'utf8'));
 
 function expectSourceUrl(url, directory = '') {
+  expect(manifest.baseUrl).toMatch(/^https:\/\/raw\.githubusercontent\.com\/bettie9\/LeagueSkins\/[a-f0-9]{40}\/$/);
   expect(url).toEqual(expect.stringContaining(manifest.baseUrl + directory));
   expect(url.startsWith(manifest.baseUrl + directory)).toBe(true);
 }
@@ -29,28 +28,6 @@ function expectSourceUrl(url, directory = '') {
 function readSkins() {
   const data = JSON.parse(fs.readFileSync(SKINS_JSON, 'utf8'));
   return Array.isArray(data.skins) ? data.skins : [];
-}
-
-function readFileSet() {
-  if (fs.existsSync(MANIFEST_JSON)) {
-    const manifest = JSON.parse(fs.readFileSync(MANIFEST_JSON, 'utf8'));
-    if (manifest && manifest.entries) {
-      const ids = [];
-      for (const entry of Object.values(manifest.entries)) {
-        if (
-          entry &&
-          entry.enabled !== false &&
-          (entry.collection === 'skins' || entry.collection === 'pbe')
-        ) {
-          ids.push(String(entry.id));
-        }
-      }
-      return new Set(ids);
-    }
-  }
-  const raw = JSON.parse(fs.readFileSync(FILES_JSON, 'utf8'));
-  const arr = Array.isArray(raw) ? raw : (Array.isArray(raw.files) ? raw.files : []);
-  return new Set(arr.map((v) => String(typeof v === 'object' ? (v.id ?? v.skinId) : v).replace(/\.fantome$/i, '').trim()));
 }
 
 /**
@@ -718,6 +695,30 @@ test.describe('Champion Pack — Preview (production build)', () => {
     console.log('  Collection tabs, PBE badge, Rainbow modal link and Classic tab verified ✓');
   });
 
+  test('Classic ZIP includes only the selected Jade champion and its enabled packages', async ({ page }) => {
+    const requestedPaths = [];
+    await page.route('**/*.fantome', async (route, request) => {
+      expectSourceUrl(request.url(), 'classic/Jade_Annie/');
+      requestedPaths.push(decodeURIComponent(request.url().slice(manifest.baseUrl.length)));
+      await route.fulfill({ body: 'PK\x03\x04mock-fantome-payload', headers: { 'Access-Control-Allow-Origin': '*' } });
+    });
+    await page.goto(`${PREVIEW_URL}/?collection=classic&skin=60001001`);
+    const block = page.locator('#champion-pack-block');
+    await expect(block).toBeVisible();
+    await block.locator('.champion-pack-chroma-checkbox').uncheck();
+    const event = page.waitForEvent('download');
+    await block.locator('.champion-pack-btn').click();
+    const download = await event;
+    const zip = parseZipEntries(fs.readFileSync(await download.path()));
+    expect(zip.length).toBeGreaterThan(1);
+    expect(zip.length).toBe(requestedPaths.length);
+    expect(zip.every(entry => entry.name.startsWith('Annie/') && entry.name.endsWith('.fantome'))).toBe(true);
+    const expected = Object.values(manifest.entries)
+      .filter(entry => entry.c === 'classic' && entry.champ === 'Annie' && entry.enabled && entry.type === 'classic')
+      .map(entry => entry.path);
+    expect(requestedPaths.sort()).toEqual(expected.sort());
+  });
+
   test('Downloads show the exact Ahri and PBE chroma previews with a swatch on image failure', async ({ page }) => {
     const catalog = readSkins();
     const ahriChroma = catalog.find(skin => String(skin.id) === '103060');
@@ -885,11 +886,7 @@ test.describe('Champion Pack — Preview (production build)', () => {
       }
     });
     await page.route('**/data/fantome-files.json', async (route) => {
-      if (!allowManifest) {
-        await route.fulfill({ status: 404, contentType: 'application/json', body: '[]' });
-      } else {
-        await route.continue();
-      }
+      throw new Error(`Obsolete download fallback was fetched: ${route.request().url()}`);
     });
 
     await page.goto(PREVIEW_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });

@@ -1,16 +1,11 @@
-const directory = { skins: 'skins', pbe: 'PBE', classic: 'classic', rainbow: 'rainbow' };
+import { validSkinPackagePath } from '../src/skin-source.js';
+
+export { validSkinPackagePath as validAssetPath };
 const idPattern = /^(?:0|[1-9]\d*)(?:_f[1-9]\d*)?$/;
 
 export function skinNumber(value) {
   if (!/^\d{1,3}$/.test(String(value))) throw new Error(`Invalid source skin number: ${value}`);
   return Number(value);
-}
-
-export function validAssetPath(path, collection) {
-  if (typeof path !== 'string' || /[\\\x00-\x1f]/.test(path) || !path.endsWith('.fantome')) return false;
-  const parts = path.split('/');
-  return parts[0] === directory[collection] && parts.length >= 3 &&
-    parts.every(part => part && part !== '.' && part !== '..');
 }
 
 function addToIndex(index, key, value) {
@@ -33,7 +28,7 @@ export function reconcileDownloads(candidates, tree, previous = {}) {
   const byId = new Map();
   const pathClaims = new Map();
   for (const entry of candidates) {
-    if (!idPattern.test(entry.id) || !entry.champ || !validAssetPath(entry.path, entry.c)) {
+    if (!idPattern.test(entry.id) || !entry.champ || !validSkinPackagePath(entry.path, entry.c)) {
       throw new Error(`Invalid indexed download: ${JSON.stringify(entry)}`);
     }
     const key = `${entry.c}:${entry.id}`;

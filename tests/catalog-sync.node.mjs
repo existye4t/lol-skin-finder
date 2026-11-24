@@ -3,11 +3,12 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { publishedSkinDownload } from '../bot/src/skin-downloads.js';
 import { verifyPackageBytes, verifyRainbowIdentity } from '../scripts/fantome-package.mjs';
-import { indexedDownloads } from '../scripts/prepare-fantome.mjs';
+import { indexedDownloads, verifyPbeIndexCoverage } from '../scripts/prepare-fantome.mjs';
 import { reconcileDownloads } from '../scripts/reconcile-downloads.mjs';
 import { fetchWithRetry, readSourceDirectories, requireTree } from '../scripts/sync-source.mjs';
 import { getChromaVisuals } from '../scripts/update-skins.mjs';
 import { catalogIdentityErrors } from '../scripts/verify-collections.mjs';
+import { skinSourceBaseUrl, skinSourceRepo } from '../src/skin-source.js';
 
 const first = { c: 'skins', id: 1001, champ: 'Annie', type: 'base', name: 'Fixture', path: 'skins/Annie/Fixture.fantome' };
 const second = { ...first, id: 1002, path: 'skins/Annie/New.fantome' };
@@ -77,7 +78,7 @@ test('duplicate paths, duplicate IDs and non-unique moves are quarantined', () =
 test('PBE promotion retains the numeric identity and prioritizes the Live index', () => {
   const root = { patch: '16.23', champions: { Annie: { skins: { 1: 'Fixture' } } } };
   const pbe = {
-    sourcePatch: '16.24', formPackages: [],
+    schemaVersion: 1, sourcePatch: '16.24',
     packages: [
       { id: 1001, championId: 1, champion: 'Annie', path: 'skins/Annie/Fixture.fantome', name: 'Fixture' },
       { id: 1002, championId: 1, champion: 'Annie', path: 'skins/Annie/Next.fantome', name: 'Next' }
@@ -92,8 +93,23 @@ test('PBE promotion retains the numeric identity and prioritizes the Live index'
   assert.ok(candidates.some(entry => entry.id === 1001 && entry.c === 'skins'));
   assert.ok(!candidates.some(entry => entry.id === 1001 && entry.c === 'pbe'));
   assert.ok(candidates.some(entry => entry.id === 1002 && entry.c === 'pbe'));
+  assert.ok(candidates.some(entry => entry.c === 'rainbow' && entry.id === 1001 && entry.path === 'rainbow/Annie/Fixture.fantome'));
+  assert.ok(candidates.some(entry => entry.c === 'classic' && entry.id === '60001001' && entry.path === 'classic/Jade_Annie/60001001.fantome'));
+  assert.throws(() => indexedDownloads(root, { ...pbe, formPackages: null }, rainbow, classic, champions), /package index/);
+  assert.throws(() => indexedDownloads(root, { ...pbe, schemaVersion: 2 }, rainbow, classic, champions), /package index/);
   pbe.packages[1].path = 'skins/Ashe/Next.fantome';
   assert.throws(() => indexedDownloads(root, pbe, rainbow, classic, champions), /Cross-champion/);
+});
+
+test('a missing optional PBE form list is safe only when the pinned tree has no unindexed PBE package', () => {
+  const pbe = { packages: [{ path: 'skins/Sona/DJ Sona.fantome' }] };
+  const base = blob('PBE/skins/Sona/DJ Sona.fantome');
+  const form = blob('PBE/skins/Sona/DJ Sona/Form 2.fantome');
+  assert.doesNotThrow(() => verifyPbeIndexCoverage(pbe, [base]));
+  assert.throws(() => verifyPbeIndexCoverage(pbe, [base, form]), /Incomplete PBE index/);
+  assert.doesNotThrow(() => verifyPbeIndexCoverage({
+    ...pbe, formPackages: [{ path: form.path.slice(4) }]
+  }, [base, form]));
 });
 
 test('catalog checks keep unavailable records and reject duplicate or cross-variant mappings', () => {
@@ -111,12 +127,17 @@ test('catalog checks keep unavailable records and reject duplicate or cross-vari
 });
 
 test('Discord exposes only the published collection, champion and enabled file', () => {
+  const sourceRevision = 'a'.repeat(40);
   const manifest = {
-    baseUrl: 'https://raw.githubusercontent.com/example/repo/' + 'a'.repeat(40) + '/',
-    entries: { 'skins:1001': { ...first, path: 'skins/Annie/A #1.fantome', enabled: true, status: 'enabled' } }
+    sourceRepo: skinSourceRepo,
+    sourceRevision,
+    baseUrl: skinSourceBaseUrl(sourceRevision),
+    entries: { 'skins:1001': { ...first, path: 'skins/Annie/Ä #1.fantome', enabled: true, status: 'enabled' } }
   };
   const skin = { id: '1001', championId: 'Annie' };
-  assert.match(publishedSkinDownload(manifest, skin), /A%20%231\.fantome$/);
+  assert.match(publishedSkinDownload(manifest, skin), /%C3%84%20%231\.fantome$/);
+  assert.equal(publishedSkinDownload({ ...manifest, sourceRepo: 'example/repo' }, skin), null);
+  assert.equal(publishedSkinDownload({ ...manifest, baseUrl: skinSourceBaseUrl('b'.repeat(40)) }, skin), null);
   assert.equal(publishedSkinDownload(manifest, { ...skin, isPbe: true }), null);
   assert.equal(publishedSkinDownload(manifest, { ...skin, championId: 'Ashe' }), null);
   manifest.entries['skins:1001'].enabled = false;

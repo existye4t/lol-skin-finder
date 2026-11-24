@@ -4,6 +4,7 @@ import { PATHS, buildSourceDownloadUrl } from './config.mjs';
 import { fetchSourceTree, fetchWithRetry, sourceSnapshot } from './sync-source.mjs';
 import { validAssetPath } from './reconcile-downloads.mjs';
 import { downloadVerifiedPackage } from './fantome-package.mjs';
+import { isSkinSourceManifest } from '../src/skin-source.js';
 
 function parseArgs(argv) {
   let sampleSize = 20;
@@ -46,7 +47,7 @@ export async function checkLinks({ sampleSize = 20, newOnly = false, download = 
 
   // 1. GitHub Trees API dosya listesini çek
   snapshot ??= await sourceSnapshot();
-  if (manifest.sourceRevision && (await sourceSnapshot(manifest.sourceRevision)).baseUrl !== manifest.baseUrl) {
+  if (!isSkinSourceManifest(manifest)) {
     throw new Error('Manifest download URL does not match its upstream commit');
   }
   const treeItems = await fetchSourceTree(snapshot.revision);
@@ -68,11 +69,12 @@ export async function checkLinks({ sampleSize = 20, newOnly = false, download = 
       schemaErrors.push(`${key}: Girdi içinde url veya legacyPath saklanmamalı!`);
     }
     if (key !== `${entry.c}:${entry.id}` || typeof entry.enabled !== 'boolean' ||
-        !['enabled', 'missing', 'ambiguous', 'legacy'].includes(entry.status) ||
-        !entry.legacy && entry.enabled !== (entry.status === 'enabled')) {
+        !['enabled', 'missing', 'ambiguous'].includes(entry.status) ||
+        entry.legacy || entry.enabled !== (entry.status === 'enabled') ||
+        entry.sha256 && !/^[a-f0-9]{64}$/.test(entry.sha256)) {
       schemaErrors.push(`${key}: Invalid manifest identity or status`);
     }
-    if (!entry.enabled || entry.legacy) continue;
+    if (!entry.enabled) continue;
 
     activeEntries.push([key, entry]);
 

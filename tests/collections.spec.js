@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 
 const site = 'http://127.0.0.1:4173/';
 const { skins } = JSON.parse(readFileSync(new URL('../public/data/skins.json', import.meta.url)));
+const { patch: classicPatch } = JSON.parse(readFileSync(new URL('../public/data/classic.json', import.meta.url)));
 const pbeSkins = skins.filter(skin => skin.isPbe);
 const pbeChroma = pbeSkins.find(skin => pbeSkins.some(parent => parent.id === skin.parentSkinId));
 const pbeParent = pbeSkins.find(skin => skin.id === pbeChroma?.parentSkinId);
@@ -57,7 +58,8 @@ test('shared URLs expose crawler metadata and select the right collection and sk
     ['skins', 'Skinler', '103060', /skin60\/chromapreview/],
     ['pbe', 'PBE', pbeChroma?.id, /raw\.communitydragon\.org\/pbe\//],
     ['rainbow', 'Rainbow', '103015', /Ahri_15\.jpg/],
-    ['classic', 'Classic', '60062031', /communitydragon\.org\/16\.21\//]
+    ['classic', 'Classic', '60062031',
+      new RegExp(`communitydragon\\.org/${classicPatch.replaceAll('.', '\\.')}/.*?/62/62031\\.png$`)]
   ]) {
     if (!id) continue;
     const folder = collection === 'pbe' ? 'skins' : collection;
