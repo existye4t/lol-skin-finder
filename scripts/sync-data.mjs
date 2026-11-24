@@ -6,7 +6,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.resolve(process.env.SKIN_SYNC_DATA_DIR || path.join(root, 'public', 'data'));
 const work = path.join(root, 'work');
 const generated = ['fantome-manifest.json', 'skins.json', 'rainbow.json', 'classic.json'];
-const inputs = [...generated, 'fantome-files.json', 'admin-overrides.json'];
+const inputs = [...generated, 'admin-overrides.json'];
 const args = process.argv.slice(2);
 const reportFile = args.find(arg => arg.startsWith('--report='))?.slice('--report='.length);
 

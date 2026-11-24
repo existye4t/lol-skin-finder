@@ -53,7 +53,7 @@ jobs:
           const lines = [
             '## Skin senkronizasyonu',
             '',
-            '- Upstream: `' + r.revision + '`',
+            '- Upstream: `' + r.sourceRepo + '@' + r.revision + '`',
             '- Patch: `' + r.patch + '`',
             '- Manifest girdileri: +' + r.addedCount + ', değişen ' + r.changedCount + ', kaldırılan bağlantı ' + r.removedCount,
             '- Live’a geçen PBE kayıtları: ' + r.promoted.length,

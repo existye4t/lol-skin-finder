@@ -1,12 +1,10 @@
+import { encodeSkinPackagePath, isSkinSourceManifest, validSkinPackagePath } from '../../src/skin-source.js';
+
 export function publishedSkinDownload(manifest, skin) {
+  if (!isSkinSourceManifest(manifest)) return null;
   const collection = skin.isPbe ? 'pbe' : 'skins';
   const entry = manifest?.entries?.[`${collection}:${skin.id}`];
-  if (entry?.status !== 'enabled' || !entry.enabled || entry.legacy || entry.champ !== skin.championId ||
-      typeof entry.path !== 'string' || !entry.path.endsWith('.fantome')) return null;
-  const parts = entry.path.split('/');
-  if (parts[0] !== (skin.isPbe ? 'PBE' : 'skins') ||
-      parts.some(part => !part || part === '.' || part === '..' || part.includes('\\'))) return null;
-  const base = manifest.baseUrl;
-  if (typeof base !== 'string' || !/^https:\/\/raw\.githubusercontent\.com\/[\w.-]+\/[\w.-]+\/[\w.-]+\/$/.test(base)) return null;
-  return base + parts.map(encodeURIComponent).join('/');
+  if (entry?.status !== 'enabled' || !entry.enabled || entry.legacy || entry.c !== collection ||
+      entry.champ !== skin.championId || !validSkinPackagePath(entry.path, collection)) return null;
+  return manifest.baseUrl + encodeSkinPackagePath(entry.path);
 }

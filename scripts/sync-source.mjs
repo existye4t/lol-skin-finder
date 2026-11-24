@@ -1,7 +1,8 @@
 import { setTimeout as sleep } from 'node:timers/promises';
-import { SOURCE_BRANCH, SOURCE_REPO } from './config.mjs';
+import { skinSourceBaseUrl } from '../src/skin-source.js';
+import { SKIN_SOURCE_BRANCH, SKIN_SOURCE_REPO } from './config.mjs';
 
-const api = `https://api.github.com/repos/${SOURCE_REPO}`;
+const api = `https://api.github.com/repos/${SKIN_SOURCE_REPO}`;
 const directories = ['skins', 'PBE', 'rainbow', 'classic'];
 const revisionPattern = /^[a-f0-9]{40}$/;
 const jsonRequests = new Map();
@@ -58,14 +59,14 @@ export function requireTree(value, label) {
 }
 
 async function latestRevision() {
-  const ref = await fetchJson(`${api}/git/ref/heads/${encodeURIComponent(SOURCE_BRANCH)}`, true);
+  const ref = await fetchJson(`${api}/git/ref/heads/${SKIN_SOURCE_BRANCH.split('/').map(encodeURIComponent).join('/')}`, true);
   return ref?.object?.sha;
 }
 
 export async function sourceSnapshot(revision) {
-  revision ??= process.env.YIMIKAMI_SOURCE_SHA || await latestRevision();
-  if (!revisionPattern.test(revision)) throw new Error('Invalid Yimikami commit SHA');
-  const baseUrl = `https://raw.githubusercontent.com/${SOURCE_REPO}/${revision}/`;
+  revision ??= process.env.SKIN_SOURCE_SHA || await latestRevision();
+  const baseUrl = skinSourceBaseUrl(revision);
+  if (!baseUrl) throw new Error('Invalid skin source commit SHA');
   return { revision, baseUrl, index: (file) => fetchJson(baseUrl + file) };
 }
 

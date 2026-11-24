@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { encodeSkinPackagePath, skinSourceRepo } from '../src/skin-source.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,14 +9,8 @@ export const ROOT_DIR = path.resolve(__dirname, '..');
 export const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 export const DATA_DIR = process.env.SKIN_SYNC_DATA_DIR || path.join(PUBLIC_DIR, 'data');
 
-export const SOURCE_REPO = process.env.YIMIKAMI_REPO || 'Yimikami/LeagueSkins-Experimental';
-export const SOURCE_BRANCH = process.env.YIMIKAMI_BRANCH || 'main';
-export const RAW_BASE_URL = `https://raw.githubusercontent.com/${SOURCE_REPO}/${SOURCE_BRANCH}/`;
-
-// Yalnızca manifest üretiminde (prepare-fantome) kaynak repoda olmayan eski yerel dosya girdilerini etkinleştiren bayrak
-export const ENABLE_LEGACY_FANTOME = process.env.ENABLE_LEGACY_FANTOME === 'true';
-export const LEGACY_BASE_PATH = '/fantome/';
-export const LEGACY_EXTERNAL_DIR = process.env.LOL_SKINS_LEGACY_DIR || '';
+export const SKIN_SOURCE_REPO = skinSourceRepo;
+export const SKIN_SOURCE_BRANCH = process.env.SKIN_SOURCE_BRANCH || 'main';
 
 
 // Güvenlik eşiği: kaynakta toplam girdi sayısı %5'ten fazla düşerse hata verip dur
@@ -26,40 +21,34 @@ export const PATHS = {
   skins: path.join(DATA_DIR, 'skins.json'),
   rainbow: path.join(DATA_DIR, 'rainbow.json'),
   classic: path.join(DATA_DIR, 'classic.json'),
-  legacyFantomeList: path.join(DATA_DIR, 'fantome-files.json'),
   adminOverrides: path.join(DATA_DIR, 'admin-overrides.json'),
   syncReport: path.join(DATA_DIR, 'sync-report.json')
 };
 
 /**
- * Yimikami dosya adı sanitizasyon kuralı:
+ * Kaynak indeksinde yalnızca görünen ad bulunan dosyalar için adlandırma kuralı.
  * "/" -> "_", ":" ve "?" silinir.
  */
-export function sanitizeYimiFileName(name) {
+export function sourceFileName(name) {
   return String(name || '')
     .replace(/\//g, '_')
     .replace(/[:?]/g, '');
 }
 
 /**
- * Yimikami klasör adı sanitizasyon kuralı:
+ * Kaynak klasörlerini Git ağacındaki adlandırmayla eşleştirir.
  * Dosya adı kuralına ek olarak sondaki noktalar (.) silinir (örn. "Kennen M.D." -> "Kennen M.D").
  */
-export function sanitizeYimiFolderName(name) {
-  return sanitizeYimiFileName(name).replace(/\.+$/, '');
+export function sourceFolderName(name) {
+  return sourceFileName(name).replace(/\.+$/, '');
 }
 
 /**
  * Göreli kaynak dosya yolunu (örn. "skins/Ahri/K_DA Ahri.fantome") segment bazlı encode ederek
  * tam raw.githubusercontent.com indirme URL'sine dönüştürür.
  */
-export function buildSourceDownloadUrl(relativePath, baseUrl = RAW_BASE_URL) {
-  if (!relativePath) return null;
+export function buildSourceDownloadUrl(relativePath, baseUrl) {
+  if (!relativePath || !baseUrl) return null;
   const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  const encodedPath = String(relativePath)
-    .split('/')
-    .filter(Boolean)
-    .map(segment => encodeURIComponent(segment))
-    .join('/');
-  return `${cleanBase}${encodedPath}`;
+  return cleanBase + encodeSkinPackagePath(relativePath);
 }

@@ -64,7 +64,7 @@ Framework yükü olmadan **Vanilla JavaScript + Vite** mimarisiyle hız ve akıc
 Katalog verileri ve `.fantome` indirme bağlantıları iki ana kaynaktan **günde 4 kez otomatik** senkronize edilir:
 
 1. **Riot Games Data Dragon & CommunityDragon** — Canlı sunucu (Live) ve PBE skin/chroma meta verileri, Türkçe ve İngilizce yerelleştirmeler.
-2. **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)** — `.fantome` paketlerinin tamamı doğrudan bu kaynak repodan indirilir (bu repoya yeni ikili dosya kopyalanmaz).
+2. **[bettie9/LeagueSkins](https://github.com/bettie9/LeagueSkins)** — Live, PBE, Rainbow ve Classic `.fantome` paketleri commit’e sabitlenmiş bağlantılarla bu depodan indirilir.
 
 | Koleksiyon | Kaynak Dizini | Açıklama |
 | :--- | :--- | :--- |
@@ -83,7 +83,7 @@ Katalog verileri ve `.fantome` indirme bağlantıları iki ana kaynaktan **günd
 ```mermaid
 flowchart LR
     A["Data Dragon & CommunityDragon"] --> C["sync-data.mjs"]
-    B["LeagueSkins-Experimental"] --> C
+    B["bettie9/LeagueSkins"] --> C
     C --> D["Manifest & Katalog JSON"]
     D --> E["Link & Şema Doğrulama"]
     E --> F["Vite Build + Share Pages"]
@@ -121,6 +121,8 @@ npm run verify-collections # Koleksiyon tutarlılık kontrolü
 * `dry_run`: Yalnızca doğrulama ve derleme çalıştırır, yayınlamaz.
 * `force_deploy`: Veri değişmese dahi doğrulanmış koşuda Pages dağıtımını yeniler.
 
+Kaynak dalı varsayılan olarak `main`’dir. Yerelde `SKIN_SOURCE_BRANCH` ile farklı bir kaynak dalı veya `SKIN_SOURCE_SHA` ile doğrulanacak tam commit seçilebilir. Eski sağlayıcıya özgü ortam değişkenleri ve yerel paket geri dönüşü kaldırıldı.
+
 </details>
 
 <details>
@@ -128,18 +130,11 @@ npm run verify-collections # Koleksiyon tutarlılık kontrolü
 
 <br />
 
-1. **Merge'i Geri Alma (Tam Rollback):**
-   Frontend ve manifest yapısını önceki yerel `public/fantome/*.fantome` düzenine tek adımda döndürmek için ilgili merge commit'ini geri alabilirsiniz (yerel arşiv depoda korunmaktadır):
-   ```bash
-   git revert -m 1 <merge-commit-hash>
-   git push origin main
-   ```
+1. **Doğrulanmış kataloğu geri yükleme:**
+   Bilinen son geçerli LeagueSkins manifestini ve üç katalog dosyasını aynı commit’ten geri yükleyip normal PR ve Pages akışından geçirin.
 
 2. **Otomatik Senkronizasyonu Durdurma:**
    GitHub üzerinden **Actions → Kaynak Repodan Skin Senkronizasyonu → `...` → Disable workflow** adımıyla zamanlanmış koşuları durdurabilirsiniz.
-
-3. **Legacy Manifest Bayrağı (`ENABLE_LEGACY_FANTOME`):**
-   `scripts/config.mjs` içindeki `ENABLE_LEGACY_FANTOME` bayrağı yalnızca `prepare-fantome.mjs` çalışırken etkilidir; kaynak repoda karşılığı bulunmayan 6 eski yerel dosyanın (ID: `234994`–`234999`) manifest'te `enabled` olarak işaretlenip işaretlenmeyeceğini belirler (9.096 yerel dosyanın 9.090'ı kaynak repoda birebir mevcuttur).
 
 </details>
 
@@ -225,7 +220,7 @@ Hata bildirmek, yeni özellik önermek veya doğrudan koda katkıda bulunmak iç
 👉 **[Discord Topluluğuna Katıl](https://discord.gg/rvRxbf8B9N)**
 
 ### Teşekkürler
-Kaynak paket altyapısı, veri kaynakları ve araçları için **[Yimikami/LeagueSkins-Experimental](https://github.com/Yimikami/LeagueSkins-Experimental)**, **[bettie9/Sunshine](https://github.com/bettie9/Sunshine)** ve **[CommunityDragon](https://www.communitydragon.org/)** projelerine teşekkürler.
+Kaynak paket altyapısı, veri kaynakları ve araçları için **[bettie9/LeagueSkins](https://github.com/bettie9/LeagueSkins)**, **[bettie9/Sunshine](https://github.com/bettie9/Sunshine)** ve **[CommunityDragon](https://www.communitydragon.org/)** projelerine teşekkürler.
 
 ---
 

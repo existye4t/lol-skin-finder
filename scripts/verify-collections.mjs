@@ -6,8 +6,8 @@ import { fetchSourceTree, sourceSnapshot } from './sync-source.mjs';
 import {
   DATA_DIR,
   PATHS,
-  sanitizeYimiFileName,
-  sanitizeYimiFolderName
+  sourceFileName,
+  sourceFolderName
 } from './config.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -158,24 +158,24 @@ export async function verifyCollections({ verbose = false, sampleSize = 15, snap
     for (const [champFolder, cData] of Object.entries(rootIndex.champions)) {
       for (const [sNum, sName] of Object.entries(cData.skins || {})) {
         rootIdxTotal++;
-        const p = `skins/${champFolder}/${sanitizeYimiFileName(sName)}.fantome`;
+        const p = `skins/${champFolder}/${sourceFileName(sName)}.fantome`;
         if (!treeBlobs.has(p)) indexMissing.rootIndex.push({ path: p, sNum, sName });
       }
       for (const [parentNum, chromas] of Object.entries(cData.chromas || {})) {
         const pName = parentNum === '0' ? champFolder : (cData.skins?.[parentNum] || champFolder);
-        const pFolder = sanitizeYimiFolderName(pName);
+        const pFolder = sourceFolderName(pName);
         for (const [cNum, cName] of Object.entries(chromas)) {
           rootIdxTotal++;
-          const p = `skins/${champFolder}/${pFolder}/${sanitizeYimiFileName(cName)}.fantome`;
+          const p = `skins/${champFolder}/${pFolder}/${sourceFileName(cName)}.fantome`;
           if (!treeBlobs.has(p)) indexMissing.rootIndex.push({ path: p, cNum, cName });
         }
       }
       for (const [parentNum, forms] of Object.entries(cData.forms || {})) {
         const pName = parentNum === '0' ? champFolder : (cData.skins?.[parentNum] || champFolder);
-        const pFolder = sanitizeYimiFolderName(pName);
+        const pFolder = sourceFolderName(pName);
         for (const [fKey, fName] of Object.entries(forms)) {
           rootIdxTotal++;
-          const p = `skins/${champFolder}/${pFolder}/${sanitizeYimiFileName(fName)}.fantome`;
+          const p = `skins/${champFolder}/${pFolder}/${sourceFileName(fName)}.fantome`;
           if (!treeBlobs.has(p)) indexMissing.rootIndex.push({ path: p, fKey, fName });
         }
       }
@@ -210,7 +210,7 @@ export async function verifyCollections({ verbose = false, sampleSize = 15, snap
     for (const [champ, cData] of Object.entries(rainbowIndex.champions)) {
       for (const [sNum, sName] of Object.entries(cData.skins || {})) {
         rbIdxTotal++;
-        const p = `rainbow/${champ}/${sanitizeYimiFileName(sName)}.fantome`;
+        const p = `rainbow/${champ}/${sourceFileName(sName)}.fantome`;
         if (!treeBlobs.has(p)) indexMissing.rainbowIndex.push(p);
       }
     }

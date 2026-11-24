@@ -2,8 +2,8 @@ import { isDeepStrictEqual } from 'node:util';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import {
-  DATA_DIR, SOURCE_REPO, SOURCE_BRANCH, ENABLE_LEGACY_FANTOME, LEGACY_BASE_PATH,
-  MAX_ALLOWED_DROP_RATIO, PATHS, sanitizeYimiFileName, sanitizeYimiFolderName
+  DATA_DIR, SKIN_SOURCE_REPO, SKIN_SOURCE_BRANCH,
+  MAX_ALLOWED_DROP_RATIO, PATHS, sourceFileName, sourceFolderName
 } from './config.mjs';
 import { fetchJson, fetchSourceTree, latestDataDragonVersion, sourceSnapshot } from './sync-source.mjs';
 import { reconcileDownloads, skinNumber } from './reconcile-downloads.mjs';
@@ -22,11 +22,23 @@ async function readOptional(file, fallback) {
 
 function validateIndex(root, pbe, rainbow, classic) {
   if (!root?.patch || !Object.keys(root.champions || {}).length ||
-      !pbe?.sourcePatch || !Array.isArray(pbe.packages) || !Array.isArray(pbe.formPackages) ||
+      pbe?.schemaVersion !== 1 || !pbe.sourcePatch || !Array.isArray(pbe.packages) ||
+      Object.hasOwn(pbe, 'formPackages') && !Array.isArray(pbe.formPackages) ||
       !Array.isArray(rainbow?.packages) || !rainbow.packages.length ||
       !Array.isArray(classic?.champions) || !classic.champions.length) {
-    throw new Error('Incomplete Yimikami index');
+    throw new Error('Incomplete or unsupported package index');
   }
+}
+
+export function verifyPbeIndexCoverage(pbe, tree, entries = {}) {
+  const paths = new Set([...(pbe.packages || []), ...(pbe.formPackages || [])]
+    .map(pkg => 'PBE/' + pkg.path));
+  for (const entry of Object.values(entries)) {
+    if (entry.c === 'pbe' && entry.enabled) paths.add(entry.path);
+  }
+  const unlisted = tree.find(item => item.type === 'blob' && item.path.startsWith('PBE/skins/') &&
+    item.path.endsWith('.fantome') && !paths.has(item.path));
+  if (unlisted) throw new Error('Incomplete PBE index, first unlisted package: ' + unlisted.path);
 }
 
 export function indexedDownloads(root, pbe, rainbow, classic, champions) {
@@ -71,7 +83,7 @@ export function indexedDownloads(root, pbe, rainbow, classic, champions) {
     const base = Number(champion.key) * 1000;
     for (const [number, name] of Object.entries(group.skins || {})) {
       const id = base + skinNumber(number);
-      add('skins', champion, id, name, 'base', 'skins/' + folder + '/' + sanitizeYimiFileName(name) + '.fantome');
+      add('skins', champion, id, name, 'base', 'skins/' + folder + '/' + sourceFileName(name) + '.fantome');
       liveIds.add(id);
     }
     for (const [type, parentGroups] of [['chroma', group.chromas], ['form', group.forms]]) {
@@ -82,7 +94,7 @@ export function indexedDownloads(root, pbe, rainbow, classic, champions) {
         for (const [number, name] of Object.entries(children)) {
           const id = base + skinNumber(number);
           add('skins', champion, id, name, type,
-            'skins/' + folder + '/' + sanitizeYimiFolderName(parentName) + '/' + sanitizeYimiFileName(name) + '.fantome',
+            'skins/' + folder + '/' + sourceFolderName(parentName) + '/' + sourceFileName(name) + '.fantome',
             base + parentNumber);
           liveIds.add(id);
         }
@@ -97,7 +109,7 @@ export function indexedDownloads(root, pbe, rainbow, classic, champions) {
     add('pbe', champion, id, pkg.name, pkg.chroma ? 'chroma' : 'base', 'PBE/' + pkg.path,
       pkg.chroma ? Number(pkg.parentId) : undefined, pkg.sha256, pkg.bytes);
   }
-  for (const pkg of pbe.formPackages) {
+  for (const pkg of pbe.formPackages ?? []) {
     const id = Number(pkg.id);
     if (liveIds.has(id)) continue;
     add('pbe', requireChampion(pkg.champion, pkg.championId), id + '_f' + pkg.form, pkg.name, 'form',
@@ -116,7 +128,7 @@ export function indexedDownloads(root, pbe, rainbow, classic, champions) {
         'classic/' + skin.path, skin.parentSkinId ? String(skin.parentSkinId) : undefined, skin.sha256, skin.bytes);
     }
   }
-  return { candidates, liveIds, byId };
+  return { candidates, liveIds };
 }
 
 async function verifyConflictingIndexes(entries, oldEntries, snapshot, ambiguities) {
@@ -152,20 +164,22 @@ async function verifyConflictingIndexes(entries, oldEntries, snapshot, ambiguiti
 export async function prepareFantome({ snapshot, writeReport = false, currentDate = new Date() } = {}) {
   snapshot ??= await sourceSnapshot();
   const ddragonVersion = await latestDataDragonVersion();
-  console.log('[prepare-fantome] Upstream ' + SOURCE_REPO + '@' + snapshot.revision);
-  const [tree, root, pbe, rainbow, classic, champions, previous, legacy] = await Promise.all([
+  console.log('[prepare-fantome] Upstream ' + SKIN_SOURCE_REPO + '@' + snapshot.revision);
+  const [tree, root, pbe, rainbow, classic, champions, previous] = await Promise.all([
     fetchSourceTree(snapshot.revision), snapshot.index('index.json'), snapshot.index('PBE/index.json'),
     snapshot.index('rainbow/chroma-cycles.json'), snapshot.index('classic/index.json'),
     fetchJson('https://ddragon.leagueoflegends.com/cdn/' + ddragonVersion + '/data/en_US/champion.json'),
-    readOptional(PATHS.manifest, null), readOptional(PATHS.legacyFantomeList, [])
+    readOptional(PATHS.manifest, null)
   ]);
-  const { candidates, liveIds, byId } = indexedDownloads(root, pbe, rainbow, classic, Object.values(champions.data));
+  const { candidates, liveIds } = indexedDownloads(root, pbe, rainbow, classic, Object.values(champions.data));
   const oldEntries = previous?.entries || {};
-  const { entries, ambiguities, unindexed } = reconcileDownloads(candidates, tree, oldEntries);
+  const previousSourceEntries = previous?.sourceRepo === SKIN_SOURCE_REPO ? oldEntries : {};
+  const { entries, ambiguities, unindexed } = reconcileDownloads(candidates, tree, previousSourceEntries);
+  verifyPbeIndexCoverage(pbe, tree, entries);
   if (Object.values(entries).some(entry => entry.enabled && entry.sourceBytes && entry.sourceBytes !== entry.bytes)) {
     console.log('[prepare-fantome] Checking ZIP identities for outdated index digests');
   }
-  const indexConflicts = await verifyConflictingIndexes(entries, oldEntries, snapshot, ambiguities);
+  const indexConflicts = await verifyConflictingIndexes(entries, previousSourceEntries, snapshot, ambiguities);
 
   for (const c of ['skins', 'pbe', 'rainbow', 'classic']) {
     const before = Object.values(oldEntries).filter(e => e.c === c && e.enabled && !e.legacy).length;
@@ -185,17 +199,13 @@ export async function prepareFantome({ snapshot, writeReport = false, currentDat
       continue;
     }
     if (old.enabled) removed.push(key);
-    const { missingCount, bytes, ...metadata } = old;
-    entries[key] = { ...metadata, status: 'missing', enabled: false };
-  }
-  for (const id of new Set(legacy.map(Number))) {
-    if (entries['skins:' + id]) continue;
-    if (!Number.isSafeInteger(id)) throw new Error('Invalid legacy skin identifier');
-    const champion = byId.get(Math.floor(id / 1000));
-    entries['skins:' + id] = {
-      c: 'skins', id, champ: champion?.id || String(Math.floor(id / 1000)), name: 'Legacy #' + id,
-      type: 'form', path: null, status: 'legacy', enabled: ENABLE_LEGACY_FANTOME, legacy: true
-    };
+    if (previousSourceEntries[key]) {
+      const { missingCount, bytes, ...metadata } = old;
+      entries[key] = { ...metadata, status: 'missing', enabled: false };
+    } else {
+      const { c, id, champ, name, type, pId } = old;
+      entries[key] = { c, id, champ, name, type, ...(pId ? { pId } : {}), path: null, status: 'missing', enabled: false };
+    }
   }
   const sorted = Object.fromEntries(Object.entries(entries).sort(([a], [b]) => a.localeCompare(b, 'en')));
   const stats = {};
@@ -210,9 +220,9 @@ export async function prepareFantome({ snapshot, writeReport = false, currentDat
 
   const { generatedAt, sourceRevision, baseUrl, ...previousContent } = previous || {};
   const content = {
-    schemaVersion: 1, sourceRepo: SOURCE_REPO, sourceBranch: SOURCE_BRANCH, legacyBasePath: LEGACY_BASE_PATH,
+    schemaVersion: 1, sourceRepo: SKIN_SOURCE_REPO, sourceBranch: SKIN_SOURCE_BRANCH,
     patch: root.patch, pbePatch: pbe.sourcePatch, ddragonVersion,
-    config: { enableLegacyFantome: ENABLE_LEGACY_FANTOME }, stats, entries: sorted
+    stats, entries: sorted
   };
   const changed = !sourceRevision || !isDeepStrictEqual(previousContent, content);
   const manifest = {
@@ -225,7 +235,7 @@ export async function prepareFantome({ snapshot, writeReport = false, currentDat
   const added = Object.keys(sorted).filter(key => !oldEntries[key]);
   const updated = Object.keys(sorted).filter(key => oldEntries[key] && !isDeepStrictEqual(oldEntries[key], sorted[key]));
   const report = {
-    patch: manifest.patch, previousPatch: previous?.patch || null, patchChanged: previous?.patch !== manifest.patch,
+    sourceRepo: SKIN_SOURCE_REPO, patch: manifest.patch, previousPatch: previous?.patch || null, patchChanged: previous?.patch !== manifest.patch,
     revision: snapshot.revision, addedCount: added.length, changedCount: updated.length, removedCount: removed.length,
     totalDeltaCount: added.length + updated.length + removed.length, promoted, ambiguities, unindexed, indexConflicts,
     stats, addedSample: added.slice(0, 50), changedSample: updated.slice(0, 50)
